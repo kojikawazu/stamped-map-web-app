@@ -1,5 +1,6 @@
 {
-  "name": "stamped-map-temp",
+  "name": "stamped-map-web-app",
+  "packageManager": "pnpm@10.28.0",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -19,6 +20,14 @@
     "react-dom": "19.2.4",
     "sonner": "^2.0.7",
     "zod": "^4.3.6"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
