@@ -1,11 +1,11 @@
-import { supabase } from "./supabase";
+import { getSupabase } from "./supabase";
 
 const API_BASE = "/api";
 
 async function getAuthHeaders(): Promise<HeadersInit> {
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSupabase().auth.getSession();
 
   if (!session?.access_token) {
     throw new Error("Not authenticated");
@@ -20,7 +20,7 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 async function handleResponse<T>(response: Response): Promise<T> {
   if (response.status === 401) {
     // Token expired - try refresh
-    const { error } = await supabase.auth.refreshSession();
+    const { error } = await getSupabase().auth.refreshSession();
     if (error) {
       window.location.href = "/login";
       throw new Error("Session expired");

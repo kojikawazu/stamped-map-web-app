@@ -40,6 +40,11 @@ export default function MapView() {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
+    if (!MAPTILER_KEY) {
+      console.warn("NEXT_PUBLIC_MAPTILER_KEY is not set. Map will not load.");
+      return;
+    }
+
     const { center, zoom } = getSavedMapState();
 
     const map = new maplibregl.Map({
@@ -63,6 +68,16 @@ export default function MapView() {
       mapRef.current = null;
     };
   }, []);
+
+  if (!MAPTILER_KEY) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-zinc-100">
+        <p className="text-zinc-400 text-sm">
+          MapTiler API Key が未設定です。.env.local に NEXT_PUBLIC_MAPTILER_KEY を設定してください。
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div
