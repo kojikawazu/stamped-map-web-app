@@ -18,10 +18,3 @@ export function getSupabase(): SupabaseClient {
 
   return _supabase;
 }
-
-// Re-export for backwards compatibility with existing imports
-export const supabase = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    return Reflect.get(getSupabase(), prop);
-  },
-});

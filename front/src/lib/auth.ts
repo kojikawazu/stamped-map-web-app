@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { getSupabase } from "./supabase";
 
 export class AuthError extends Error {
   constructor(message = "Unauthorized") {
@@ -18,7 +18,7 @@ export async function verifyAuth(request: Request) {
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser(token);
+  } = await getSupabase().auth.getUser(token);
 
   if (error || !user) {
     throw new AuthError("認証が無効です");

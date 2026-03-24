@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 interface AuthContextValue {
   user: User | null;
@@ -31,12 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    } = getSupabase().auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
     });
 
-    supabase.auth
+    getSupabase().auth
       .getSession()
       .then(({ data: { session: currentSession } }) => {
         setSession(currentSession);
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: string,
       password: string
     ): Promise<{ error: string | null }> => {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await getSupabase().auth.signInWithPassword({
         email,
         password,
       });
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const logout = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await getSupabase().auth.signOut();
 
     if (error) {
       toast.error("ログアウトに失敗しました。もう一度お試しください。");

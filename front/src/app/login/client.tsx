@@ -33,8 +33,9 @@ export default function LoginClient() {
       return;
     }
 
+    // Navigation is handled by the useEffect watching session changes.
+    // onAuthStateChange will update session → useEffect triggers router.replace("/").
     toast.success("ログインしました");
-    router.replace("/");
   }
 
   if (isLoading) {
