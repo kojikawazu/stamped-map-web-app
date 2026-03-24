@@ -16,7 +16,7 @@ const defaultCategories = [
 
 async function main() {
   for (const cat of defaultCategories) {
-    await prisma.category.upsert({
+    await prisma.mapCategory.upsert({
       where: { name: cat.name },
       update: {},
       create: {

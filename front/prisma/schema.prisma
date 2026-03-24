@@ -9,7 +9,7 @@ datasource db {
   extensions = [postgis]
 }
 
-model Category {
+model MapCategory {
   id        String   @id @default(uuid())
   name      String   @unique
   color     String   @default("#6B7280")
@@ -17,26 +17,26 @@ model Category {
   sortOrder Int      @default(0) @map("sort_order")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  spots     Spot[]
+  mapSpots  MapSpot[]
 
-  @@map("categories")
+  @@map("map_categories")
 }
 
-model Spot {
-  id         String   @id @default(uuid())
+model MapSpot {
+  id         String      @id @default(uuid())
   name       String
-  categoryId String   @map("category_id")
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String      @map("category_id")
+  category   MapCategory @relation(fields: [categoryId], references: [id])
   latitude   Float
   longitude  Float
-  visitedAt  DateTime @map("visited_at") @db.Date
+  visitedAt  DateTime    @map("visited_at") @db.Date
   memo       String?
-  imageUrl   String?  @map("image_url")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  imageUrl   String?     @map("image_url")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
 
   @@index([categoryId])
   @@index([visitedAt])
   @@index([createdAt])
-  @@map("spots")
+  @@map("map_spots")
 }
