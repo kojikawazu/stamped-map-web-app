@@ -32,12 +32,6 @@ let authStateCallback: ((event: string, session: unknown) => void) | null =
 const mockGetSession = vi.fn();
 const mockSignInWithPassword = vi.fn();
 const mockSignOut = vi.fn();
-const mockOnAuthStateChange = vi.fn(() => ({
-  data: {
-    subscription: { unsubscribe: vi.fn() },
-  },
-}));
-
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({
     auth: {
@@ -48,7 +42,11 @@ vi.mock("@/lib/supabase", () => ({
         cb: (event: string, session: unknown) => void
       ) => {
         authStateCallback = cb;
-        return mockOnAuthStateChange(cb);
+        return {
+          data: {
+            subscription: { unsubscribe: vi.fn() },
+          },
+        };
       },
     },
   }),
