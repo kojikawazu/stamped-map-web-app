@@ -1,0 +1,42 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  color     String   @default("#6B7280")
+  isDefault Boolean  @default(false) @map("is_default")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  spots     Spot[]
+
+  @@map("categories")
+}
+
+model Spot {
+  id         String   @id @default(uuid())
+  name       String
+  categoryId String   @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id])
+  latitude   Float
+  longitude  Float
+  visitedAt  DateTime @map("visited_at") @db.Date
+  memo       String?
+  imageUrl   String?  @map("image_url")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([categoryId])
+  @@index([visitedAt])
+  @@index([createdAt])
+  @@map("spots")
+}
