@@ -7,7 +7,7 @@
 | M1 | 環境構築 | プロジェクトセットアップ、外部サービス準備、接続確認 | 完了 |
 | M2 | 認証 | Supabase Auth でログイン、認証ガード | 完了 |
 | M3 | 地図表示 | Next.js + MapLibre GL JS で地図表示 + マーカー描画 | 未着手 |
-| M4 | CRUD実装 | スポットの登録・一覧・詳細・編集・削除（API Routes + Prisma） | 未着手 |
+| M4 | CRUD実装 | スポットの登録・一覧・詳細・編集・削除（API Routes + Prisma） | 進行中 |
 | M5 | 地図連携 | 地図クリック→登録、クラスタリング、カテゴリアイコン | 未着手 |
 | M6 | 拡張機能 | ヒートマップ、統計、タイムラインなど | 未着手 |
 
@@ -48,9 +48,31 @@
 - [x] Sonner `<Toaster>` をルートレイアウトに追加
 - [x] 認証ページを `force-dynamic` に設定（プリレンダリング回避）
 
+## M4: CRUD実装（進行中）
+
+### API Routes（完了）
+- [x] 共通ヘルパー（`lib/api-helpers.ts` — レスポンス整形、バリデーションエラー変換、WHERE句ビルダー）
+- [x] `GET /api/categories` — カテゴリ一覧（spotCount付き）
+- [x] `POST /api/categories` — カテゴリ追加（重複チェック付き）
+- [x] `PUT /api/categories/:id` — カテゴリ更新（重複チェック付き）
+- [x] `DELETE /api/categories/:id` — カテゴリ削除（デフォルト・使用中ガード）
+- [x] `GET /api/spots` — スポット一覧（ページネーション、ソート、カテゴリフィルター、名前検索）
+- [x] `POST /api/spots` — スポット登録（カテゴリ存在チェック付き）
+- [x] `GET /api/spots/markers` — マーカー用軽量データ（全件、フィルター対応）
+- [x] `GET /api/spots/:id` — スポット詳細
+- [x] `PUT /api/spots/:id` — スポット更新
+- [x] `DELETE /api/spots/:id` — スポット削除
+
+### フロントエンドUI（未着手）
+- [ ] スポット一覧（左パネル）
+- [ ] スポット登録モーダル
+- [ ] スポット詳細表示
+- [ ] スポット編集モーダル
+- [ ] スポット削除（確認ダイアログ）
+- [ ] カテゴリ管理UI
+
 ## 次のアクション（M3: 地図表示）
 
-- [ ] API Routes: `GET /api/spots/markers`（マーカー用軽量データ）
 - [ ] 地図マーカー描画（カテゴリ色で表示）
 - [ ] マーカークリックでポップアップ表示（名前・カテゴリ・訪問日）
 - [ ] マーカークラスタリング（MapLibre GeoJSON cluster）
@@ -63,3 +85,5 @@
 | 2026-03-23 | M1: pnpm 移行、front/ ディレクトリへのリファクタリング |
 | 2026-03-24 | M1: タスクファイル更新、進捗を実態に合わせて反映 |
 | 2026-03-24 | M2: ログイン画面、認証ガード、ログアウト、useAuthフック実装 |
+| 2026-03-24 | Prisma スキーマを実DB（map_categories, map_spots）に同期 |
+| 2026-03-24 | M4: API Routes 全10エンドポイント実装（Categories CRUD + Spots CRUD + markers） |
