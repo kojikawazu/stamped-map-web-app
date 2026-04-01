@@ -1,4 +1,4 @@
-import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 // seed は直接接続（DIRECT_URL）を優先、なければ DATABASE_URL にフォールバック

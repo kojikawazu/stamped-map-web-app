@@ -5,6 +5,10 @@ node_modules/
 .next/
 out/
 
+# nuxt.js
+.nuxt/
+.output/
+
 # production
 build/
 
@@ -34,6 +38,7 @@ next-env.d.ts
 
 # prisma generated
 **/src/generated/prisma/
+**/generated/prisma/
 
 # testing
 coverage/
