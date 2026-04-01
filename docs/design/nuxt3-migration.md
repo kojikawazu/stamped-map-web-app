@@ -210,6 +210,29 @@ export async function verifyAuth(event: H3Event) {
 }
 ```
 
+### Prisma クライアント（`server/utils/prisma.ts`）
+
+開発環境の Hot Reload による接続数上限エラーを防ぐため、シングルトンパターンが必須。
+
+```typescript
+// server/utils/prisma.ts
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+
+function createPrismaClient() {
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+  return new PrismaClient({ adapter });
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
+```
+
 ### エラーヘルパー（`server/utils/api-helpers.ts`）
 
 ```typescript
@@ -221,6 +244,24 @@ export function notFound(message: string) {
 export function badRequest(code: string, message: string, data?: unknown) {
   throw createError({ statusCode: 400, data: { code, message, ...(data && { details: data }) } });
 }
+```
+
+---
+
+## `app.vue` の実装パターン
+
+```vue
+<!-- app.vue -->
+<template>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
+  <Toaster rich-colors />
+</template>
+
+<script setup lang="ts">
+import { Toaster } from 'vue-sonner';
+</script>
 ```
 
 ---
@@ -288,6 +329,8 @@ export const useAuth = () => {
 
   // session が undefined の間はローディング中と判定する
   // watch + immediate: true は「null でも即 false になる」論理的誤りを生むため使わない
+  // ⚠️ useSupabaseSession() の初期値が undefined か null かは @nuxtjs/supabase のバージョンに依存する
+  //    実装時に動作確認が必要。null から始まる場合は isLoading の代替手段を検討すること
   const isLoading = computed(() => session.value === undefined);
 
   // 成功時の navigateTo('/') は呼び出し側の pages/login.vue が行う
