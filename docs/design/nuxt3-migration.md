@@ -245,7 +245,9 @@ export const useApiClient = () => {
       }
     },
     async onResponseError({ request, options, response }) {
-      if (response.status === 401) {
+      // _retried フラグで再試行を1回に制限し、無限ループを防ぐ
+      if (response.status === 401 && !options._retried) {
+        options._retried = true;
         const { error } = await supabase.auth.refreshSession();
         if (error) {
           await navigateTo('/login');
@@ -272,19 +274,20 @@ export const useApiClient = () => {
 
 ## `useAuth.ts` の実装パターン
 
+> `onMounted` は composable 内では使用しない。plugin や middleware から呼ばれた場合に実行時エラーになるため。
+> `@nuxtjs/supabase` の `useSupabaseUser()` が内部でセッション変化をリアクティブに監視するため、
+> `isLoading` は `watch` で代替する。
+
 ```typescript
 // composables/useAuth.ts
 export const useAuth = () => {
   const supabase = useSupabaseClient();
   const user = useSupabaseUser();       // @nuxtjs/supabase が提供（リアクティブ）
   const session = useSupabaseSession(); // @nuxtjs/supabase が提供（リアクティブ）
-  const isLoading = useState('auth:loading', () => true);
 
-  // セッション初期化完了まで isLoading = true
-  onMounted(async () => {
-    await supabase.auth.getSession();
-    isLoading.value = false;
-  });
+  // user が確定するまで isLoading = true（onMounted は使わない）
+  const isLoading = useState('auth:loading', () => !user.value);
+  watch(user, () => { isLoading.value = false; }, { immediate: true });
 
   const login = async (email: string, password: string): Promise<{ error: string | null }> => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -309,9 +312,15 @@ export const useAuth = () => {
 
 ## `middleware/auth.ts` の実装パターン
 
+> `useSupabaseUser()` は SSR 実行時点では `null` になるため、`import.meta.server` でガードしないと
+> 認証済みユーザーでも `/login` にリダイレクトされるリダイレクトループが発生する。
+
 ```typescript
 // middleware/auth.ts
 export default defineNuxtRouteMiddleware(() => {
+  // SSR ではスキップしクライアントサイドで再評価する
+  if (import.meta.server) return;
+
   const user = useSupabaseUser();
   if (!user.value) {
     return navigateTo('/login');
