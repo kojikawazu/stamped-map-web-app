@@ -25,12 +25,12 @@
 | APIサーバー | Route Handlers | Nuxt Server Routes |
 | 状態管理 | React Context + useState | Vue Composable（Composition API） |
 | 認証ガード | `AuthGuard` コンポーネント | Nuxt Route Middleware |
-| SSR制御 | `'use client'` 指示子 | `<ClientOnly>` コンポーネント / `client:only` |
+| SSR制御 | `dynamic import（ssr:false）` | `<ClientOnly>` コンポーネント |
 | 地図コンポーネント | `dynamic import（ssr:false）` | `<ClientOnly>` でラップ |
 | トースト通知 | sonner | vue-sonner（sonner の Vue ラッパー） |
 | CSS | Tailwind CSS v4 | Tailwind CSS v4（変更なし） |
 | パッケージマネージャ | pnpm | pnpm（変更なし） |
-| テスト | Vitest | Vitest（変更なし） |
+| テスト | Vitest + @testing-library/react | Vitest + @vue/test-utils + @nuxt/test-utils（**設定・テストコード全書き直し**） |
 
 ---
 
@@ -57,30 +57,80 @@ front/
 │   └── utils/                      ← サーバー側ユーティリティ（Nuxt が自動インポート）
 │       ├── auth.ts                 ← verifyAuth()
 │       ├── prisma.ts               ← Prisma クライアント
-│       └── api-helpers.ts          ← レスポンス整形・エラーヘルパー
+│       └── api-helpers.ts          ← レスポンス整形・エラーヘルパー（createError 統一）
 ├── pages/
 │   ├── index.vue                   ← メイン画面（地図 + リスト）
 │   └── login.vue                   ← ログイン画面
+├── layouts/
+│   ├── default.vue                 ← 共通レイアウト（ヘッダーあり）
+│   └── empty.vue                   ← ログイン用レイアウト（ヘッダーなし）
 ├── middleware/
 │   └── auth.ts                     ← 認証ガード（未認証 → /login）
 ├── composables/
-│   ├── useAuth.ts                  ← 認証状態管理（Composition API）
-│   └── useApiClient.ts             ← API クライアント（トークンリフレッシュ含む）
+│   ├── useAuth.ts                  ← 認証状態管理（@nuxtjs/supabase 利用）
+│   └── useApiClient.ts             ← API クライアント（$fetch + リトライ戦略）
 ├── components/
 │   └── map/
 │       └── MapView.vue             ← MapLibre GL JS 地図コンポーネント
 ├── lib/
-│   ├── supabase.ts                 ← Supabase クライアント（クライアント側）
 │   └── validations/
 │       ├── spot.ts                 ← Zod スキーマ（再利用）
 │       └── category.ts             ← Zod スキーマ（再利用）
-├── prisma/                         ← 移動（front/ 配下へ）
+├── prisma/                         ← front/prisma/ に配置（変更なし）
 │   ├── schema.prisma
 │   └── seed.ts
 ├── app.vue                         ← ルートコンポーネント（Toaster 配置）
+├── error.vue                       ← Nuxt エラーページ（404 / 500 対応）
 ├── nuxt.config.ts
 └── package.json
 ```
+
+---
+
+## `nuxt.config.ts` 設計
+
+```typescript
+export default defineNuxtConfig({
+  modules: [
+    '@nuxtjs/supabase',
+    '@nuxtjs/tailwindcss',
+    'nuxt-fonts',
+  ],
+  supabase: {
+    url: process.env.NUXT_PUBLIC_SUPABASE_URL,
+    key: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
+    redirect: false, // 独自 middleware/auth.ts で制御するため無効化
+  },
+  runtimeConfig: {
+    // サーバー側のみ（クライアントに公開しない）
+    databaseUrl: process.env.DATABASE_URL,
+    directUrl: process.env.DIRECT_URL,
+    // クライアントに公開する変数（NUXT_PUBLIC_ プレフィックスで上書き可）
+    public: {
+      maptilerKey: process.env.NUXT_PUBLIC_MAPTILER_KEY,
+    },
+  },
+})
+```
+
+> **注意**: `runtimeConfig.public` に登録しない限り `NUXT_PUBLIC_*` 変数はクライアントに渡らない。
+> Supabase の URL / Anon Key は `@nuxtjs/supabase` モジュールが管理するため `runtimeConfig.public` への個別登録は不要。
+
+---
+
+## `@nuxtjs/supabase` モジュールの採用方針
+
+**採用する。**
+
+理由：
+- `useSupabaseClient()`・`useSupabaseUser()`・`useSupabaseSession()` が自動インポートで使えるため、`lib/supabase.ts` が不要になる
+- 設定が `nuxt.config.ts` の `supabase` セクションに集約され、クライアント管理コードが減る
+- Nuxt エコシステムとの統合度が高く、学習目的にも適している
+
+影響範囲：
+- `lib/supabase.ts` は**作成しない**
+- `composables/useAuth.ts` は `useSupabaseClient()` を利用して実装する
+- `server/utils/auth.ts` の `verifyAuth()` はサーバー側で直接 `createClient` を使う（`@supabase/supabase-js`）
 
 ---
 
@@ -90,9 +140,9 @@ front/
 
 | 移行前（Next.js） | 移行後（Nuxt.js 3） | 変更点 |
 |------------------|-------------------|--------|
-| `AuthProvider` (React Context) | `composables/useAuth.ts` | `useState` + `useSupabaseClient` に置き換え |
+| `AuthProvider` (React Context) | `composables/useAuth.ts` | `useSupabaseClient()` + `useState` で実装 |
 | `AuthGuard` コンポーネント | `middleware/auth.ts` | Nuxt route middleware でリダイレクト |
-| `useRouter()` | `useRouter()` | Nuxt の composable に変更 |
+| `useRouter()` (next/navigation) | `useRouter()` (Nuxt) | import 元が変わる |
 
 ### サーバー側
 
@@ -100,30 +150,33 @@ front/
 |------------------|-------------------|--------|
 | `app/api/spots/route.ts`（GET+POST） | `server/api/spots/index.get.ts` + `index.post.ts` | メソッド別にファイル分割 |
 | `app/api/spots/[id]/route.ts` | `server/api/spots/[id]/index.get.ts` 等 | 同上 |
-| `Response.json(...)` | `$fetch` レスポンス / `createError` | Nuxt の `defineEventHandler` で `return {}` |
+| `Response.json(...)` | `return { data: ... }` / `createError(...)` | `defineEventHandler` で return |
+| `handleAuthError()` | `createError({ statusCode: 401, ... })` を throw | `server/utils/api-helpers.ts` でヘルパー化 |
 | `lib/auth.ts` | `server/utils/auth.ts` | Nuxt が `server/utils/` を自動インポート |
 | `lib/prisma.ts` | `server/utils/prisma.ts` | 同上 |
-| `lib/api-helpers.ts` | `server/utils/api-helpers.ts` | 同上 |
+| `lib/api-helpers.ts` | `server/utils/api-helpers.ts` | 同上、`errorResponse` を `createError` ベースに変更 |
 
 ### フロントエンド
 
 | 移行前（Next.js） | 移行後（Nuxt.js 3） | 変更点 |
 |------------------|-------------------|--------|
-| `app/page.tsx` + `app/client.tsx` | `pages/index.vue` | ファイル分離不要（SFC で統合） |
-| `app/login/page.tsx` + `client.tsx` | `pages/login.vue` | 同上 |
-| `dynamic import(ssr:false)` | `<ClientOnly>` コンポーネント | SSR 無効化の方法が変わる |
-| `app/layout.tsx` | `app.vue` | ルートレイアウト |
-| `useRouter` (next/navigation) | `useRouter` (Nuxt) | import 元が変わる |
+| `app/page.tsx` + `app/client.tsx` | `pages/index.vue` | SFC で統合 |
+| `app/login/page.tsx` + `client.tsx` | `pages/login.vue` | SFC で統合 |
+| `app/layout.tsx` | `layouts/default.vue` / `layouts/empty.vue` | ページ別にレイアウト使い分け |
+| `dynamic import(ssr:false)` | `<ClientOnly>` | SSR 無効化の方法が変わる |
 | `useEffect` | `onMounted` / `watch` | Vue ライフサイクルへ |
+| `next/font/google`（Geist フォント） | `nuxt-fonts` モジュール | フォント設定方法が変わる |
 
 ---
 
 ## Nuxt Server Routes の実装パターン
 
+### イベントハンドラー（`defineEventHandler`）
+
 ```typescript
 // server/api/spots/index.get.ts
 export default defineEventHandler(async (event) => {
-  await verifyAuth(event);  // server/utils/auth.ts（自動インポート）
+  await verifyAuth(event); // server/utils/auth.ts（自動インポート）
 
   const query = getQuery(event);
   // ... Prisma クエリ（server/utils/prisma.ts を利用）
@@ -132,35 +185,130 @@ export default defineEventHandler(async (event) => {
 });
 ```
 
+### 認証ヘルパー（`server/utils/auth.ts`）
+
 ```typescript
-// server/utils/auth.ts
-export class AuthError extends Error { ... }
+export class AuthError extends Error {
+  constructor(message = 'Unauthorized') {
+    super(message);
+    this.name = 'AuthError';
+  }
+}
 
 export async function verifyAuth(event: H3Event) {
   const token = getHeader(event, 'authorization')?.replace('Bearer ', '');
-  if (!token) throw createError({ statusCode: 401, ... });
-  // Supabase getUser(token) で検証
+  if (!token) {
+    throw createError({ statusCode: 401, message: '認証が必要です' });
+  }
+  const supabase = createClient(
+    process.env.NUXT_PUBLIC_SUPABASE_URL!,
+    process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) {
+    throw createError({ statusCode: 401, message: '認証が無効です' });
+  }
+  return user;
+}
+```
+
+### エラーヘルパー（`server/utils/api-helpers.ts`）
+
+```typescript
+// createError を利用してエラーを統一
+export function notFound(message: string) {
+  throw createError({ statusCode: 404, message });
+}
+
+export function badRequest(code: string, message: string, data?: unknown) {
+  throw createError({ statusCode: 400, data: { code, message, ...(data && { details: data }) } });
 }
 ```
 
 ---
 
-## 実装ステップ
+## `useApiClient.ts` の実装パターン（リトライ戦略）
 
-| # | 作業 | ブランチ | 内容 |
-|---|------|----------|------|
-| 1 | 環境構築 | `feature/migrate-nuxt3` | Nuxt.js 3 初期化、Tailwind・Prisma・Supabase セットアップ |
-| 2 | サーバー側移植 | 同上 | `server/utils/` + `server/api/` 全10エンドポイント |
-| 3 | 認証実装 | 同上 | `composables/useAuth.ts` + `middleware/auth.ts` |
-| 4 | ログイン画面 | 同上 | `pages/login.vue` |
-| 5 | メイン画面・地図 | 同上 | `pages/index.vue` + `MapView.vue` |
-| 6 | ドキュメント更新 | 同上 | `docs/11-tasks.md`・`docs/09-architecture-specification.md` 更新 |
+```typescript
+// composables/useApiClient.ts
+export const useApiClient = () => {
+  const supabase = useSupabaseClient();
+
+  const apiFetch = $fetch.create({
+    async onRequest({ options }) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${session.access_token}`,
+        };
+      }
+    },
+    async onResponseError({ response }) {
+      if (response.status === 401) {
+        const { error } = await supabase.auth.refreshSession();
+        if (error) {
+          await navigateTo('/login');
+        }
+        // リトライは呼び出し側で再度 apiFetch を実行
+      }
+    },
+  });
+
+  return { apiFetch };
+};
+```
 
 ---
 
-## 注意事項
+## テスト移行方針
 
-- `prisma/` ディレクトリは現在リポジトリルートの `front/prisma/` にある。Nuxt プロジェクト初期化後も同じ `front/prisma/` に配置する
-- Nuxt の `server/utils/` は自動インポートされるため `@/lib/` のような import alias は不要
-- MapLibre GL JS は SSR 非対応のため `<ClientOnly>` でラップ必須
-- 環境変数プレフィックスは `NEXT_PUBLIC_` → `NUXT_PUBLIC_` に変更が必要
+現行の `src/__tests__/auth.test.tsx` は React + `@testing-library/react` 前提のため、全書き直しが必要。
+
+### パッケージ変更
+
+| 削除 | 追加 |
+|------|------|
+| `@testing-library/react` | `@vue/test-utils` |
+| `@testing-library/jest-dom` | `@nuxt/test-utils` |
+| `babel-plugin-react-compiler` | — |
+
+### `vitest.config.ts` の変更
+
+```typescript
+// 移行後
+import { defineVitestConfig } from '@nuxt/test-utils/config';
+
+export default defineVitestConfig({
+  test: {
+    environment: 'nuxt',
+  },
+});
+```
+
+---
+
+## 環境変数の変更
+
+| 移行前 | 移行後 | 備考 |
+|--------|--------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | `NUXT_PUBLIC_SUPABASE_URL` | `@nuxtjs/supabase` が参照 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `NUXT_PUBLIC_SUPABASE_ANON_KEY` | `@nuxtjs/supabase` が参照 |
+| `NEXT_PUBLIC_MAPTILER_KEY` | `NUXT_PUBLIC_MAPTILER_KEY` | `runtimeConfig.public.maptilerKey` で管理 |
+| `DATABASE_URL` | `DATABASE_URL` | 変更なし |
+| `DIRECT_URL` | `DIRECT_URL` | 変更なし |
+
+---
+
+## 実装ステップ
+
+| # | 作業 | 内容 |
+|---|------|------|
+| 1 | 環境構築 | Nuxt.js 3 初期化、`@nuxtjs/supabase`・Tailwind・`nuxt-fonts` セットアップ、`nuxt.config.ts` + 環境変数設定 |
+| 2 | サーバー側移植 | `server/utils/`（auth / prisma / api-helpers）+ `server/api/` 全10エンドポイント |
+| 3 | 認証実装 | `composables/useAuth.ts` + `middleware/auth.ts` |
+| 4 | ログイン画面 | `pages/login.vue` + `layouts/empty.vue` |
+| 5 | メイン画面・地図 | `pages/index.vue` + `layouts/default.vue` + `components/map/MapView.vue` |
+| 6 | エラーページ | `error.vue`（404 / 500 対応） |
+| 7 | テスト移行 | `@vue/test-utils` + `@nuxt/test-utils` でテストコード書き直し |
+| 8 | ドキュメント更新 | `docs/11-tasks.md`・`docs/09-architecture-specification.md` 更新 |
