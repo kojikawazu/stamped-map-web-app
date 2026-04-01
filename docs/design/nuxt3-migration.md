@@ -246,8 +246,9 @@ export const useApiClient = () => {
     },
     async onResponseError({ request, options, response }) {
       // _retried フラグで再試行を1回に制限し、無限ループを防ぐ
-      if (response.status === 401 && !options._retried) {
-        options._retried = true;
+      // ⚠️ FetchOptions に _retried は存在しないため型アサーションが必要（実装時注意）
+      if (response.status === 401 && !(options as Record<string, unknown>)._retried) {
+        (options as Record<string, unknown>)._retried = true;
         const { error } = await supabase.auth.refreshSession();
         if (error) {
           await navigateTo('/login');
@@ -285,10 +286,11 @@ export const useAuth = () => {
   const user = useSupabaseUser();       // @nuxtjs/supabase が提供（リアクティブ）
   const session = useSupabaseSession(); // @nuxtjs/supabase が提供（リアクティブ）
 
-  // user が確定するまで isLoading = true（onMounted は使わない）
-  const isLoading = useState('auth:loading', () => !user.value);
-  watch(user, () => { isLoading.value = false; }, { immediate: true });
+  // session が undefined の間はローディング中と判定する
+  // watch + immediate: true は「null でも即 false になる」論理的誤りを生むため使わない
+  const isLoading = computed(() => session.value === undefined);
 
+  // 成功時の navigateTo('/') は呼び出し側の pages/login.vue が行う
   const login = async (email: string, password: string): Promise<{ error: string | null }> => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: 'メールアドレスまたはパスワードが正しくありません' };
@@ -333,6 +335,16 @@ export default defineNuxtRouteMiddleware(() => {
 ```vue
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' });
+</script>
+```
+
+ログイン画面（`pages/login.vue`）でレイアウト指定：
+
+```vue
+<script setup lang="ts">
+// ヘッダーなしの empty レイアウトを指定
+// ログイン成功後の遷移は login.vue 側で navigateTo('/') を呼ぶ
+definePageMeta({ layout: 'empty' });
 </script>
 ```
 
