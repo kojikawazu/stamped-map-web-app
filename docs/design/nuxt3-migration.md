@@ -93,13 +93,16 @@ front/
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/supabase',
-    '@nuxtjs/tailwindcss',
+    '@tailwindcss/nuxt',  // Tailwind CSS v4 対応モジュール（@nuxtjs/tailwindcss は v3 専用のため使用不可）
     'nuxt-fonts',
   ],
   supabase: {
     url: process.env.NUXT_PUBLIC_SUPABASE_URL,
     key: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
-    redirect: false, // 独自 middleware/auth.ts で制御するため無効化
+    // 独自 middleware/auth.ts で制御するため自動リダイレクトを無効化
+    // ⚠️ @nuxtjs/supabase のバージョンによりオプション名が異なる場合あり（実装時に要確認）
+    //   v1 系: redirect / v2 系: redirectOptions
+    redirect: false,
   },
   runtimeConfig: {
     // サーバー側のみ（クライアントに公開しない）
@@ -187,14 +190,9 @@ export default defineEventHandler(async (event) => {
 
 ### 認証ヘルパー（`server/utils/auth.ts`）
 
-```typescript
-export class AuthError extends Error {
-  constructor(message = 'Unauthorized') {
-    super(message);
-    this.name = 'AuthError';
-  }
-}
+> `AuthError` クラスは不要。`createError` で直接 throw するため定義しない。
 
+```typescript
 export async function verifyAuth(event: H3Event) {
   const token = getHeader(event, 'authorization')?.replace('Bearer ', '');
   if (!token) {
@@ -229,6 +227,8 @@ export function badRequest(code: string, message: string, data?: unknown) {
 
 ## `useApiClient.ts` の実装パターン（リトライ戦略）
 
+現行の `fetchWithRetry`（401 時にリフレッシュ → 同一リクエストを自動再実行）と同等の動作を実現する。
+
 ```typescript
 // composables/useApiClient.ts
 export const useApiClient = () => {
@@ -244,19 +244,87 @@ export const useApiClient = () => {
         };
       }
     },
-    async onResponseError({ response }) {
+    async onResponseError({ request, options, response }) {
       if (response.status === 401) {
         const { error } = await supabase.auth.refreshSession();
         if (error) {
           await navigateTo('/login');
+          return;
         }
-        // リトライは呼び出し側で再度 apiFetch を実行
+        // 新しいトークンでリクエストを再実行（現行の fetchWithRetry と同等）
+        const { data: { session: newSession } } = await supabase.auth.getSession();
+        if (newSession?.access_token) {
+          options.headers = {
+            ...options.headers,
+            Authorization: `Bearer ${newSession.access_token}`,
+          };
+          return $fetch(request, options);
+        }
       }
     },
   });
 
   return { apiFetch };
 };
+```
+
+---
+
+## `useAuth.ts` の実装パターン
+
+```typescript
+// composables/useAuth.ts
+export const useAuth = () => {
+  const supabase = useSupabaseClient();
+  const user = useSupabaseUser();       // @nuxtjs/supabase が提供（リアクティブ）
+  const session = useSupabaseSession(); // @nuxtjs/supabase が提供（リアクティブ）
+  const isLoading = useState('auth:loading', () => true);
+
+  // セッション初期化完了まで isLoading = true
+  onMounted(async () => {
+    await supabase.auth.getSession();
+    isLoading.value = false;
+  });
+
+  const login = async (email: string, password: string): Promise<{ error: string | null }> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: 'メールアドレスまたはパスワードが正しくありません' };
+    return { error: null };
+  };
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      // トースト通知
+      return;
+    }
+    await navigateTo('/login');
+  };
+
+  return { user, session, isLoading, login, logout };
+};
+```
+
+---
+
+## `middleware/auth.ts` の実装パターン
+
+```typescript
+// middleware/auth.ts
+export default defineNuxtRouteMiddleware(() => {
+  const user = useSupabaseUser();
+  if (!user.value) {
+    return navigateTo('/login');
+  }
+});
+```
+
+メイン画面（`pages/index.vue`）で適用：
+
+```vue
+<script setup lang="ts">
+definePageMeta({ middleware: 'auth' });
+</script>
 ```
 
 ---
