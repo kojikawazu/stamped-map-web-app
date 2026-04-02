@@ -5,20 +5,20 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Client (Browser)                      │
-│  Next.js + TypeScript + MapLibre GL JS                   │
+│  Nuxt.js 3 + TypeScript + MapLibre GL JS                 │
 │  ┌──────────┐  ┌──────────────┐  ┌──────────────────┐   │
-│  │ UI/Pages │  │ Map Component│  │ MapTiler Tiles   │   │
-│  │ (CSR)    │  │ ('use client')│  │                  │   │
+│  │ Pages    │  │ Map Component│  │ MapTiler Tiles   │   │
+│  │ (CSR)    │  │ (<ClientOnly>)│  │                  │   │
 │  └──────────┘  └──────────────┘  └──────────────────┘   │
 │  ┌──────────────────────────────┐                        │
-│  │ Supabase Auth SDK (認証)     │                        │
-│  │ signInWithPassword / getSession                       │
+│  │ @nuxtjs/supabase (認証)      │                        │
+│  │ useSupabaseClient / Session  │                        │
 │  └──────────┬───────────────────┘                        │
 └─────────────┼───────────────────┬────────────────────────┘
               │ JWT Bearer        │ タイルリクエスト
               ▼                   ▼
 ┌──────────────────────────┐  ┌───────────────────────┐
-│   Next.js API Routes     │  │  MapTiler Cloud       │
+│   Nuxt Server Routes     │  │  MapTiler Cloud       │
 │   (Vercel Serverless)    │  │  ベクタータイル配信    │
 │  ┌────────────────────┐  │  └───────────────────────┘
 │  │ JWT検証             │  │
@@ -44,16 +44,16 @@
 
 | レイヤー | 技術 | 選定理由 |
 |----------|------|----------|
-| フロントエンド | Next.js (App Router) + TypeScript | Vercel最適、型安全 |
+| フロントエンド | Nuxt.js 3 + TypeScript | Vue.js エコシステム、地図SPA開発に適した CSR/SSR ハイブリッド構成 |
 | 地図ライブラリ | MapLibre GL JS | MapTiler推奨、TS製、WebGL描画、ベクタータイルネイティブ対応 |
 | 地図タイル | MapTiler Cloud | 無料枠100,000タイル/月、日本語地名対応、MapLibre相性◎ |
-| バックエンドAPI | Next.js API Routes | Vercel一体デプロイ、追加インフラ不要 |
-| ORM | Prisma | 型安全なDB操作、マイグレーション管理 |
+| バックエンドAPI | Nuxt Server Routes (`defineEventHandler`) | Vercel一体デプロイ、追加インフラ不要 |
+| ORM | Prisma + `@prisma/adapter-pg` | 型安全なDB操作、PostgreSQL アダプター経由接続 |
 | バリデーション | Zod | クライアント・サーバー共有スキーマ |
 | データベース | Supabase (PostgreSQL + PostGIS) | 地理クエリ対応、無料枠あり |
-| 認証 | Supabase Auth（クライアント側 `@supabase/supabase-js`） | JWT発行、サインアップ不要 |
-| ホスティング | Vercel | Next.js最適、自動デプロイ |
-| テスト | Vitest | ESM対応、Jest互換、高速 |
+| 認証 | Supabase Auth（`@nuxtjs/supabase`） | JWT発行、`useSupabaseClient/User/Session` auto-import |
+| ホスティング | Vercel | Nuxt.js 対応、自動デプロイ |
+| テスト | Vitest + `@nuxt/test-utils` + `@vue/test-utils` | ESM対応、Nuxt環境テスト |
 
 ## 認証アーキテクチャ
 
@@ -61,18 +61,74 @@
 
 ```
 クライアント側：
-  - @supabase/supabase-js でログイン（signInWithPassword）
-  - JWT トークンの保持・送信（SDK が自動管理）
-  - 認証ガード（getSession → 未認証なら /login へリダイレクト）
+  - @nuxtjs/supabase の useSupabaseClient() でログイン（signInWithPassword）
+  - useApiClient composable が Authorization: Bearer <token> を自動付与
+  - 401 時はトークンリフレッシュ → 1回リトライ（try/catch ラッパー）
+  - middleware/auth.ts で未認証なら /login へリダイレクト（クライアントサイドのみ）
 
-サーバー側（API Routes）：
+サーバー側（Server Routes）：
   - Authorization: Bearer <token> からJWTを取得
-  - supabase.auth.getUser(token) で検証
+  - supabase.auth.getUser(token) で検証（singleton クライアント使用）
   - 検証OK → Prisma でDB操作
 ```
 
-> `@supabase/ssr` は使用しない。メイン画面が CSR 中心のため、クライアント側認証で十分。
+> `@nuxtjs/supabase` の `serverSupabaseClient` はCookieセッション前提のため使用しない。
+> Bearer トークン方式を採用することでフロント・APIの認証方式を統一。
 > サインアップ機能は提供しない。アカウントは Supabase ダッシュボードで事前作成。
+
+### SSR ガードの設計
+
+```typescript
+// middleware/auth.ts
+export default defineNuxtRouteMiddleware(() => {
+  if (import.meta.server) return; // SSR ではスキップ（useSupabaseUser が null になるため）
+  const user = useSupabaseUser();
+  if (!user.value) return navigateTo("/login");
+});
+```
+
+> 初回 SSR レスポンスは認証なしで返るが、クライアントハイドレーション後に即座にガードが発動する。
+> 地図SPA の特性上（全ページ要認証）、この設計で十分。
+
+## ディレクトリ構成（`front/`）
+
+```
+front/
+├── app.vue                    # ルートレイアウト（NuxtLayout + Toaster）
+├── nuxt.config.ts             # Nuxt設定
+├── assets/css/main.css        # Tailwind CSS v4 エントリーポイント
+├── pages/
+│   ├── index.vue              # メイン画面（地図、auth middleware 適用）
+│   └── login.vue              # ログイン画面（empty layout）
+├── layouts/
+│   ├── default.vue            # ヘッダー付きレイアウト
+│   └── empty.vue              # ログイン用シンプルレイアウト
+├── components/
+│   └── map/MapView.vue        # MapLibre GL JS（<ClientOnly> でSSR除外）
+├── composables/
+│   ├── useAuth.ts             # Supabase セッション管理・ログイン・ログアウト
+│   └── useApiClient.ts        # $fetch ラッパー（Bearer token + 401 リトライ）
+├── middleware/
+│   └── auth.ts                # 認証ガード（クライアントサイドのみ）
+├── server/
+│   ├── utils/
+│   │   ├── auth.ts            # verifyAuth（Bearer JWT検証）
+│   │   ├── prisma.ts          # Prisma singleton（globalThis）
+│   │   └── api-helpers.ts     # レスポンス整形・WHERE句ビルダー・バリデーション
+│   └── api/
+│       ├── categories/        # GET, POST, PUT/:id, DELETE/:id
+│       └── spots/             # GET, POST, GET/markers, GET/:id, PUT/:id, DELETE/:id
+├── lib/
+│   └── validations/
+│       ├── spot.ts            # Zod スキーマ（スポット）
+│       └── category.ts        # Zod スキーマ（カテゴリ）
+├── __tests__/
+│   ├── server/utils/          # api-helpers ユニットテスト
+│   └── lib/validations/       # Zod バリデーションテスト
+└── prisma/
+    ├── schema.prisma
+    └── seed.ts
+```
 
 ## データアクセス層
 
@@ -93,17 +149,20 @@ longitude (Float) ─┘
 ### JWT 検証の共通化
 
 ```typescript
-// lib/auth.ts — 全 API Route で使用する共通ヘルパー
-export async function verifyAuth(request: Request) {
-  const token = request.headers.get('Authorization')?.replace('Bearer ', '');
-  if (!token) throw new AuthError();
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) throw new AuthError();
+// server/utils/auth.ts — 全 Server Route で使用する共通ヘルパー
+// Supabase クライアントは singleton でモジュールレベルに保持（per-request 生成を避ける）
+let _supabaseAdmin: SupabaseClient | null = null;
+
+export async function verifyAuth(event: H3Event) {
+  const token = getHeader(event, "authorization")?.replace("Bearer ", "");
+  if (!token) throw createError({ statusCode: 401, message: "認証が必要です" });
+  const { data: { user }, error } = await getSupabaseAdmin().auth.getUser(token);
+  if (error || !user) throw createError({ statusCode: 401, message: "認証が無効です" });
   return user;
 }
 ```
 
-> 全 API Route で `verifyAuth()` を呼び出す。1つでも漏れるとセキュリティホール。
+> 全 Server Route で `verifyAuth()` を呼び出す。1つでも漏れるとセキュリティホール。
 
 ### DB制約・インデックス
 
@@ -129,9 +188,9 @@ export async function verifyAuth(request: Request) {
 
 | 環境 | ホスト | 内容 |
 |------|--------|------|
-| フロントエンド + API | Vercel | Next.js 一体デプロイ |
+| フロントエンド + API | Vercel | Nuxt.js 一体デプロイ |
 | データベース | Supabase | PostgreSQL + PostGIS |
-| 認証 | Supabase Auth | クライアントSDK経由 |
+| 認証 | Supabase Auth | `@nuxtjs/supabase` 経由 |
 | 地図タイル | MapTiler Cloud | CDN配信 |
 
 ## 将来の拡張パス
@@ -145,4 +204,9 @@ DB       : Supabase（そのまま）
 ```
 
 - API を RESTful に設計しておけば、フロントは base URL を差し替えるだけで移行可能
-- `api-client.ts` に API 呼び出しを集約し、移行コストを最小化
+- `useApiClient.ts` に API 呼び出しを集約し、移行コストを最小化
+
+### コンポーネント設計の拡張
+
+現状は `components/` フラット構成。UIが複雑化した際はアトミックデザイン階層への移行を予定。
+（Issue #7 参照）
