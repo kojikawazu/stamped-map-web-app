@@ -85,16 +85,20 @@ async function handleSubmit() {
   errorMessage.value = "";
   submitting.value = true;
 
-  const result = await login(email.value, password.value);
+  try {
+    const result = await login(email.value, password.value);
 
-  if (result.error) {
-    errorMessage.value = result.error;
-    toast.error(result.error);
+    if (result.error) {
+      errorMessage.value = result.error;
+      toast.error(result.error);
+      return;
+    }
+
+    // セッション確立後、watch が navigateTo('/') を呼ぶ
+    toast.success("ログインしました");
+  } finally {
+    // navigateTo が失敗した場合もボタンを確実にリセットする
     submitting.value = false;
-    return;
   }
-
-  // セッション確立後、watch が navigateTo('/') を呼ぶ
-  toast.success("ログインしました");
 }
 </script>

@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit) || 1,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
     },
   };
 });

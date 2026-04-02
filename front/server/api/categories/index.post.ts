@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
 
   const { name, color } = result.data;
 
+  // name は schema.prisma で @unique 制約あり → findUnique が使用可能
   const existing = await prisma.mapCategory.findUnique({ where: { name } });
   if (existing) {
     throw createError({

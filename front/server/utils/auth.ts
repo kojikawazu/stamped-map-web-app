@@ -6,18 +6,20 @@ import type { H3Event } from "h3";
 // @nuxtjs/supabase の serverSupabaseClient（Cookie セッション前提）ではなく
 // createClient + getUser(token) を使用する。
 // HTTP サーバーは長寿命のため、モジュールレベルで singleton 化してリクエストごとの生成を避ける。
-let _supabaseAdmin: SupabaseClient | null = null;
+// JWT 検証専用クライアント（ANON_KEY は auth.getUser() の検証用途のみ）
+// 名称を _supabaseAuth とし、管理操作（SERVICE_ROLE_KEY）との混同を防ぐ
+let _supabaseAuth: SupabaseClient | null = null;
 
-function getSupabaseAdmin(): SupabaseClient {
-  if (!_supabaseAdmin) {
+function getSupabaseAuth(): SupabaseClient {
+  if (!_supabaseAuth) {
     const url = process.env.NUXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !key) {
       throw createError({ statusCode: 500, message: "サーバー設定エラー" });
     }
-    _supabaseAdmin = createClient(url, key);
+    _supabaseAuth = createClient(url, key);
   }
-  return _supabaseAdmin;
+  return _supabaseAuth;
 }
 
 export async function verifyAuth(event: H3Event) {
@@ -26,7 +28,7 @@ export async function verifyAuth(event: H3Event) {
     throw createError({ statusCode: 401, message: "認証が必要です" });
   }
 
-  const supabase = getSupabaseAdmin();
+  const supabase = getSupabaseAuth();
 
   const {
     data: { user },

@@ -72,7 +72,7 @@
 - [ ] スポット削除（確認ダイアログ）
 - [ ] カテゴリ管理UI
 
-## M0: Nuxt.js 3 移行（進行中）
+## M0: Nuxt.js 3 移行（完了）
 
 - [x] 設計書作成・レビュー（`docs/design/nuxt3-migration.md`）
 - [x] `front/` を Nuxt.js 3 で再構築（Next.js ファイル削除）
@@ -84,8 +84,8 @@
 - [x] `pages/index.vue` + `layouts/default.vue` + `MapView.vue` 実装
 - [x] `error.vue` 実装
 - [x] 環境変数プレフィックス `NEXT_PUBLIC_` → `NUXT_PUBLIC_` 更新
-- [ ] テスト移行（`@vue/test-utils` + `@nuxt/test-utils`）
-- [ ] `docs/09-architecture-specification.md` 更新
+- [x] テスト移行（`@vue/test-utils` + `@nuxt/test-utils`）
+- [x] `docs/09-architecture-specification.md` 更新
 
 ## 次のアクション（M3: 地図表示）
 
