@@ -31,7 +31,9 @@ export const createSpotSchema = z.object({
     )
     .refine(
       (date) => {
-        // サーバータイムゾーン依存を避けるため UTC 基準で当日と比較する
+        // UTC 基準で当日と比較する（サーバータイムゾーン依存を排除）
+        // ⚠️ JST (UTC+9) では日本時間 00:00〜08:59 の間、UTC 当日が前日になるため
+        //    その時間帯に当日の日付を入力すると拒否される場合がある。個人アプリとして許容する。
         const todayUtc = new Date().toISOString().split("T")[0];
         return date <= todayUtc;
       },
