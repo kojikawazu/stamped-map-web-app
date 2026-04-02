@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   await verifyAuth(event);
 
-  const query = getQuery(event) as Record<string, string>;
+  const query = getQuery(event) as Record<string, string | string[]>;
   const where = buildSpotWhereClause(query);
 
   const spots = await prisma.mapSpot.findMany({

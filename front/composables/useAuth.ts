@@ -26,8 +26,8 @@ export const useAuth = () => {
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      // トースト通知は呼び出し側で行う
-      return;
+      // 呼び出し側（default.vue）の catch ブロックでトースト通知を行う
+      throw new Error("ログアウトに失敗しました");
     }
     await navigateTo("/login");
   };

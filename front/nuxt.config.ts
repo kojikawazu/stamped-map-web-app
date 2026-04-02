@@ -25,11 +25,12 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // サーバー側のみ（クライアントに公開しない）
-    databaseUrl: process.env.DATABASE_URL,
-    directUrl: process.env.DIRECT_URL,
-    // クライアントに公開する変数（NUXT_PUBLIC_ プレフィックスで上書き可）
+    // 対応する環境変数（NUXT_DATABASE_URL, NUXT_DIRECT_URL）で実行時に上書きされる
+    databaseUrl: "",
+    directUrl: "",
+    // クライアントに公開する変数（NUXT_PUBLIC_MAPTILER_KEY で実行時に上書きされる）
     public: {
-      maptilerKey: process.env.NUXT_PUBLIC_MAPTILER_KEY,
+      maptilerKey: "",
     },
   },
 });

@@ -1,49 +1,50 @@
+import type { FetchError } from "ofetch";
+
 export const useApiClient = () => {
   const supabase = useSupabaseClient();
 
-  const apiFetch = $fetch.create({
-    async onRequest({ options }) {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session?.access_token) {
-        options.headers = new Headers(options.headers as HeadersInit);
-        (options.headers as Headers).set(
-          "Authorization",
-          `Bearer ${session.access_token}`
-        );
+  const getAccessToken = async (): Promise<string | null> => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
+  };
+
+  // onResponseError の戻り値は ofetch に無視されるため、
+  // リトライは try/catch でラップした独自ラッパー関数として実装する
+  const apiFetch = async <T = unknown>(
+    url: string,
+    options: Parameters<typeof $fetch>[1] = {}
+  ): Promise<T> => {
+    const token = await getAccessToken();
+    const headers = new Headers(options.headers as HeadersInit);
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    try {
+      return await ($fetch<T>(url, { ...options, headers }) as Promise<T>);
+    } catch (err) {
+      const fetchError = err as FetchError;
+      if (fetchError.response?.status !== 401) {
+        throw err;
       }
-    },
-    async onResponseError({ request, options, response }) {
-      // _retried フラグで再試行を1回に制限し、無限ループを防ぐ
-      // ⚠️ FetchOptions に _retried は存在しないため型アサーションが必要
-      if (
-        response.status === 401 &&
-        !(options as Record<string, unknown>)._retried
-      ) {
-        (options as Record<string, unknown>)._retried = true;
-        const { error } = await supabase.auth.refreshSession();
-        if (error) {
-          await navigateTo("/login");
-          return;
-        }
-        // 新しいトークンでリクエストを再実行（現行の fetchWithRetry と同等）
-        const {
-          data: { session: newSession },
-        } = await supabase.auth.getSession();
-        if (newSession?.access_token) {
-          const newHeaders = new Headers(options.headers as HeadersInit);
-          newHeaders.set(
-            "Authorization",
-            `Bearer ${newSession.access_token}`
-          );
-          options.headers = newHeaders;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return $fetch(request as string, options as any);
-        }
+      // 401 のとき: トークンをリフレッシュして1回だけリトライ
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        await navigateTo("/login");
+        throw err;
       }
-    },
-  });
+      const newToken = await getAccessToken();
+      if (!newToken) {
+        await navigateTo("/login");
+        throw err;
+      }
+      const retryHeaders = new Headers(options.headers as HeadersInit);
+      retryHeaders.set("Authorization", `Bearer ${newToken}`);
+      return await ($fetch<T>(url, { ...options, headers: retryHeaders }) as Promise<T>);
+    }
+  };
 
   return { apiFetch };
 };

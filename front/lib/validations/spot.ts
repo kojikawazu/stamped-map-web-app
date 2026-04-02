@@ -31,11 +31,9 @@ export const createSpotSchema = z.object({
     )
     .refine(
       (date) => {
-        const [year, month, day] = date.split("-").map(Number);
-        const now = new Date();
-        const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const inputLocal = new Date(year, month - 1, day);
-        return inputLocal <= todayLocal;
+        // サーバータイムゾーン依存を避けるため UTC 基準で当日と比較する
+        const todayUtc = new Date().toISOString().split("T")[0];
+        return date <= todayUtc;
       },
       { message: "未来の日付は指定できません" }
     ),

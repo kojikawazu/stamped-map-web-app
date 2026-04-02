@@ -3,15 +3,19 @@ const SORT_FIELD_MAP: Record<string, string> = {
   created_at: "createdAt",
 };
 
+// このアプリは個人利用の単一ユーザー設計のため、全スポットを返す。
+// マルチユーザー化の際は userId フィルターを追加すること。
 export default defineEventHandler(async (event) => {
   await verifyAuth(event);
 
-  const query = getQuery(event) as Record<string, string>;
+  const rawQuery = getQuery(event);
+  // getQuery の値型は QueryValue | QueryValue[] のため、文字列比較・数値変換には String() で正規化する
+  const query = rawQuery as Record<string, string | string[]>;
 
-  const page = Math.max(1, parseInt(query.page ?? "1", 10) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(query.limit ?? "20", 10) || 20));
-  const sortParam = query.sort ?? "visited_at";
-  const order = query.order === "asc" ? "asc" : "desc";
+  const page = Math.max(1, parseInt(String(rawQuery.page ?? "1"), 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(String(rawQuery.limit ?? "20"), 10) || 20));
+  const sortParam = String(rawQuery.sort ?? "visited_at");
+  const order = rawQuery.order === "asc" ? "asc" : "desc";
 
   const sortField = SORT_FIELD_MAP[sortParam] ?? "visitedAt";
   const where = buildSpotWhereClause(query);
