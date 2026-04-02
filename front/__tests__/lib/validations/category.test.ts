@@ -3,10 +3,10 @@ import { createCategorySchema } from "../../../lib/validations/category";
 
 describe("createCategorySchema", () => {
   it("正常な入力を受け入れる", () => {
+    // createCategorySchema は name + color のみ定義（sortOrder は別途管理）
     const result = createCategorySchema.safeParse({
       name: "カフェ",
       color: "#FF5733",
-      sortOrder: 1,
     });
     expect(result.success).toBe(true);
   });

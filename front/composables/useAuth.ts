@@ -4,8 +4,8 @@ export const useAuth = () => {
   const session = useSupabaseSession();
 
   // session が undefined の間はローディング中と判定する
-  // ⚠️ useSupabaseSession() の初期値が undefined か null かは @nuxtjs/supabase のバージョンに依存する
-  //    実装時に動作確認が必要。null から始まる場合は isLoading の代替手段を検討すること
+  // @nuxtjs/supabase v1 では初期値 undefined → 認証確認後に null（未認証）or Session に変わる
+  // null もチェックすると「ログアウト後」も loading 扱いになるため undefined のみ対象とする
   const isLoading = computed(() => session.value === undefined);
 
   // 成功時の navigateTo('/') は呼び出し側の pages/login.vue が行う

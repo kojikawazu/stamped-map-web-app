@@ -62,19 +62,19 @@ describe("isValidUuid", () => {
 });
 
 describe("getValidationErrorDetails", () => {
-  it("Zod エラーをフィールド名→メッセージのマップに変換する", () => {
-    import("zod").then(({ z }) => {
-      const schema = z.object({
-        name: z.string().min(1, "必須"),
-        age: z.number().min(0, "0以上"),
-      });
-      const result = schema.safeParse({ name: "", age: -1 });
-      if (!result.success) {
-        const details = getValidationErrorDetails(result.error);
-        expect(details.name).toBe("必須");
-        expect(details.age).toBe("0以上");
-      }
+  it("Zod エラーをフィールド名→メッセージのマップに変換する", async () => {
+    const { z } = await import("zod");
+    const schema = z.object({
+      name: z.string().min(1, "必須"),
+      age: z.number().min(0, "0以上"),
     });
+    const result = schema.safeParse({ name: "", age: -1 });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const details = getValidationErrorDetails(result.error);
+      expect(details.name).toBe("必須");
+      expect(details.age).toBe("0以上");
+    }
   });
 });
 

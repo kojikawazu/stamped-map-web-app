@@ -53,6 +53,26 @@ describe("createSpotSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("visitedAt が未来の日付のときバリデーションエラーになる", () => {
+    const result = createSpotSchema.safeParse({ ...validSpot, visitedAt: "2099-12-31" });
+    expect(result.success).toBe(false);
+  });
+
+  it("name が100文字のとき許容する（上限境界値）", () => {
+    const result = createSpotSchema.safeParse({ ...validSpot, name: "a".repeat(100) });
+    expect(result.success).toBe(true);
+  });
+
+  it("latitude がちょうど ±90 のとき許容する（境界値）", () => {
+    expect(createSpotSchema.safeParse({ ...validSpot, latitude: 90 }).success).toBe(true);
+    expect(createSpotSchema.safeParse({ ...validSpot, latitude: -90 }).success).toBe(true);
+  });
+
+  it("longitude がちょうど ±180 のとき許容する（境界値）", () => {
+    expect(createSpotSchema.safeParse({ ...validSpot, longitude: 180 }).success).toBe(true);
+    expect(createSpotSchema.safeParse({ ...validSpot, longitude: -180 }).success).toBe(true);
+  });
+
   it("memo が空文字のとき許容する", () => {
     const result = createSpotSchema.safeParse({ ...validSpot, memo: "" });
     expect(result.success).toBe(true);
