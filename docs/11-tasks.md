@@ -6,8 +6,9 @@
 |---|---------------|------|------|
 | M1 | 環境構築 | プロジェクトセットアップ、外部サービス準備、接続確認 | 完了 |
 | M2 | 認証 | Supabase Auth でログイン、認証ガード | 完了 |
-| M3 | 地図表示 | Next.js + MapLibre GL JS で地図表示 + マーカー描画 | 未着手 |
-| M4 | CRUD実装 | スポットの登録・一覧・詳細・編集・削除（API Routes + Prisma） | 進行中 |
+| M0 | Nuxt.js 3 移行 | フロントエンドを Next.js 16 から Nuxt.js 3 へ移行 | 進行中 |
+| M3 | 地図表示 | Nuxt.js 3 + MapLibre GL JS で地図表示 + マーカー描画 | 未着手 |
+| M4 | CRUD実装 | スポットの登録・一覧・詳細・編集・削除（Server Routes + Prisma） | 進行中 |
 | M5 | 地図連携 | 地図クリック→登録、クラスタリング、カテゴリアイコン | 未着手 |
 | M6 | 拡張機能 | ヒートマップ、統計、タイムラインなど | 未着手 |
 
@@ -70,6 +71,21 @@
 - [ ] スポット編集モーダル
 - [ ] スポット削除（確認ダイアログ）
 - [ ] カテゴリ管理UI
+
+## M0: Nuxt.js 3 移行（進行中）
+
+- [x] 設計書作成・レビュー（`docs/design/nuxt3-migration.md`）
+- [x] `front/` を Nuxt.js 3 で再構築（Next.js ファイル削除）
+- [x] `package.json` / `nuxt.config.ts` / `tsconfig.json` 作成
+- [x] `server/utils/`（auth / prisma / api-helpers）移植
+- [x] `server/api/` 全10エンドポイント移植（Server Routes）
+- [x] `composables/useAuth.ts` + `middleware/auth.ts` 実装
+- [x] `pages/login.vue` + `layouts/empty.vue` 実装
+- [x] `pages/index.vue` + `layouts/default.vue` + `MapView.vue` 実装
+- [x] `error.vue` 実装
+- [x] 環境変数プレフィックス `NEXT_PUBLIC_` → `NUXT_PUBLIC_` 更新
+- [ ] テスト移行（`@vue/test-utils` + `@nuxt/test-utils`）
+- [ ] `docs/09-architecture-specification.md` 更新
 
 ## 次のアクション（M3: 地図表示）
 
