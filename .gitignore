@@ -8,6 +8,7 @@ out/
 # nuxt.js
 .nuxt/
 .output/
+.nuxtrc
 
 # production
 build/
