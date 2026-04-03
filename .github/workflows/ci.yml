@@ -45,6 +45,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare Nuxt
+        run: pnpm exec nuxt prepare
+        env:
+          NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+          NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
+
       - name: Unit & integration tests
         run: pnpm test
         env:
