@@ -15,6 +15,13 @@
 <script setup lang="ts">
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { Marker } from "~/types/marker";
+import type { Category } from "~/types/category";
+
+const props = defineProps<{
+  markers: Marker[];
+  categories: Category[];
+}>();
 
 const config = useRuntimeConfig();
 const maptilerKey = config.public.maptilerKey as string;
@@ -48,6 +55,38 @@ function saveMapState(center: [number, number], zoom: number) {
   }
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function buildCategoryMap(cats: Category[]): Map<string, string> {
+  return new Map(cats.map((c) => [c.id, c.name]));
+}
+
+function markersToGeoJSON(items: Marker[], categoryMap: Map<string, string>): GeoJSON.FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: items.map((m) => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [m.longitude, m.latitude],
+      },
+      properties: {
+        id: m.id,
+        name: m.name,
+        color: m.categoryColor,
+        categoryName: categoryMap.get(m.categoryId) ?? "",
+      },
+    })),
+  };
+}
+
 const mapContainerRef = ref<HTMLDivElement | null>(null);
 const mapRef = ref<maplibregl.Map | null>(null);
 
@@ -70,8 +109,67 @@ onMounted(() => {
     saveMapState([lng, lat], map.getZoom());
   });
 
+  map.on("load", () => {
+    map.addSource("spots", {
+      type: "geojson",
+      data: markersToGeoJSON(props.markers, buildCategoryMap(props.categories)),
+    });
+
+    map.addLayer({
+      id: "spots-circle",
+      type: "circle",
+      source: "spots",
+      paint: {
+        "circle-radius": 7,
+        "circle-color": ["get", "color"],
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#ffffff",
+      },
+    });
+
+    // ポップアップ表示
+    map.on("click", "spots-circle", (e) => {
+      const feature = e.features?.[0];
+      if (!feature || feature.geometry.type !== "Point") return;
+      const props = feature.properties;
+      if (!props) return;
+      const name: string = props.name ?? "";
+      const categoryName: string = props.categoryName ?? "";
+      new maplibregl.Popup({ offset: 10 })
+        .setLngLat(feature.geometry.coordinates as [number, number])
+        .setHTML(
+          `<div class="text-sm">
+            <p class="font-medium">${escapeHtml(name)}</p>
+            <p class="text-zinc-500 text-xs">${escapeHtml(categoryName)}</p>
+          </div>`
+        )
+        .addTo(map);
+    });
+
+    map.on("mouseenter", "spots-circle", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "spots-circle", () => {
+      map.getCanvas().style.cursor = "";
+    });
+  });
+
   mapRef.value = map;
 });
+
+// markers / categories が変化したら GeoJSON ソースを更新
+watch(
+  () => [props.markers, props.categories],
+  () => {
+    const map = mapRef.value;
+    if (!map) return;
+    const source = map.getSource("spots") as maplibregl.GeoJSONSource | undefined;
+    if (source) {
+      source.setData(markersToGeoJSON(props.markers, buildCategoryMap(props.categories)));
+    }
+  },
+  { deep: true }
+);
 
 onUnmounted(() => {
   mapRef.value?.remove();

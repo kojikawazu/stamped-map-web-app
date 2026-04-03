@@ -64,8 +64,8 @@
 - [x] `PUT /api/spots/:id` — スポット更新
 - [x] `DELETE /api/spots/:id` — スポット削除
 
-### フロントエンドUI（未着手）
-- [ ] スポット一覧（左パネル）
+### フロントエンドUI（進行中）
+- [x] スポット一覧（左パネル）— SpotPanel / SpotList / SpotListItem / SpotFilter / SpotPagination
 - [ ] スポット登録モーダル
 - [ ] スポット詳細表示
 - [ ] スポット編集モーダル
@@ -89,8 +89,8 @@
 
 ## 次のアクション（M3: 地図表示）
 
-- [ ] 地図マーカー描画（カテゴリ色で表示）
-- [ ] マーカークリックでポップアップ表示（名前・カテゴリ・訪問日）
+- [x] 地図マーカー描画（カテゴリ色で表示）— GeoJSON Source + Circle Layer
+- [x] マーカークリックでポップアップ表示（名前・カテゴリ名）
 - [ ] マーカークラスタリング（MapLibre GeoJSON cluster）
 
 ## 進捗
