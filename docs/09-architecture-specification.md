@@ -104,10 +104,24 @@ front/
 │   ├── default.vue            # ヘッダー付きレイアウト
 │   └── empty.vue              # ログイン用シンプルレイアウト
 ├── components/
-│   └── map/MapView.vue        # MapLibre GL JS（<ClientOnly> でSSR除外）
+│   ├── map/MapView.vue        # MapLibre GL JS（<ClientOnly> でSSR除外）、GeoJSONマーカー描画
+│   └── spot/
+│       ├── SpotPanel.vue      # 左パネルコンテナ（検索・一覧・ページネーション）
+│       ├── SpotFilter.vue     # 検索・ソート・カテゴリフィルターUI
+│       ├── SpotList.vue       # スポット一覧（ローディング・空状態含む）
+│       ├── SpotListItem.vue   # スポット1件（カテゴリ色バッジ付き）
+│       └── SpotPagination.vue # ページネーションUI
 ├── composables/
 │   ├── useAuth.ts             # Supabase セッション管理・ログイン・ログアウト
-│   └── useApiClient.ts        # $fetch ラッパー（Bearer token + 401 リトライ）
+│   ├── useApiClient.ts        # $fetch ラッパー（Bearer token + 401 リトライ）
+│   ├── useSpotFilter.ts       # フィルター・ソート・ページ状態の一元管理（useState共有）
+│   ├── useSpots.ts            # スポット一覧取得（ページネーション付き）
+│   ├── useMarkers.ts          # マーカーデータ取得（全件・軽量）
+│   └── useCategories.ts       # カテゴリ一覧取得
+├── types/
+│   ├── spot.ts                # Spot / Pagination / SpotsResponse 型
+│   ├── marker.ts              # Marker / MarkersResponse 型
+│   └── category.ts            # Category / CategoriesResponse 型
 ├── middleware/
 │   └── auth.ts                # 認証ガード（クライアントサイドのみ）
 ├── server/
