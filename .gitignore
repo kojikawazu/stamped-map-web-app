@@ -42,3 +42,5 @@ next-env.d.ts
 
 # testing
 coverage/
+front/.nuxtrc
+front/package-lock.json
