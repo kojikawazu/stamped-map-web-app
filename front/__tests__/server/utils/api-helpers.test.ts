@@ -4,6 +4,8 @@ import {
   isValidUuid,
   getValidationErrorDetails,
   formatCategoryResponse,
+  formatSpotResponse,
+  formatMarkerResponse,
 } from "../../../server/utils/api-helpers";
 
 describe("buildSpotWhereClause", () => {
@@ -96,5 +98,88 @@ describe("formatCategoryResponse", () => {
       sortOrder: 1,
       spotCount: 5,
     });
+  });
+
+  it("spotCount が 0 のときも正しくフォーマットされる", () => {
+    const category = {
+      id: "cat-2",
+      name: "レストラン",
+      color: "#00FF00",
+      isDefault: true,
+      sortOrder: 2,
+    };
+    const result = formatCategoryResponse(category, 0);
+    expect(result.spotCount).toBe(0);
+    expect(result.isDefault).toBe(true);
+  });
+});
+
+describe("formatSpotResponse", () => {
+  const baseSpot = {
+    id: "spot-1",
+    name: "東京タワー",
+    category: { id: "cat-1", name: "観光地", color: "#FF5733" },
+    latitude: 35.6586,
+    longitude: 139.7454,
+    visitedAt: new Date("2026-01-15T00:00:00.000Z"),
+    memo: "素晴らしい景色",
+    imageUrl: null,
+    createdAt: new Date("2026-01-15T12:00:00.000Z"),
+    updatedAt: new Date("2026-01-15T12:00:00.000Z"),
+  };
+
+  it("スポットオブジェクトを API レスポンス形式にフォーマットする", () => {
+    const result = formatSpotResponse(baseSpot);
+    expect(result).toEqual({
+      id: "spot-1",
+      name: "東京タワー",
+      category: { id: "cat-1", name: "観光地", color: "#FF5733" },
+      latitude: 35.6586,
+      longitude: 139.7454,
+      visitedAt: "2026-01-15",
+      memo: "素晴らしい景色",
+      imageUrl: null,
+      createdAt: "2026-01-15T12:00:00.000Z",
+      updatedAt: "2026-01-15T12:00:00.000Z",
+    });
+  });
+
+  it("visitedAt を YYYY-MM-DD 形式に変換する", () => {
+    const result = formatSpotResponse(baseSpot);
+    expect(result.visitedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("memo が null のとき null のまま返す", () => {
+    const result = formatSpotResponse({ ...baseSpot, memo: null });
+    expect(result.memo).toBeNull();
+  });
+});
+
+describe("formatMarkerResponse", () => {
+  const baseMarker = {
+    id: "spot-1",
+    name: "東京タワー",
+    latitude: 35.6586,
+    longitude: 139.7454,
+    categoryId: "cat-1",
+    category: { color: "#FF5733" },
+  };
+
+  it("マーカーオブジェクトを API レスポンス形式にフォーマットする", () => {
+    const result = formatMarkerResponse(baseMarker);
+    expect(result).toEqual({
+      id: "spot-1",
+      name: "東京タワー",
+      latitude: 35.6586,
+      longitude: 139.7454,
+      categoryId: "cat-1",
+      categoryColor: "#FF5733",
+    });
+  });
+
+  it("category.color が categoryColor としてフラット化される", () => {
+    const result = formatMarkerResponse(baseMarker);
+    expect(result).not.toHaveProperty("category");
+    expect(result.categoryColor).toBe("#FF5733");
   });
 });
