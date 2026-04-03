@@ -131,7 +131,10 @@ onMounted(() => {
     map.on("click", "spots-circle", (e) => {
       const feature = e.features?.[0];
       if (!feature || feature.geometry.type !== "Point") return;
-      const { name, categoryName } = feature.properties;
+      const props = feature.properties;
+      if (!props) return;
+      const name: string = props.name ?? "";
+      const categoryName: string = props.categoryName ?? "";
       new maplibregl.Popup({ offset: 10 })
         .setLngLat(feature.geometry.coordinates as [number, number])
         .setHTML(

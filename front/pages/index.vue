@@ -22,5 +22,6 @@ const categories = computed(() => [...categoriesData.categories.value]);
 
 onMounted(() => {
   markersData.fetchMarkers();
+  categoriesData.fetchCategories();
 });
 </script>

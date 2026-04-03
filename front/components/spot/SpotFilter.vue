@@ -90,7 +90,9 @@ onUnmounted(() => {
 });
 
 function onSortChange(e: Event) {
-  const [field, order] = (e.target as HTMLSelectElement).value.split(":") as [SortField, SortOrder];
+  const parts = (e.target as HTMLSelectElement).value.split(":");
+  if (parts.length !== 2) return;
+  const [field, order] = parts as [SortField, SortOrder];
   emit("update:sort", field, order);
 }
 </script>
