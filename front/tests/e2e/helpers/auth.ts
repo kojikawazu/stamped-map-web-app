@@ -23,7 +23,9 @@ export async function injectSupabaseSession(
       role: "authenticated",
     },
   };
-  const cookieName = "sb-dummy-supabase-co-auth-token";
+  const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co";
+  const supabaseHost = new URL(supabaseUrl).hostname.replace(/\./g, "-");
+  const cookieName = `sb-${supabaseHost}-auth-token`;
   // playwright.config.ts の baseURL のホスト名を取得
   const url = new URL(process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000");
 
