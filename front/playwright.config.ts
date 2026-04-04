@@ -20,12 +20,12 @@ export default defineConfig({
     },
   ],
 
-  // CI: ビルド済みサーバーを起動。ローカル: 既存の dev サーバーを再利用。
+  // CI: 事前ビルド済み前提で pnpm preview のみ起動。ローカル: 既存の dev サーバーを再利用。
   webServer: {
-    command: process.env.CI ? "pnpm build && pnpm preview" : "pnpm dev",
+    command: process.env.CI ? "pnpm preview" : "pnpm dev",
     url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 60_000,
     env: {
       NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co",
       NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ?? "dummy-anon-key",
