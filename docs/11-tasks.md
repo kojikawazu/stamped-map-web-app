@@ -112,7 +112,7 @@
 
 - [x] 地図マーカー描画（カテゴリ色で表示）— GeoJSON Source + Circle Layer
 - [x] マーカークリックでポップアップ表示（名前・カテゴリ名）
-- [ ] マーカークラスタリング（MapLibre GeoJSON cluster）
+- [x] マーカークラスタリング（MapLibre GeoJSON cluster）
 
 ## 進捗
 

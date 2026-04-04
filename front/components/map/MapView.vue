@@ -90,6 +90,116 @@ function markersToGeoJSON(items: Marker[], categoryMap: Map<string, string>): Ge
 const mapContainerRef = ref<HTMLDivElement | null>(null);
 const mapRef = ref<maplibregl.Map | null>(null);
 
+function addSpotLayers(map: maplibregl.Map) {
+  // クラスター円
+  map.addLayer({
+    id: "spots-cluster",
+    type: "circle",
+    source: "spots",
+    filter: ["has", "point_count"],
+    paint: {
+      "circle-color": [
+        "step",
+        ["get", "point_count"],
+        "#6366f1", // 1〜9件: インディゴ
+        10,
+        "#f59e0b", // 10〜29件: アンバー
+        30,
+        "#ef4444", // 30件以上: レッド
+      ],
+      "circle-radius": [
+        "step",
+        ["get", "point_count"],
+        20, // 1〜9件
+        10,
+        26, // 10〜29件
+        30,
+        32, // 30件以上
+      ],
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#ffffff",
+      "circle-opacity": 0.85,
+    },
+  });
+
+  // クラスター件数ラベル
+  map.addLayer({
+    id: "spots-cluster-count",
+    type: "symbol",
+    source: "spots",
+    filter: ["has", "point_count"],
+    layout: {
+      "text-field": "{point_count_abbreviated}",
+      "text-font": ["Open Sans Bold"],
+      "text-size": 13,
+    },
+    paint: {
+      "text-color": "#ffffff",
+    },
+  });
+
+  // 個別スポット円（クラスター未参加のみ）
+  map.addLayer({
+    id: "spots-circle",
+    type: "circle",
+    source: "spots",
+    filter: ["!", ["has", "point_count"]],
+    paint: {
+      "circle-radius": 7,
+      "circle-color": ["get", "color"],
+      "circle-stroke-width": 2,
+      "circle-stroke-color": "#ffffff",
+    },
+  });
+
+  // クラスタークリック → ズームイン
+  map.on("click", "spots-cluster", (e) => {
+    const features = map.queryRenderedFeatures(e.point, { layers: ["spots-cluster"] });
+    const clusterId = features[0]?.properties?.cluster_id as number | undefined;
+    if (clusterId == null) return;
+
+    const source = map.getSource("spots") as maplibregl.GeoJSONSource;
+    source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+      if (err || zoom == null) return;
+      const coords = (features[0].geometry as GeoJSON.Point).coordinates as [number, number];
+      map.easeTo({ center: coords, zoom });
+    });
+  });
+
+  map.on("mouseenter", "spots-cluster", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "spots-cluster", () => {
+    map.getCanvas().style.cursor = "";
+  });
+
+  // 個別スポットクリック → ポップアップ
+  map.on("click", "spots-circle", (e) => {
+    const feature = e.features?.[0];
+    if (!feature || feature.geometry.type !== "Point") return;
+    const p = feature.properties;
+    if (!p) return;
+    const name: string = p.name ?? "";
+    const categoryName: string = p.categoryName ?? "";
+    new maplibregl.Popup({ offset: 10 })
+      .setLngLat(feature.geometry.coordinates as [number, number])
+      .setHTML(
+        `<div class="text-sm">
+          <p class="font-medium">${escapeHtml(name)}</p>
+          <p class="text-zinc-500 text-xs">${escapeHtml(categoryName)}</p>
+        </div>`
+      )
+      .addTo(map);
+  });
+
+  map.on("mouseenter", "spots-circle", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+  map.on("mouseleave", "spots-circle", () => {
+    map.getCanvas().style.cursor = "";
+  });
+}
+
 onMounted(() => {
   if (!mapContainerRef.value || mapRef.value || !maptilerKey) return;
 
@@ -113,45 +223,12 @@ onMounted(() => {
     map.addSource("spots", {
       type: "geojson",
       data: markersToGeoJSON(props.markers, buildCategoryMap(props.categories)),
+      cluster: true,
+      clusterMaxZoom: 14, // ズーム14以上では個別表示
+      clusterRadius: 50,  // クラスタリング半径（px）
     });
 
-    map.addLayer({
-      id: "spots-circle",
-      type: "circle",
-      source: "spots",
-      paint: {
-        "circle-radius": 7,
-        "circle-color": ["get", "color"],
-        "circle-stroke-width": 2,
-        "circle-stroke-color": "#ffffff",
-      },
-    });
-
-    // ポップアップ表示
-    map.on("click", "spots-circle", (e) => {
-      const feature = e.features?.[0];
-      if (!feature || feature.geometry.type !== "Point") return;
-      const props = feature.properties;
-      if (!props) return;
-      const name: string = props.name ?? "";
-      const categoryName: string = props.categoryName ?? "";
-      new maplibregl.Popup({ offset: 10 })
-        .setLngLat(feature.geometry.coordinates as [number, number])
-        .setHTML(
-          `<div class="text-sm">
-            <p class="font-medium">${escapeHtml(name)}</p>
-            <p class="text-zinc-500 text-xs">${escapeHtml(categoryName)}</p>
-          </div>`
-        )
-        .addTo(map);
-    });
-
-    map.on("mouseenter", "spots-circle", () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
-    map.on("mouseleave", "spots-circle", () => {
-      map.getCanvas().style.cursor = "";
-    });
+    addSpotLayers(map);
   });
 
   mapRef.value = map;
