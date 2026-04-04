@@ -95,6 +95,8 @@ jobs:
         env:
           NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
           NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_KEY: dummy-anon-key
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
@@ -103,6 +105,8 @@ jobs:
           PORT=3000 HOST=0.0.0.0 \
           NUXT_PUBLIC_SUPABASE_URL=https://dummy.supabase.co \
           NUXT_PUBLIC_SUPABASE_ANON_KEY=dummy-anon-key \
+          SUPABASE_URL=https://dummy.supabase.co \
+          SUPABASE_KEY=dummy-anon-key \
           NUXT_PUBLIC_MAPTILER_KEY=dummy-maptiler-key \
           DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy \
           node .output/server/index.mjs > /tmp/nitro.log 2>&1 &
@@ -111,15 +115,7 @@ jobs:
       - name: Wait for production server
         run: |
           timeout 30 bash -c 'until curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000 | grep -qE "^[2345]"; do sleep 1; done' \
-            || {
-              echo "=== nitro.log ==="
-              cat /tmp/nitro.log
-              echo "=== process check ==="
-              ps aux | grep node | grep -v grep || echo "No node process found"
-              echo "=== port check ==="
-              ss -tlnp | grep 3000 || echo "Port 3000 not listening"
-              exit 1
-            }
+            || (echo "=== nitro.log ===" && cat /tmp/nitro.log && exit 1)
 
       - name: Run E2E tests
         run: pnpm test:e2e
