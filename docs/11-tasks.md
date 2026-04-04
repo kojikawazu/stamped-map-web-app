@@ -56,10 +56,10 @@
 - [ ] Supabase ダッシュボード → Authentication → Providers → Google 有効化
 
 コード実装:
-- [ ] `nuxt.config.ts` に `siteUrl` runtimeConfig 追加
-- [ ] `composables/useAuth.ts` に `loginWithGoogle()` 追加
-- [ ] `pages/login.vue` に Google ログインボタン・区切り線追加
-- [ ] `.env` / `.env.example` に `NUXT_PUBLIC_SITE_URL` 追加
+- [x] `nuxt.config.ts` に `siteUrl` runtimeConfig 追加
+- [x] `composables/useAuth.ts` に `loginWithGoogle()` 追加
+- [x] `pages/login.vue` に Google ログインボタン・区切り線追加
+- [x] `.env` / `.env.example` に `NUXT_PUBLIC_SITE_URL` 追加
 
 ## M4: CRUD実装（進行中）
 
