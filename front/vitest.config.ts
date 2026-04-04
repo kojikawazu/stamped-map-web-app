@@ -6,8 +6,8 @@ export default defineVitestConfig({
     exclude: ["tests/e2e/**", "node_modules/**"],
     setupFiles: ["./vitest.setup.ts"],
     env: {
-      NUXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co",
-      NUXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-anon-key",
+      SUPABASE_URL: "https://dummy.supabase.co",
+      SUPABASE_KEY: "dummy-anon-key",
       NUXT_PUBLIC_MAPTILER_KEY: "dummy-maptiler-key",
     },
     environmentOptions: {

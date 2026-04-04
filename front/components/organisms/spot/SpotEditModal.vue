@@ -5,42 +5,44 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       @click.self="close"
     >
-      <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+      <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl modal-enter">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold">スポット編集</h2>
+          <h2 class="text-lg font-bold text-slate-800">スポット編集</h2>
           <button
             type="button"
-            class="text-gray-400 hover:text-gray-600"
+            class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             aria-label="閉じる"
             @click="close"
           >
-            ✕
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+            </svg>
           </button>
         </div>
 
         <form class="space-y-4" @submit.prevent="submit">
           <!-- スポット名 -->
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">
+            <label class="mb-1 block text-sm font-medium text-slate-700">
               スポット名 <span class="text-red-500">*</span>
             </label>
             <input
               v-model="form.name"
               type="text"
               maxlength="100"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.name" class="mt-1 text-xs text-red-500">{{ errors.name }}</p>
           </div>
 
           <!-- カテゴリ -->
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">
+            <label class="mb-1 block text-sm font-medium text-slate-700">
               カテゴリ <span class="text-red-500">*</span>
             </label>
             <select
               v-model="form.categoryId"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             >
               <option value="">カテゴリを選択</option>
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -52,14 +54,14 @@
 
           <!-- 訪問日 -->
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">
+            <label class="mb-1 block text-sm font-medium text-slate-700">
               訪問日 <span class="text-red-500">*</span>
             </label>
             <input
               v-model="form.visitedAt"
               type="date"
               :max="todayStr"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.visitedAt" class="mt-1 text-xs text-red-500">{{ errors.visitedAt }}</p>
           </div>
@@ -67,7 +69,7 @@
           <!-- 緯度・経度 -->
           <div class="flex gap-3">
             <div class="flex-1">
-              <label class="mb-1 block text-sm font-medium text-gray-700">
+              <label class="mb-1 block text-sm font-medium text-slate-700">
                 緯度 <span class="text-red-500">*</span>
               </label>
               <input
@@ -76,12 +78,12 @@
                 step="0.000001"
                 min="-90"
                 max="90"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               />
               <p v-if="errors.latitude" class="mt-1 text-xs text-red-500">{{ errors.latitude }}</p>
             </div>
             <div class="flex-1">
-              <label class="mb-1 block text-sm font-medium text-gray-700">
+              <label class="mb-1 block text-sm font-medium text-slate-700">
                 経度 <span class="text-red-500">*</span>
               </label>
               <input
@@ -90,7 +92,7 @@
                 step="0.000001"
                 min="-180"
                 max="180"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               />
               <p v-if="errors.longitude" class="mt-1 text-xs text-red-500">{{ errors.longitude }}</p>
             </div>
@@ -98,12 +100,12 @@
 
           <!-- メモ -->
           <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700">メモ</label>
+            <label class="mb-1 block text-sm font-medium text-slate-700">メモ</label>
             <textarea
               v-model="form.memo"
               rows="3"
               maxlength="1000"
-              class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              class="w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.memo" class="mt-1 text-xs text-red-500">{{ errors.memo }}</p>
           </div>
@@ -113,7 +115,7 @@
           <div class="flex justify-end gap-2 pt-2">
             <button
               type="button"
-              class="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50"
+              class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               @click="close"
             >
               キャンセル
@@ -121,7 +123,7 @@
             <button
               type="submit"
               :disabled="updateLoading"
-              class="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+              class="rounded-xl bg-[#4CAF6F] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#388E54] disabled:opacity-50 transition-all duration-150"
             >
               {{ updateLoading ? "更新中..." : "更新" }}
             </button>

@@ -5,21 +5,23 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       @click.self="close"
     >
-      <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+      <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl modal-enter">
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold">カテゴリ管理</h2>
+          <h2 class="text-lg font-bold text-slate-800">カテゴリ管理</h2>
           <button
             type="button"
-            class="text-gray-400 hover:text-gray-600"
+            class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             aria-label="閉じる"
             @click="close"
           >
-            ✕
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+            </svg>
           </button>
         </div>
 
         <!-- カテゴリ一覧 -->
-        <ul class="divide-y max-h-72 overflow-y-auto">
+        <ul class="divide-y divide-slate-100 max-h-72 overflow-y-auto">
           <li
             v-for="cat in categories"
             :key="cat.id"
@@ -30,25 +32,25 @@
               <input
                 v-model="editForm.color"
                 type="color"
-                class="h-7 w-9 cursor-pointer rounded border border-gray-300 p-0.5"
+                class="h-7 w-9 cursor-pointer rounded border border-slate-200 p-0.5"
               />
               <input
                 v-model="editForm.name"
                 type="text"
                 maxlength="50"
-                class="flex-1 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+                class="flex-1 rounded-lg border border-slate-200 px-2 py-1 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               />
               <button
                 type="button"
                 :disabled="editLoading"
-                class="rounded-md bg-blue-600 px-2.5 py-1 text-xs text-white hover:bg-blue-700 disabled:opacity-50"
+                class="rounded-lg bg-[#4CAF6F] px-2.5 py-1 text-xs font-medium text-white hover:bg-[#388E54] disabled:opacity-50 transition-colors"
                 @click="saveEdit(cat.id)"
               >
                 {{ editLoading ? "..." : "保存" }}
               </button>
               <button
                 type="button"
-                class="rounded-md border border-gray-300 px-2.5 py-1 text-xs hover:bg-gray-50"
+                class="rounded-lg border border-slate-200 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
                 @click="cancelEdit"
               >
                 取消
@@ -61,11 +63,11 @@
                 class="h-4 w-4 shrink-0 rounded-full"
                 :style="{ backgroundColor: cat.color }"
               />
-              <span class="flex-1 text-sm text-zinc-800">{{ cat.name }}</span>
-              <span class="text-xs text-zinc-400">{{ cat.spotCount }}件</span>
+              <span class="flex-1 text-sm text-slate-800">{{ cat.name }}</span>
+              <span class="text-xs text-slate-400">{{ cat.spotCount }}件</span>
               <button
                 type="button"
-                class="text-xs text-zinc-500 hover:text-zinc-900 px-1"
+                class="text-xs text-slate-500 hover:text-slate-900 px-1 transition-colors"
                 @click="startEdit(cat)"
               >
                 編集
@@ -73,7 +75,7 @@
               <button
                 type="button"
                 :disabled="cat.isDefault"
-                class="text-xs text-red-500 hover:text-red-700 px-1 disabled:text-zinc-300 disabled:cursor-not-allowed"
+                class="text-xs text-rose-500 hover:text-rose-700 px-1 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
                 :title="cat.isDefault ? 'デフォルトカテゴリは削除できません' : ''"
                 @click="requestDelete(cat)"
               >
@@ -83,12 +85,12 @@
           </li>
         </ul>
 
-        <p v-if="editError" class="mt-2 text-xs text-red-500">{{ editError }}</p>
+        <p v-if="editError" class="mt-2 text-xs text-rose-500">{{ editError }}</p>
 
         <div class="mt-4 flex justify-end">
           <button
             type="button"
-            class="rounded-md border border-zinc-300 px-4 py-2 text-sm hover:bg-zinc-50"
+            class="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
             @click="close"
           >
             閉じる
