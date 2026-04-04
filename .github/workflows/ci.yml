@@ -110,7 +110,6 @@ jobs:
           NUXT_PUBLIC_MAPTILER_KEY=dummy-maptiler-key \
           DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy \
           node .output/server/index.mjs > /tmp/nitro.log 2>&1 &
-          echo "Nitro PID: $!"
 
       - name: Wait for production server
         run: |
