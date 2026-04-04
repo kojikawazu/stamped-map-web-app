@@ -66,7 +66,7 @@
 
 ### フロントエンドUI（進行中）
 - [x] スポット一覧（左パネル）— SpotPanel / SpotList / SpotListItem / SpotFilter / SpotPagination
-- [ ] スポット登録モーダル
+- [x] スポット登録モーダル
 - [ ] スポット詳細表示
 - [ ] スポット編集モーダル
 - [ ] スポット削除（確認ダイアログ）
