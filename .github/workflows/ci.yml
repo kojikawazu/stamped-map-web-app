@@ -90,10 +90,29 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
 
+      - name: Prepare Nuxt
+        run: pnpm exec nuxt prepare
+        env:
+          NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+          NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
+
+      - name: Start dev server
+        run: pnpm dev &
+        env:
+          NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+          NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - name: Wait for dev server
+        run: npx --yes wait-on http://localhost:3000 --timeout 180000
+
       - name: Run E2E tests
         run: pnpm test:e2e
         env:
           CI: "true"
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
           NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
           NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key

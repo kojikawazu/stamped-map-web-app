@@ -20,17 +20,13 @@ export default defineConfig({
     },
   ],
 
-  // CI / ローカル共通: nuxt dev を起動（API は page.route() でモックするため DB 不要）
-  webServer: {
-    command: "pnpm dev",
-    url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-    env: {
-      NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co",
-      NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ?? "dummy-anon-key",
-      NUXT_PUBLIC_MAPTILER_KEY: process.env.NUXT_PUBLIC_MAPTILER_KEY ?? "dummy-maptiler-key",
-      DATABASE_URL: process.env.DATABASE_URL ?? "postgresql://dummy:dummy@localhost:5432/dummy",
-    },
-  },
+  // CI: 別ステップで起動済みのサーバーを再利用。ローカル: pnpm dev を自動起動。
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: "pnpm dev",
+        url: "http://localhost:3000",
+        reuseExistingServer: true,
+        timeout: 120_000,
+      },
 });
