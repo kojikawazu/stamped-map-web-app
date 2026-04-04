@@ -20,11 +20,17 @@ export default defineConfig({
     },
   ],
 
-  // E2E テストは開発サーバーが起動済みであることを前提とする。
-  // CI では別途 `nuxt dev` を起動してから playwright を実行すること。
-  // webServer: {
-  //   command: "pnpm dev",
-  //   url: "http://localhost:3000",
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  // CI: ビルド済みサーバーを起動。ローカル: 既存の dev サーバーを再利用。
+  webServer: {
+    command: process.env.CI ? "pnpm build && pnpm preview" : "pnpm dev",
+    url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+    env: {
+      NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co",
+      NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ?? "dummy-anon-key",
+      NUXT_PUBLIC_MAPTILER_KEY: process.env.NUXT_PUBLIC_MAPTILER_KEY ?? "dummy-maptiler-key",
+      DATABASE_URL: process.env.DATABASE_URL ?? "postgresql://dummy:dummy@localhost:5432/dummy",
+    },
+  },
 });
