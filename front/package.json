@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "prisma generate && nuxt prepare && nuxt build",
+    "build": "nuxt prepare && prisma generate && nuxt build",
     "preview": "nuxt preview",
     "lint": "eslint .",
     "test": "vitest run",
