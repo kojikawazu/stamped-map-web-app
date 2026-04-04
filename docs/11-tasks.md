@@ -5,7 +5,7 @@
 | # | マイルストーン | 内容 | 状態 |
 |---|---------------|------|------|
 | M1 | 環境構築 | プロジェクトセットアップ、外部サービス準備、接続確認 | 完了 |
-| M2 | 認証 | Supabase Auth でログイン、認証ガード | 完了 |
+| M2 | 認証 | Supabase Auth でログイン、認証ガード、Google OAuth | 完了 |
 | M0 | Nuxt.js 3 移行 | フロントエンドを Next.js 16 から Nuxt.js 3 へ移行 | 完了 |
 | M3 | 地図表示 | Nuxt.js 3 + MapLibre GL JS で地図表示 + マーカー描画 | 未着手 |
 | M4 | CRUD実装 | スポットの登録・一覧・詳細・編集・削除（Server Routes + Prisma） | 進行中 |
@@ -28,7 +28,7 @@
   - [x] API クライアント（`lib/api-client.ts` — spots/categories CRUD + トークンリフレッシュ）
   - [x] Zod バリデーションスキーマ（`lib/validations/spot.ts`, `category.ts`）
 - [x] 基本レイアウト（ヘッダー + サイドバー + 地図の3カラム構成）
-- [ ] Vercel プロジェクト作成・デプロイ確認
+- [x] Vercel プロジェクト作成・デプロイ確認
 
 ## M2: 認証（完了）
 
@@ -49,11 +49,11 @@
 - [x] Sonner `<Toaster>` をルートレイアウトに追加
 - [x] 認証ページを `force-dynamic` に設定（プリレンダリング回避）
 
-### M2 追加: Google OAuth認証（進行中）
+### M2 追加: Google OAuth認証（完了）
 
-手動作業（実装前に完了が必要）:
-- [ ] Google Cloud Console で OAuth 2.0 クライアントID 作成（承認済みリダイレクト URI に `https://[project-ref].supabase.co/auth/v1/callback` を追加）
-- [ ] Supabase ダッシュボード → Authentication → Providers → Google 有効化
+手動作業:
+- [x] Google Cloud Console で OAuth 2.0 クライアントID 作成（承認済みリダイレクト URI に `https://[project-ref].supabase.co/auth/v1/callback` を追加）
+- [x] Supabase ダッシュボード → Authentication → Providers → Google 有効化
 
 コード実装:
 - [x] `nuxt.config.ts` に `siteUrl` runtimeConfig 追加
@@ -82,7 +82,8 @@
 - [ ] スポット詳細表示
 - [ ] スポット編集モーダル
 - [ ] スポット削除（確認ダイアログ）
-- [ ] カテゴリ管理UI
+- [x] スポット登録モーダル内のインラインカテゴリ追加
+- [ ] カテゴリ管理UI（編集・削除）
 
 ## M0: Nuxt.js 3 移行（完了）
 
@@ -115,3 +116,7 @@
 | 2026-03-24 | M2: ログイン画面、認証ガード、ログアウト、useAuthフック実装 |
 | 2026-03-24 | Prisma スキーマを実DB（map_categories, map_spots）に同期 |
 | 2026-03-24 | M4: API Routes 全10エンドポイント実装（Categories CRUD + Spots CRUD + markers） |
+| 2026-04-04 | M2: Google OAuth 認証実装・設定完了 |
+| 2026-04-04 | M4: スポット登録モーダル内インラインカテゴリ追加 |
+| 2026-04-04 | CI: E2E テスト（Playwright）を CI に追加、Prisma 遅延初期化 |
+| 2026-04-04 | Vercel デプロイ完了、ダミーデータ投入 |
