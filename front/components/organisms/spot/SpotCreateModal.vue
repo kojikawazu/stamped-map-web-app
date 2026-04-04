@@ -31,7 +31,7 @@
               type="text"
               maxlength="100"
               placeholder="例：渋谷スクランブル交差点"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.name" class="mt-1 text-xs text-red-500">{{ errors.name }}</p>
           </div>
@@ -43,7 +43,7 @@
             </label>
             <select
               v-model="form.categoryId"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               @change="onCategoryChange"
             >
               <option value="">カテゴリを選択</option>
@@ -67,13 +67,13 @@
                   type="text"
                   maxlength="50"
                   placeholder="カテゴリ名"
-                  class="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+                  class="flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
                 />
                 <div class="flex items-center gap-1">
                   <input
                     v-model="newCategory.color"
                     type="color"
-                    class="h-8 w-10 cursor-pointer rounded border border-gray-300 p-0.5"
+                    class="h-8 w-10 cursor-pointer rounded border border-slate-300 p-0.5"
                   />
                   <span class="text-xs text-gray-500">{{ newCategory.color }}</span>
                 </div>
@@ -108,7 +108,7 @@
               v-model="form.visitedAt"
               type="date"
               :max="todayStr"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.visitedAt" class="mt-1 text-xs text-red-500">{{ errors.visitedAt }}</p>
           </div>
@@ -126,7 +126,7 @@
                 min="-90"
                 max="90"
                 placeholder="例：35.6812"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               />
               <p v-if="errors.latitude" class="mt-1 text-xs text-red-500">{{ errors.latitude }}</p>
             </div>
@@ -141,7 +141,7 @@
                 min="-180"
                 max="180"
                 placeholder="例：139.7671"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               />
               <p v-if="errors.longitude" class="mt-1 text-xs text-red-500">{{ errors.longitude }}</p>
             </div>
@@ -155,7 +155,7 @@
               rows="3"
               maxlength="1000"
               placeholder="任意のメモを入力"
-              class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.memo" class="mt-1 text-xs text-red-500">{{ errors.memo }}</p>
           </div>

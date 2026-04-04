@@ -30,7 +30,7 @@
               v-model="form.name"
               type="text"
               maxlength="100"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.name" class="mt-1 text-xs text-red-500">{{ errors.name }}</p>
           </div>
@@ -42,7 +42,7 @@
             </label>
             <select
               v-model="form.categoryId"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             >
               <option value="">カテゴリを選択</option>
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -61,7 +61,7 @@
               v-model="form.visitedAt"
               type="date"
               :max="todayStr"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.visitedAt" class="mt-1 text-xs text-red-500">{{ errors.visitedAt }}</p>
           </div>
@@ -78,7 +78,7 @@
                 step="0.000001"
                 min="-90"
                 max="90"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               />
               <p v-if="errors.latitude" class="mt-1 text-xs text-red-500">{{ errors.latitude }}</p>
             </div>
@@ -92,7 +92,7 @@
                 step="0.000001"
                 min="-180"
                 max="180"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
               />
               <p v-if="errors.longitude" class="mt-1 text-xs text-red-500">{{ errors.longitude }}</p>
             </div>
@@ -105,7 +105,7 @@
               v-model="form.memo"
               rows="3"
               maxlength="1000"
-              class="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
+              class="w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4]"
             />
             <p v-if="errors.memo" class="mt-1 text-xs text-red-500">{{ errors.memo }}</p>
           </div>

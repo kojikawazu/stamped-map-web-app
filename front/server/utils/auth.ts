@@ -12,8 +12,8 @@ let _supabaseAuth: SupabaseClient | null = null;
 
 function getSupabaseAuth(): SupabaseClient {
   if (!_supabaseAuth) {
-    const url = process.env.NUXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY;
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_KEY;
     if (!url || !key) {
       throw createError({ statusCode: 500, message: "サーバー設定エラー" });
     }

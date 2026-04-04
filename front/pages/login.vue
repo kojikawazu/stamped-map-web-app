@@ -106,6 +106,7 @@ const password = ref("");
 const errorMessage = ref("");
 const submitting = ref(false);
 
+// 認証済みならメイン画面へリダイレクト
 watch(
   session,
   (s) => {
@@ -118,6 +119,7 @@ async function handleGoogleLogin() {
   submitting.value = true;
   try {
     await loginWithGoogle();
+    // 成功時はブラウザが Google 同意画面へリダイレクトするため、ここには戻らない
   } catch {
     toast.error("Googleログインに失敗しました");
     submitting.value = false;
@@ -137,8 +139,10 @@ async function handleSubmit() {
       return;
     }
 
+    // セッション確立後、watch が navigateTo('/') を呼ぶ
     toast.success("ログインしました");
   } finally {
+    // navigateTo が失敗した場合もボタンを確実にリセットする
     submitting.value = false;
   }
 }
