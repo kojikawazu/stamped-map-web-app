@@ -44,6 +44,22 @@ export async function injectSupabaseSession(
     },
     { sess: session, key: cookieName }
   );
+
+  // Supabase Auth API のモック: getUser / getSession を成功レスポンスにする
+  await page.route("**/auth/v1/user", (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(session.user),
+    });
+  });
+  await page.route("**/auth/v1/token?grant_type=refresh_token", (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(session),
+    });
+  });
 }
 
 /**
