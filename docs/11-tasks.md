@@ -7,7 +7,7 @@
 | M1 | 環境構築 | プロジェクトセットアップ、外部サービス準備、接続確認 | 完了 |
 | M2 | 認証 | Supabase Auth でログイン、認証ガード、Google OAuth | 完了 |
 | M0 | Nuxt.js 3 移行 | フロントエンドを Next.js 16 から Nuxt.js 3 へ移行 | 完了 |
-| M3 | 地図表示 | Nuxt.js 3 + MapLibre GL JS で地図表示 + マーカー描画 | 未着手 |
+| M3 | 地図表示 | Nuxt.js 3 + MapLibre GL JS で地図表示 + マーカー描画 | 進行中 |
 | M4 | CRUD実装 | スポットの登録・一覧・詳細・編集・削除（Server Routes + Prisma） | 進行中 |
 | M5 | 地図連携 | 地図クリック→登録、クラスタリング、カテゴリアイコン | 未着手 |
 | M6 | 拡張機能 | ヒートマップ、統計、タイムラインなど | 未着手 |
@@ -45,9 +45,9 @@
   - [x] ヘッダーにログアウトボタン追加
   - [x] セッション破棄 → ログイン画面にリダイレクト
 - [x] `useAuth` カスタムフック（セッション管理・ログイン・ログアウト）
-- [x] メインページ `page.tsx` / `client.tsx` 分離（設計方針準拠）
-- [x] Sonner `<Toaster>` をルートレイアウトに追加
-- [x] 認証ページを `force-dynamic` に設定（プリレンダリング回避）
+- [x] メインページ `page.tsx` / `client.tsx` 分離（設計方針準拠 / Next.js 版 → M0 で Nuxt.js に移行）
+- [x] Sonner `<Toaster>` をルートレイアウトに追加（`vue-sonner`、`app.vue`）
+- [x] 認証ページを `force-dynamic` に設定（プリレンダリング回避 / Next.js 版 → M0 で Nuxt.js に移行）
 
 ### M2 追加: Google OAuth認証（完了）
 
@@ -64,7 +64,7 @@
 ## M4: CRUD実装（進行中）
 
 ### API Routes（完了）
-- [x] 共通ヘルパー（`lib/api-helpers.ts` — レスポンス整形、バリデーションエラー変換、WHERE句ビルダー）
+- [x] 共通ヘルパー（`server/utils/api-helpers.ts` — レスポンス整形、バリデーションエラー変換、WHERE句ビルダー）
 - [x] `GET /api/categories` — カテゴリ一覧（spotCount付き）
 - [x] `POST /api/categories` — カテゴリ追加（重複チェック付き）
 - [x] `PUT /api/categories/:id` — カテゴリ更新（重複チェック付き）
@@ -78,11 +78,19 @@
 
 ### フロントエンドUI（進行中）
 - [x] スポット一覧（左パネル）— SpotPanel / SpotList / SpotListItem / SpotFilter / SpotPagination
-- [x] スポット登録モーダル
+- [x] スポット登録モーダル（SpotCreateModal）
+- [x] コンポーザブル実装
+  - [x] `composables/useApiClient.ts` — API クライアント（トークンリフレッシュ付き）
+  - [x] `composables/useSpots.ts` — スポット一覧データ管理
+  - [x] `composables/useCategories.ts` — カテゴリ一覧データ管理
+  - [x] `composables/useMarkers.ts` — マーカー用軽量データ管理
+  - [x] `composables/useSpotCreate.ts` — スポット登録状態管理
+  - [x] `composables/useSpotFilter.ts` — フィルター・ページネーション状態管理
+  - [x] `composables/useCategoryCreate.ts` — インラインカテゴリ追加状態管理
+- [x] スポット登録モーダル内のインラインカテゴリ追加
 - [ ] スポット詳細表示
 - [ ] スポット編集モーダル
 - [ ] スポット削除（確認ダイアログ）
-- [x] スポット登録モーダル内のインラインカテゴリ追加
 - [ ] カテゴリ管理UI（編集・削除）
 
 ## M0: Nuxt.js 3 移行（完了）
@@ -100,7 +108,7 @@
 - [x] テスト移行（`@vue/test-utils` + `@nuxt/test-utils`）
 - [x] `docs/09-architecture-specification.md` 更新
 
-## 次のアクション（M3: 地図表示）
+## M3: 地図表示（進行中）
 
 - [x] 地図マーカー描画（カテゴリ色で表示）— GeoJSON Source + Circle Layer
 - [x] マーカークリックでポップアップ表示（名前・カテゴリ名）
