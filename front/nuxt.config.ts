@@ -5,6 +5,14 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-04-01",
   devtools: { enabled: true },
 
+  // アトミックデザイン階層（atoms/molecules/organisms）を使いつつ、
+  // コンポーネント名はディレクトリ名を含まない形（例: SpotPanel）で自動登録する
+  components: {
+    dirs: [
+      { path: "~/components", pathPrefix: false },
+    ],
+  },
+
   modules: [
     "@nuxtjs/supabase",
     "@nuxt/fonts",
