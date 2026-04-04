@@ -24,7 +24,7 @@
             class="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-50"
             @click="emit('confirm')"
           >
-            {{ loading ? (loadingLabel ?? "処理中...") : (confirmLabel ?? "確認") }}
+            {{ loading ? loadingLabel : confirmLabel }}
           </button>
         </div>
       </div>
