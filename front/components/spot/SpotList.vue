@@ -10,7 +10,13 @@
       スポットが見つかりませんでした
     </div>
     <ul v-else class="divide-y divide-zinc-100">
-      <SpotListItem v-for="spot in spots" :key="spot.id" :spot="spot" />
+      <SpotListItem
+        v-for="spot in spots"
+        :key="spot.id"
+        :spot="spot"
+        :selected="selectedSpotId === spot.id"
+        @select="emit('select', $event)"
+      />
     </ul>
   </div>
 </template>
@@ -22,5 +28,8 @@ defineProps<{
   spots: Spot[];
   loading: boolean;
   error: string | null;
+  selectedSpotId?: string | null;
 }>();
+
+const emit = defineEmits<{ select: [spot: Spot] }>();
 </script>
