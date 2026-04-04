@@ -49,6 +49,18 @@
 - [x] Sonner `<Toaster>` をルートレイアウトに追加
 - [x] 認証ページを `force-dynamic` に設定（プリレンダリング回避）
 
+### M2 追加: Google OAuth認証（進行中）
+
+手動作業（実装前に完了が必要）:
+- [ ] Google Cloud Console で OAuth 2.0 クライアントID 作成（承認済みリダイレクト URI に `https://[project-ref].supabase.co/auth/v1/callback` を追加）
+- [ ] Supabase ダッシュボード → Authentication → Providers → Google 有効化
+
+コード実装:
+- [ ] `nuxt.config.ts` に `siteUrl` runtimeConfig 追加
+- [ ] `composables/useAuth.ts` に `loginWithGoogle()` 追加
+- [ ] `pages/login.vue` に Google ログインボタン・区切り線追加
+- [ ] `.env` / `.env.example` に `NUXT_PUBLIC_SITE_URL` 追加
+
 ## M4: CRUD実装（進行中）
 
 ### API Routes（完了）
