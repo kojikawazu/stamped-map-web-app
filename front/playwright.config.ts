@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 30_000,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? "github" : "list",
+  reporter: process.env.CI ? [["github"], ["html"]] : "list",
 
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
@@ -20,11 +20,13 @@ export default defineConfig({
     },
   ],
 
-  // E2E テストは開発サーバーが起動済みであることを前提とする。
-  // CI では別途 `nuxt dev` を起動してから playwright を実行すること。
-  // webServer: {
-  //   command: "pnpm dev",
-  //   url: "http://localhost:3000",
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  // CI: 別ステップでビルド済みサーバーを起動。ローカル: pnpm dev を自動起動。
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: "pnpm dev",
+        url: "http://localhost:3000",
+        reuseExistingServer: true,
+        timeout: 120_000,
+      },
 });

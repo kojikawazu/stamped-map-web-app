@@ -32,7 +32,8 @@ test.describe("Smoke Tests", () => {
 
     // 404 またはエラーページが表示されること
     // Nuxt の error.vue はカスタムエラー表示を行う
-    expect(response?.status()).toBeOneOf([200, 404]);
+    const status = response?.status();
+    expect(status === 200 || status === 404).toBe(true);
   });
 
   test("S-4: コンソールに重大なエラーが出ていない", async ({ page }) => {

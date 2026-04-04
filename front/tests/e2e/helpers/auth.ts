@@ -11,27 +11,57 @@ export async function injectSupabaseSession(
   const accessToken = options.accessToken ?? "dummy-access-token";
   const userId = options.userId ?? "dummy-user-id";
 
-  // Supabase が localStorage に保存するセッションキーを注入
-  await page.addInitScript(
-    ({ token, uid }) => {
-      const session = {
-        access_token: token,
-        token_type: "bearer",
-        expires_in: 3600,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        refresh_token: "dummy-refresh-token",
-        user: {
-          id: uid,
-          email: "test@example.com",
-          role: "authenticated",
-        },
-      };
-      // @nuxtjs/supabase が使用するキー形式
-      const key = `sb-${new URL("https://dummy.supabase.co").hostname.replace(/\./g, "-")}-auth-token`;
-      localStorage.setItem(key, JSON.stringify(session));
+  const session = {
+    access_token: accessToken,
+    token_type: "bearer",
+    expires_in: 3600,
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    refresh_token: "dummy-refresh-token",
+    user: {
+      id: userId,
+      email: "test@example.com",
+      role: "authenticated",
     },
-    { token: accessToken, uid: userId }
+  };
+  const supabaseUrl = process.env.NUXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co";
+  const supabaseHost = new URL(supabaseUrl).hostname.replace(/\./g, "-");
+  const cookieName = `sb-${supabaseHost}-auth-token`;
+  // playwright.config.ts の baseURL のホスト名を取得
+  const url = new URL(process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000");
+
+  // SSR 用: @nuxtjs/supabase がサーバー側で読む cookie にセッションを注入
+  await page.context().addCookies([
+    {
+      name: cookieName,
+      value: JSON.stringify(session),
+      domain: url.hostname,
+      path: "/",
+    },
+  ]);
+
+  // クライアント用: localStorage にもセッションを注入
+  await page.addInitScript(
+    ({ sess, key }) => {
+      localStorage.setItem(key, JSON.stringify(sess));
+    },
+    { sess: session, key: cookieName }
   );
+
+  // Supabase Auth API のモック: getUser / getSession を成功レスポンスにする
+  await page.route("**/auth/v1/user", (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(session.user),
+    });
+  });
+  await page.route("**/auth/v1/token?grant_type=refresh_token", (route) => {
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(session),
+    });
+  });
 }
 
 /**
