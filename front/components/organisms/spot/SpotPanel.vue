@@ -64,6 +64,7 @@
     title="スポットを削除"
     :message="selectedSpot ? `「${selectedSpot.name}」を削除しますか？` : ''"
     confirm-label="削除"
+    loading-label="削除中..."
     :loading="deleteLoading"
     @confirm="onDeleteConfirm"
   />

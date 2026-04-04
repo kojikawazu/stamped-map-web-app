@@ -24,7 +24,7 @@
             class="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-50"
             @click="emit('confirm')"
           >
-            {{ loading ? "削除中..." : confirmLabel }}
+            {{ loading ? loadingLabel : confirmLabel }}
           </button>
         </div>
       </div>
@@ -33,13 +33,18 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+withDefaults(defineProps<{
   modelValue: boolean;
   title: string;
   message: string;
   confirmLabel?: string;
+  loadingLabel?: string;
   loading?: boolean;
-}>();
+}>(), {
+  confirmLabel: "確認",
+  loadingLabel: "処理中...",
+  loading: false,
+});
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];

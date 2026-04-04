@@ -103,21 +103,38 @@ front/
 ├── layouts/
 │   ├── default.vue            # ヘッダー付きレイアウト
 │   └── empty.vue              # ログイン用シンプルレイアウト
-├── components/
-│   ├── map/MapView.vue        # MapLibre GL JS（<ClientOnly> でSSR除外）、GeoJSONマーカー描画
-│   └── spot/
-│       ├── SpotPanel.vue      # 左パネルコンテナ（検索・一覧・ページネーション）
-│       ├── SpotFilter.vue     # 検索・ソート・カテゴリフィルターUI
-│       ├── SpotList.vue       # スポット一覧（ローディング・空状態含む）
-│       ├── SpotListItem.vue   # スポット1件（カテゴリ色バッジ付き）
-│       └── SpotPagination.vue # ページネーションUI
+├── components/                # アトミックデザイン階層（pathPrefix: false で名前はフラット登録）
+│   ├── atoms/                 # 最小UIパーツ（ボタン・入力等）※将来拡張用
+│   ├── molecules/             # Atoms を組み合わせた小さなUI部品
+│   │   ├── common/
+│   │   │   └── ConfirmDialog.vue    # 汎用削除確認ダイアログ
+│   │   └── spot/
+│   │       ├── SpotListItem.vue     # スポット1件（カテゴリ色バッジ付き）
+│   │       └── SpotPagination.vue   # ページネーションUI
+│   └── organisms/             # Molecules を組み合わせた機能単位
+│       ├── category/
+│       │   └── CategoryManageModal.vue  # カテゴリ管理（編集・削除）
+│       ├── map/
+│       │   └── MapView.vue          # MapLibre GL JS（クラスタリング・マーカー・ポップアップ）
+│       └── spot/
+│           ├── SpotPanel.vue        # 左パネルコンテナ（全モーダル統合）
+│           ├── SpotFilter.vue       # 検索・ソート・カテゴリフィルターUI
+│           ├── SpotList.vue         # スポット一覧（ローディング・空状態含む）
+│           ├── SpotCreateModal.vue  # スポット登録モーダル
+│           ├── SpotEditModal.vue    # スポット編集モーダル
+│           └── SpotDetailDrawer.vue # スポット詳細サイドパネル（スライドイン）
 ├── composables/
-│   ├── useAuth.ts             # Supabase セッション管理・ログイン・ログアウト
+│   ├── useAuth.ts             # Supabase セッション管理・ログイン・ログアウト・Google OAuth
 │   ├── useApiClient.ts        # $fetch ラッパー（Bearer token + 401 リトライ）
 │   ├── useSpotFilter.ts       # フィルター・ソート・ページ状態の一元管理（useState共有）
 │   ├── useSpots.ts            # スポット一覧取得（ページネーション付き）
 │   ├── useMarkers.ts          # マーカーデータ取得（全件・軽量）
-│   └── useCategories.ts       # カテゴリ一覧取得
+│   ├── useCategories.ts       # カテゴリ一覧取得
+│   ├── useSpotCreate.ts       # スポット登録
+│   ├── useSpotEdit.ts         # スポット更新
+│   ├── useSpotDelete.ts       # スポット削除
+│   ├── useCategoryCreate.ts   # カテゴリ追加（インライン）
+│   └── useCategoryManage.ts   # カテゴリ編集・削除
 ├── types/
 │   ├── spot.ts                # Spot / Pagination / SpotsResponse 型
 │   ├── marker.ts              # Marker / MarkersResponse 型
@@ -133,12 +150,15 @@ front/
 │       ├── categories/        # GET, POST, PUT/:id, DELETE/:id
 │       └── spots/             # GET, POST, GET/markers, GET/:id, PUT/:id, DELETE/:id
 ├── lib/
+│   ├── map-utils.ts           # 地図ユーティリティ（escapeHtml / buildCategoryMap / markersToGeoJSON）
 │   └── validations/
 │       ├── spot.ts            # Zod スキーマ（スポット）
 │       └── category.ts        # Zod スキーマ（カテゴリ）
 ├── __tests__/
+│   ├── composables/           # composable ユニットテスト
 │   ├── server/utils/          # api-helpers ユニットテスト
-│   └── lib/validations/       # Zod バリデーションテスト
+│   ├── server/api/            # Server Routes ユニットテスト
+│   └── lib/                   # Zod バリデーション・map-utils テスト
 └── prisma/
     ├── schema.prisma
     └── seed.ts
@@ -220,7 +240,14 @@ DB       : Supabase（そのまま）
 - API を RESTful に設計しておけば、フロントは base URL を差し替えるだけで移行可能
 - `useApiClient.ts` に API 呼び出しを集約し、移行コストを最小化
 
-### コンポーネント設計の拡張
+### コンポーネント設計
 
-現状は `components/` フラット構成。UIが複雑化した際はアトミックデザイン階層への移行を予定。
-（Issue #7 参照）
+アトミックデザイン階層を採用（Issue #7 対応済み）。
+
+| 階層 | 配置 | 役割 |
+|------|------|------|
+| atoms | `components/atoms/` | ボタン・入力等の最小UIパーツ（将来拡張用） |
+| molecules | `components/molecules/` | Atoms を組み合わせた小さな部品（SpotListItem 等） |
+| organisms | `components/organisms/` | 機能完結した大きな単位（SpotPanel・MapView 等） |
+
+`nuxt.config.ts` に `components: { dirs: [{ path: '~/components', pathPrefix: false }] }` を設定することで、コンポーネント名はディレクトリパスを含まず `<SpotPanel />` のように使用可能。
