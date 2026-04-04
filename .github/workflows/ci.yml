@@ -98,10 +98,26 @@ jobs:
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
+      - name: Start production server
+        run: |
+          PORT=3000 HOST=0.0.0.0 \
+          NUXT_PUBLIC_SUPABASE_URL=https://dummy.supabase.co \
+          NUXT_PUBLIC_SUPABASE_ANON_KEY=dummy-anon-key \
+          NUXT_PUBLIC_MAPTILER_KEY=dummy-maptiler-key \
+          DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy \
+          node .output/server/index.mjs > /tmp/nitro.log 2>&1 &
+          echo "Nitro PID: $!"
+
+      - name: Wait for production server
+        run: |
+          timeout 30 bash -c 'until curl -sf http://localhost:3000 > /dev/null 2>&1; do sleep 1; done' \
+            || (echo "=== nitro.log ===" && cat /tmp/nitro.log && exit 1)
+
       - name: Run E2E tests
         run: pnpm test:e2e
         env:
           CI: "true"
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
           NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
           NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
