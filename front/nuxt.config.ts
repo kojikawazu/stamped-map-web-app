@@ -16,12 +16,6 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
 
-  nitro: {
-    externals: {
-      traceInclude: ["./generated/prisma"],
-    },
-  },
-
   supabase: {
     // 独自 middleware/auth.ts で認証制御するため自動リダイレクトを無効化
     // ⚠️ @nuxtjs/supabase のバージョンによりオプション名が異なる場合あり
