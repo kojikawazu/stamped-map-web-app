@@ -39,22 +39,27 @@ async function main() {
   }
   console.log("Default categories seeded.");
 
-  // ダミースポット
-  for (const spot of dummySpots) {
-    const category = await prisma.mapCategory.findUnique({ where: { name: spot.categoryName } });
-    if (!category) continue;
-    await prisma.mapSpot.create({
-      data: {
-        name: spot.name,
-        categoryId: category.id,
-        latitude: spot.latitude,
-        longitude: spot.longitude,
-        visitedAt: spot.visitedAt,
-        memo: spot.memo,
-      },
-    });
+  // ダミースポット（既にデータが存在する場合はスキップ）
+  const spotCount = await prisma.mapSpot.count();
+  if (spotCount === 0) {
+    for (const spot of dummySpots) {
+      const category = await prisma.mapCategory.findUnique({ where: { name: spot.categoryName } });
+      if (!category) continue;
+      await prisma.mapSpot.create({
+        data: {
+          name: spot.name,
+          categoryId: category.id,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          visitedAt: spot.visitedAt,
+          memo: spot.memo,
+        },
+      });
+    }
+    console.log("Dummy spots seeded.");
+  } else {
+    console.log("Dummy spots skipped (data already exists).");
   }
-  console.log("Dummy spots seeded.");
 }
 
 main()

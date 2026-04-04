@@ -30,5 +30,9 @@ export const useCategoryCreate = () => {
     }
   }
 
-  return { loading: readonly(loading), error: readonly(error), createCategory };
+  function clearError() {
+    error.value = null;
+  }
+
+  return { loading: readonly(loading), error: readonly(error), createCategory, clearError };
 };

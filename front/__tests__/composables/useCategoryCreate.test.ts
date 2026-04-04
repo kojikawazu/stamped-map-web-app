@@ -64,4 +64,13 @@ describe("useCategoryCreate", () => {
     await promise;
     expect(loading.value).toBe(false);
   });
+
+  it("clearError: エラーをリセットできる", async () => {
+    const { createCategory, error, clearError } = useCategoryCreate();
+    await createCategory({ name: "", color: "#EF4444" });
+    expect(error.value).toBeTruthy();
+
+    clearError();
+    expect(error.value).toBeNull();
+  });
 });

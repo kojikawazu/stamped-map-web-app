@@ -213,7 +213,7 @@ const form = reactive(initialForm());
 const errors = reactive<Record<string, string>>({});
 
 const { createSpot, loading: createLoading, error: createError } = useSpotCreate();
-const { createCategory, loading: addingCategory, error: addCategoryError } = useCategoryCreate();
+const { createCategory, loading: addingCategory, error: addCategoryError, clearError: clearCategoryError } = useCategoryCreate();
 
 // カテゴリ一覧（props のコピーを保持し、追加後にローカル更新）
 const localCategories = ref<Category[]>([]);
@@ -234,6 +234,7 @@ function onCategoryChange() {
     showNewCategory.value = true;
     newCategory.name = "";
     newCategory.color = "#6B7280";
+    clearCategoryError();
   }
 }
 
