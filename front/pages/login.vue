@@ -1,21 +1,28 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center px-4">
+  <div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#E8F5EC] via-white to-slate-50 px-4">
     <div v-if="isLoading" class="flex items-center justify-center">
-      <div class="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-zinc-600" />
+      <div class="h-8 w-8 animate-spin rounded-full border-4 border-[#C8EDD4] border-t-[#4CAF6F]" />
     </div>
 
     <div v-else class="w-full max-w-sm">
+      <!-- ロゴ -->
       <div class="mb-8 text-center">
-        <h1 class="text-2xl font-bold text-zinc-900">Stamped Map</h1>
-        <p class="mt-2 text-sm text-zinc-500">アカウントにログインしてください</p>
+        <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4CAF6F] shadow-lg">
+          <svg class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900">Stamped Map</h1>
+        <p class="mt-1.5 text-sm text-slate-500">旅の記録をスタンプしよう</p>
       </div>
 
-      <div class="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+      <!-- カード -->
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl ring-1 ring-slate-900/5">
         <!-- Google ログイン -->
         <button
           type="button"
           :disabled="submitting"
-          class="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+          class="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all duration-150 hover:bg-slate-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           @click="handleGoogleLogin"
         >
           <svg class="h-5 w-5" viewBox="0 0 24 24">
@@ -28,17 +35,17 @@
         </button>
 
         <!-- 区切り線 -->
-        <div class="my-4 flex items-center gap-3">
-          <div class="h-px flex-1 bg-zinc-200" />
-          <span class="text-xs text-zinc-400">または</span>
-          <div class="h-px flex-1 bg-zinc-200" />
+        <div class="my-5 flex items-center gap-3">
+          <div class="h-px flex-1 bg-slate-200" />
+          <span class="text-xs text-slate-400">または</span>
+          <div class="h-px flex-1 bg-slate-200" />
         </div>
 
         <!-- メール/パスワードログイン -->
         <form @submit.prevent="handleSubmit">
           <div class="space-y-4">
             <div>
-              <label for="email" class="block text-sm font-medium text-zinc-700">
+              <label for="email" class="block text-sm font-medium text-slate-700">
                 メールアドレス
               </label>
               <input
@@ -48,12 +55,12 @@
                 required
                 :disabled="submitting"
                 placeholder="mail@example.com"
-                class="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                class="mt-1.5 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 shadow-sm transition-all duration-150 focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4] disabled:bg-slate-50"
               />
             </div>
 
             <div>
-              <label for="password" class="block text-sm font-medium text-zinc-700">
+              <label for="password" class="block text-sm font-medium text-slate-700">
                 パスワード
               </label>
               <input
@@ -63,17 +70,21 @@
                 required
                 :disabled="submitting"
                 placeholder="パスワードを入力"
-                class="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm placeholder-zinc-400 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                class="mt-1.5 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 shadow-sm transition-all duration-150 focus:border-[#B8E0C4] focus:outline-none focus:ring-2 focus:ring-[#C8EDD4] disabled:bg-slate-50"
               />
             </div>
 
-            <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
+            <p v-if="errorMessage" class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">{{ errorMessage }}</p>
 
             <button
               type="submit"
               :disabled="submitting"
-              class="w-full rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4CAF6F] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-[#388E54] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#4CAF6F] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
+              <svg v-if="submitting" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
               {{ submitting ? "ログイン中..." : "ログイン" }}
             </button>
           </div>
@@ -95,7 +106,6 @@ const password = ref("");
 const errorMessage = ref("");
 const submitting = ref(false);
 
-// 認証済みならメイン画面へリダイレクト
 watch(
   session,
   (s) => {
@@ -108,7 +118,6 @@ async function handleGoogleLogin() {
   submitting.value = true;
   try {
     await loginWithGoogle();
-    // 成功時はブラウザが Google 同意画面へリダイレクトするため、ここには戻らない
   } catch {
     toast.error("Googleログインに失敗しました");
     submitting.value = false;
@@ -128,10 +137,8 @@ async function handleSubmit() {
       return;
     }
 
-    // セッション確立後、watch が navigateTo('/') を呼ぶ
     toast.success("ログインしました");
   } finally {
-    // navigateTo が失敗した場合もボタンを確実にリセットする
     submitting.value = false;
   }
 }

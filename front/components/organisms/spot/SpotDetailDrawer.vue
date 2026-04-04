@@ -2,69 +2,74 @@
   <Transition name="drawer">
     <div
       v-if="spot"
-      class="flex w-80 shrink-0 flex-col border-l bg-white shadow-lg"
+      class="flex w-80 shrink-0 flex-col border-l border-slate-200 bg-white shadow-xl"
     >
-      <!-- ヘッダー -->
-      <div class="flex items-center justify-between border-b px-4 py-3">
-        <h2 class="text-sm font-semibold text-zinc-900">スポット詳細</h2>
+      <!-- カテゴリカラーヘッダー帯 -->
+      <div
+        class="px-4 py-3 flex items-center justify-between"
+        :style="{ background: `linear-gradient(135deg, ${spot.category.color}18, ${spot.category.color}08)`, borderBottom: `2px solid ${spot.category.color}40` }"
+      >
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-white text-xs font-bold shadow-sm"
+            :style="{ backgroundColor: spot.category.color }"
+          >📍</span>
+          <span class="text-xs font-semibold" :style="{ color: spot.category.color }">{{ spot.category.name }}</span>
+        </div>
         <button
           type="button"
-          class="text-zinc-400 hover:text-zinc-600"
+          class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
           aria-label="閉じる"
           @click="emit('close')"
         >
-          ✕
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+          </svg>
         </button>
       </div>
 
       <!-- コンテンツ -->
       <div class="flex-1 overflow-y-auto p-4 space-y-4">
-        <!-- カテゴリバッジ -->
-        <div class="flex items-center gap-2">
-          <span
-            class="inline-block h-3 w-3 rounded-full"
-            :style="{ backgroundColor: spot.category.color }"
-          />
-          <span class="text-xs text-zinc-500">{{ spot.category.name }}</span>
-        </div>
-
         <!-- スポット名 -->
-        <h3 class="text-lg font-semibold text-zinc-900 leading-snug">{{ spot.name }}</h3>
+        <h3 class="text-xl font-bold text-slate-900 leading-snug">{{ spot.name }}</h3>
 
         <!-- 訪問日 -->
-        <div class="flex items-center gap-2 text-sm text-zinc-600">
-          <span class="text-zinc-400">📅</span>
-          <span>{{ formatDate(spot.visitedAt) }}</span>
+        <div class="flex items-center gap-2 text-sm text-slate-600">
+          <span>📅</span>
+          <span class="font-medium">{{ formatDate(spot.visitedAt) }}</span>
         </div>
 
         <!-- 座標 -->
-        <div class="rounded-md bg-zinc-50 p-3 text-xs text-zinc-500 space-y-1">
-          <p><span class="font-medium">緯度:</span> {{ spot.latitude }}</p>
-          <p><span class="font-medium">経度:</span> {{ spot.longitude }}</p>
+        <div class="rounded-xl bg-slate-100 p-3 font-mono text-xs text-slate-600 space-y-1">
+          <p><span class="text-slate-400">緯度</span>  {{ spot.latitude }}</p>
+          <p><span class="text-slate-400">経度</span>  {{ spot.longitude }}</p>
         </div>
 
         <!-- メモ -->
-        <div v-if="spot.memo">
-          <p class="mb-1 text-xs font-medium text-zinc-500">メモ</p>
-          <p class="text-sm text-zinc-700 whitespace-pre-wrap">{{ spot.memo }}</p>
+        <div v-if="spot.memo" class="rounded-xl border border-amber-100 bg-amber-50 p-3">
+          <p class="mb-1.5 text-xs font-semibold text-amber-600">📝 メモ</p>
+          <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ spot.memo }}</p>
         </div>
 
         <!-- 作成日時 -->
-        <p class="text-xs text-zinc-400">登録: {{ formatDateTime(spot.createdAt) }}</p>
+        <p class="text-xs text-slate-400">登録: {{ formatDateTime(spot.createdAt) }}</p>
       </div>
 
       <!-- フッターボタン -->
-      <div class="border-t p-3 flex gap-2">
+      <div class="border-t border-slate-200 p-3 flex gap-2">
         <button
           type="button"
-          class="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50"
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#4CAF6F] px-3 py-2 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-[#388E54] hover:shadow-md"
           @click="emit('edit')"
         >
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z"/>
+          </svg>
           編集
         </button>
         <button
           type="button"
-          class="rounded-md border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+          class="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition-all duration-150 hover:bg-rose-50 hover:border-rose-300"
           @click="emit('delete')"
         >
           削除

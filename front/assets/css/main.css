@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #4CAF6F;
+  --color-primary-hover: #388E54;
+  --color-primary-light: #E8F5EC;
+  --color-accent: #FF8A65;
+  --color-surface: #ffffff;
+  --color-bg: #F8FBF9;
+  --color-border: #E0EFE4;
+  --color-danger: #DC2626;
+}
+
+@keyframes modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-enter {
+  animation: modal-slide-in 0.18s ease-out;
+}
