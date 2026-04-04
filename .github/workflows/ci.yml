@@ -89,14 +89,6 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
 
-      - name: Build Nuxt
-        run: pnpm build
-        env:
-          NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
-          NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
-          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
-          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
-
       - name: Run E2E tests
         run: pnpm test:e2e
         env:

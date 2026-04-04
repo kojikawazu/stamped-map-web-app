@@ -20,23 +20,17 @@ export default defineConfig({
     },
   ],
 
-  // CI: ビルド済みの Nitro サーバーを直接起動。ローカル: 既存の dev サーバーを再利用。
+  // CI / ローカル共通: nuxt dev を起動（API は page.route() でモックするため DB 不要）
   webServer: {
-    command: process.env.CI
-      ? "node .output/server/index.mjs"
-      : "pnpm dev",
+    command: "pnpm dev",
     url: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
+    timeout: 120_000,
     env: {
       NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co",
       NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ?? "dummy-anon-key",
       NUXT_PUBLIC_MAPTILER_KEY: process.env.NUXT_PUBLIC_MAPTILER_KEY ?? "dummy-maptiler-key",
       DATABASE_URL: process.env.DATABASE_URL ?? "postgresql://dummy:dummy@localhost:5432/dummy",
-      SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL ?? "https://dummy.supabase.co",
-      SUPABASE_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ?? "dummy-anon-key",
-      PORT: "3000",
-      HOST: "0.0.0.0",
     },
   },
 });
