@@ -17,6 +17,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Marker } from "~/types/marker";
 import type { Category } from "~/types/category";
+import { escapeHtml, buildCategoryMap, markersToGeoJSON } from "~/lib/map-utils";
 
 const props = defineProps<{
   markers: Marker[];
@@ -53,38 +54,6 @@ function saveMapState(center: [number, number], zoom: number) {
   } catch {
     // localStorage unavailable
   }
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function buildCategoryMap(cats: Category[]): Map<string, string> {
-  return new Map(cats.map((c) => [c.id, c.name]));
-}
-
-function markersToGeoJSON(items: Marker[], categoryMap: Map<string, string>): GeoJSON.FeatureCollection {
-  return {
-    type: "FeatureCollection",
-    features: items.map((m) => ({
-      type: "Feature" as const,
-      geometry: {
-        type: "Point" as const,
-        coordinates: [m.longitude, m.latitude],
-      },
-      properties: {
-        id: m.id,
-        name: m.name,
-        color: m.categoryColor,
-        categoryName: categoryMap.get(m.categoryId) ?? "",
-      },
-    })),
-  };
 }
 
 const mapContainerRef = ref<HTMLDivElement | null>(null);
@@ -129,7 +98,7 @@ function addSpotLayers(map: maplibregl.Map) {
     source: "spots",
     filter: ["has", "point_count"],
     layout: {
-      "text-field": "{point_count_abbreviated}",
+      "text-field": ["get", "point_count_abbreviated"],
       "text-font": ["Open Sans Bold"],
       "text-size": 13,
     },
@@ -159,11 +128,11 @@ function addSpotLayers(map: maplibregl.Map) {
     if (clusterId == null) return;
 
     const source = map.getSource("spots") as maplibregl.GeoJSONSource;
-    source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-      if (err || zoom == null) return;
-      const coords = (features[0].geometry as GeoJSON.Point).coordinates as [number, number];
+    const coords = (features[0].geometry as GeoJSON.Point).coordinates as [number, number];
+    source.getClusterExpansionZoom(clusterId).then((zoom) => {
+      if (zoom == null) return;
       map.easeTo({ center: coords, zoom });
-    });
+    }).catch(() => {});
   });
 
   map.on("mouseenter", "spots-cluster", () => {

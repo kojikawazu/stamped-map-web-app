@@ -38,9 +38,11 @@ front/
 │   ├── composables/
 │   │   ├── useSpotFilter.test.ts     # 新規：フィルター状態ロジック
 │   │   └── useApiClient.test.ts      # 新規：401リトライロジック
-│   └── lib/validations/
-│       ├── spot.test.ts              # 既存（14テスト）
-│       └── category.test.ts          # 既存（5テスト）
+│   └── lib/
+│       ├── validations/
+│       │   ├── spot.test.ts          # 既存（14テスト）
+│       │   └── category.test.ts      # 既存（5テスト）
+│       └── map-utils.test.ts         # 新規：地図ユーティリティ関数（18テスト）
 └── tests/
     └── e2e/
         ├── helpers.ts                # 新規：共通ヘルパー・モックデータ
@@ -52,6 +54,46 @@ front/
 ---
 
 ## 1. ユニットテスト
+
+### 1-0. `lib/map-utils`（lib/map-utils.ts）
+
+**対象ファイル**: `front/lib/map-utils.ts`
+**テストファイル**: `front/__tests__/lib/map-utils.test.ts`
+**モック対象**: なし（純粋関数）
+
+#### `escapeHtml`
+
+| # | テストケース | 入力 | 期待結果 | 優先度 |
+|---|---|---|---|---|
+| N-1 | 通常の文字列はそのまま返す | `"Hello World"` | `"Hello World"` | High |
+| N-2 | `&` をエスケープする | `"A & B"` | `"A &amp; B"` | High |
+| N-3 | `<` / `>` をエスケープする | `"<script>"` | `"&lt;script&gt;"` | High |
+| N-4 | `"` をエスケープする | `'say "hello"'` | `"say &quot;hello&quot;"` | High |
+| N-5 | `'` をエスケープする | `"it's"` | `"it&#039;s"` | High |
+| N-6 | XSS攻撃パターンをすべてエスケープする | `'<img src="x" onerror="alert(\'xss\')">'` | `<`, `>`, `"`, `'` を含まない | High |
+| N-7 | 空文字列はそのまま返す | `""` | `""` | Medium |
+| N-8 | 複数の特殊文字が混在している場合にすべてエスケープする | `'<p class="test">A & B</p>'` | 全特殊文字がエスケープされる | High |
+
+#### `buildCategoryMap`
+
+| # | テストケース | 入力 | 期待結果 | 優先度 |
+|---|---|---|---|---|
+| N-1 | カテゴリIDと名前のマップを返す | カテゴリ2件 | `Map { "cat-1" → "カフェ", "cat-2" → "レストラン" }` | High |
+| N-2 | 空配列は空のマップを返す | `[]` | `Map.size === 0` | Medium |
+| N-3 | 存在しないIDはundefinedを返す | `"nonexistent"` | `undefined` | Medium |
+
+#### `markersToGeoJSON`
+
+| # | テストケース | 入力 | 期待結果 | 優先度 |
+|---|---|---|---|---|
+| N-1 | GeoJSON FeatureCollection を返す | マーカー1件 | `type === "FeatureCollection"` | High |
+| N-2 | マーカー数分の Feature が含まれる | マーカー2件 | `features.length === 2` | High |
+| N-3 | 座標が `[longitude, latitude]` の順で設定される | マーカー1件 | `coords[0] === longitude`, `coords[1] === latitude` | High |
+| N-4 | properties に id, name, color, categoryName が含まれる | マーカー1件 | 各プロパティが正しい | High |
+| N-5 | categoryId がマップに存在しない場合は categoryName が空文字になる | 未知の categoryId | `categoryName === ""` | High |
+| N-6 | マーカーが0件のとき空の features 配列を返す | `[]` | `features.length === 0` | Medium |
+
+---
 
 ### 1-1. `useSpotFilter`（composables/useSpotFilter.ts）
 
