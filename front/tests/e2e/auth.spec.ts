@@ -16,7 +16,7 @@ test.describe("Authentication", () => {
     await expect(
       page.getByRole("textbox", { name: /パスワード|password/i })
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: /ログイン|sign in/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ログイン", exact: true })).toBeVisible();
   });
 
   test("N-2: Supabase 認証成功後にメイン画面に遷移する", async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe("Authentication", () => {
     await page
       .getByRole("textbox", { name: /パスワード|password/i })
       .fill("password123");
-    await page.getByRole("button", { name: /ログイン|sign in/i }).click();
+    await page.getByRole("button", { name: "ログイン", exact: true }).click();
 
     // ログイン後はメインページ（/）に遷移することを確認
     await expect(page).toHaveURL("/", { timeout: 10_000 });
@@ -59,7 +59,7 @@ test.describe("Authentication", () => {
   }) => {
     await page.goto("/login");
 
-    await page.getByRole("button", { name: /ログイン|sign in/i }).click();
+    await page.getByRole("button", { name: "ログイン", exact: true }).click();
 
     // HTML5 バリデーションまたはカスタムエラーメッセージが表示されること
     const emailInput = page.getByRole("textbox", { name: /メール|email/i });
@@ -90,7 +90,7 @@ test.describe("Authentication", () => {
     await page
       .getByRole("textbox", { name: /パスワード|password/i })
       .fill("wrongpassword");
-    await page.getByRole("button", { name: /ログイン|sign in/i }).click();
+    await page.getByRole("button", { name: "ログイン", exact: true }).click();
 
     // エラーメッセージが表示されること（ログインページに留まる）
     await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });
