@@ -52,7 +52,7 @@
 ### M2 追加: Google OAuth認証（進行中）
 
 手動作業（実装前に完了が必要）:
-- [ ] Google Cloud Console で OAuth 2.0 クライアントID 作成
+- [ ] Google Cloud Console で OAuth 2.0 クライアントID 作成（承認済みリダイレクト URI に `https://[project-ref].supabase.co/auth/v1/callback` を追加）
 - [ ] Supabase ダッシュボード → Authentication → Providers → Google 有効化
 
 コード実装:

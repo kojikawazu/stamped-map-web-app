@@ -61,6 +61,10 @@ const loginWithGoogle = async (): Promise<void> => {
 };
 ```
 
+> エラー時は `throw` するため、呼び出し元の `pages/login.vue` で `try/catch` を実装すること。
+> OAuth 成功時はブラウザが Google 同意画面へリダイレクトするため、`loginWithGoogle()` は正常系では返らない。
+> そのため `submitting` フラグは Google ボタンクリック後もリダイレクトまでの間 `true` のままで問題ない（`finally` は不要）。
+
 ---
 
 ## UI設計
@@ -103,11 +107,22 @@ const loginWithGoogle = async (): Promise<void> => {
 
 ---
 
+## Google Cloud Console 設定（事前作業）
+
+1. [Google Cloud Console](https://console.cloud.google.com/) でプロジェクトを作成または選択
+2. **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID** を作成
+   - Application type: `Web application`
+   - **承認済みのリダイレクト URI** に以下を追加（必須）:
+     - `https://[your-project-ref].supabase.co/auth/v1/callback`
+       （`[your-project-ref]` は Supabase プロジェクト参照ID）
+3. 発行された **Client ID** と **Client Secret** を控える
+
+---
+
 ## Supabase ダッシュボード設定（事前作業）
 
 1. **Authentication → Providers → Google** を有効化
-   - Google Cloud Console で OAuth 2.0 クライアントID を作成
-   - Client ID / Client Secret を設定
+   - 上記で取得した Client ID / Client Secret を設定
 2. **Authentication → URL Configuration**
    - Site URL: 本番URL（例: `https://your-domain.vercel.app`）
    - Redirect URLs に以下を追加:
