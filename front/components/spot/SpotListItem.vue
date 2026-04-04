@@ -1,5 +1,9 @@
 <template>
-  <li class="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-zinc-50 cursor-pointer">
+  <li
+    class="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-zinc-50 cursor-pointer"
+    :class="{ 'bg-blue-50': selected }"
+    @click="emit('select', spot)"
+  >
     <span
       class="mt-1 h-3 w-3 shrink-0 rounded-full"
       :style="{ backgroundColor: spot.category.color }"
@@ -18,7 +22,9 @@
 <script setup lang="ts">
 import type { Spot } from "~/types/spot";
 
-defineProps<{ spot: Spot }>();
+defineProps<{ spot: Spot; selected?: boolean }>();
+
+const emit = defineEmits<{ select: [spot: Spot] }>();
 
 function formatDate(dateStr: string): string {
   return dateStr.replace(/-/g, "/");

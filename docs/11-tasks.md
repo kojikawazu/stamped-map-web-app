@@ -88,10 +88,10 @@
   - [x] `composables/useSpotFilter.ts` — フィルター・ページネーション状態管理
   - [x] `composables/useCategoryCreate.ts` — インラインカテゴリ追加状態管理
 - [x] スポット登録モーダル内のインラインカテゴリ追加
-- [ ] スポット詳細表示
-- [ ] スポット編集モーダル
-- [ ] スポット削除（確認ダイアログ）
-- [ ] カテゴリ管理UI（編集・削除）
+- [x] スポット詳細表示（SpotDetailDrawer）
+- [x] スポット編集モーダル（SpotEditModal）
+- [x] スポット削除（ConfirmDialog）
+- [x] カテゴリ管理UI（CategoryManageModal — 編集・削除）
 
 ## M0: Nuxt.js 3 移行（完了）
 
