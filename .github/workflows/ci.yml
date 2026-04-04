@@ -109,7 +109,11 @@ jobs:
 
       - name: Wait for dev server
         run: |
-          timeout 180 bash -c 'until curl -sf http://localhost:3000 > /dev/null 2>&1; do sleep 3; done' || (cat /tmp/nuxt-dev.log && exit 1)
+          echo "=== Running processes ===" && ps aux | grep -E "node|nuxt|pnpm" | grep -v grep || true
+          echo "=== Open ports ===" && ss -tlnp 2>/dev/null | grep -E "3000|LISTEN" || true
+          echo "=== Waiting for http://localhost:3000 ==="
+          timeout 180 bash -c 'until curl -sf http://localhost:3000 > /dev/null 2>&1; do sleep 3; echo "still waiting..."; done' \
+            || (echo "=== nuxt-dev.log ===" && cat /tmp/nuxt-dev.log && exit 1)
 
       - name: Run E2E tests
         run: pnpm test:e2e
