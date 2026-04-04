@@ -42,17 +42,59 @@
             <select
               v-model="form.categoryId"
               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              @change="onCategoryChange"
             >
               <option value="">カテゴリを選択</option>
               <option
-                v-for="cat in categories"
+                v-for="cat in localCategories"
                 :key="cat.id"
                 :value="cat.id"
               >
                 {{ cat.name }}
               </option>
+              <option value="__new__">＋ 新しいカテゴリを追加</option>
             </select>
             <p v-if="errors.categoryId" class="mt-1 text-xs text-red-500">{{ errors.categoryId }}</p>
+
+            <!-- インラインカテゴリ追加フォーム -->
+            <div v-if="showNewCategory" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 space-y-2">
+              <p class="text-xs font-medium text-blue-700">新しいカテゴリ</p>
+              <div class="flex gap-2">
+                <input
+                  v-model="newCategory.name"
+                  type="text"
+                  maxlength="50"
+                  placeholder="カテゴリ名"
+                  class="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                />
+                <div class="flex items-center gap-1">
+                  <input
+                    v-model="newCategory.color"
+                    type="color"
+                    class="h-8 w-10 cursor-pointer rounded border border-gray-300 p-0.5"
+                  />
+                  <span class="text-xs text-gray-500">{{ newCategory.color }}</span>
+                </div>
+              </div>
+              <p v-if="newCategoryError" class="text-xs text-red-500">{{ newCategoryError }}</p>
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  :disabled="addingCategory"
+                  class="rounded-md bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-700 disabled:opacity-50"
+                  @click="addCategory"
+                >
+                  {{ addingCategory ? "追加中..." : "追加" }}
+                </button>
+                <button
+                  type="button"
+                  class="rounded-md border border-gray-300 px-3 py-1.5 text-xs hover:bg-gray-50"
+                  @click="cancelNewCategory"
+                >
+                  キャンセル
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- 訪問日 -->
@@ -171,6 +213,42 @@ const form = reactive(initialForm());
 const errors = reactive<Record<string, string>>({});
 
 const { createSpot, loading: createLoading, error: createError } = useSpotCreate();
+const { createCategory, loading: addingCategory, error: addCategoryError } = useCategoryCreate();
+
+// カテゴリ一覧（props のコピーを保持し、追加後にローカル更新）
+const localCategories = ref<Category[]>([]);
+watch(
+  () => props.categories,
+  (cats) => { localCategories.value = [...cats]; },
+  { immediate: true }
+);
+
+// インラインカテゴリ追加
+const showNewCategory = ref(false);
+const newCategory = reactive({ name: "", color: "#6B7280" });
+const newCategoryError = computed(() => addCategoryError.value ?? "");
+
+function onCategoryChange() {
+  if (form.categoryId === "__new__") {
+    form.categoryId = "";
+    showNewCategory.value = true;
+    newCategory.name = "";
+    newCategory.color = "#6B7280";
+  }
+}
+
+function cancelNewCategory() {
+  showNewCategory.value = false;
+}
+
+async function addCategory() {
+  const cat = await createCategory({ name: newCategory.name, color: newCategory.color });
+  if (cat) {
+    localCategories.value.push(cat);
+    form.categoryId = cat.id;
+    showNewCategory.value = false;
+  }
+}
 
 // モーダルが開くたびにフォームをリセット
 watch(
@@ -179,6 +257,7 @@ watch(
     if (val) {
       Object.assign(form, initialForm());
       Object.keys(errors).forEach((k) => delete errors[k]);
+      showNewCategory.value = false;
     }
   }
 );
