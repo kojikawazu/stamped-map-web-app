@@ -32,7 +32,7 @@ describe("useSpotEdit", () => {
 
   it("更新成功時: Spot を返し、成功トーストを表示する", async () => {
     const spot = { id: "spot-1", ...validPayload };
-    mockApiFetch.mockResolvedValue(spot);
+    mockApiFetch.mockResolvedValue({ data: spot });
 
     const { updateSpot, loading, error } = useSpotEdit();
     const result = await updateSpot("spot-1", validPayload);
@@ -66,7 +66,7 @@ describe("useSpotEdit", () => {
     const { updateSpot, loading } = useSpotEdit();
     const promise = updateSpot("spot-1", validPayload);
     expect(loading.value).toBe(true);
-    resolveFn({ id: "spot-1" });
+    resolveFn({ data: { id: "spot-1" } });
     await promise;
     expect(loading.value).toBe(false);
   });

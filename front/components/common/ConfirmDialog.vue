@@ -7,7 +7,7 @@
     >
       <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
         <h2 class="text-base font-semibold text-zinc-900">{{ title }}</h2>
-        <p class="mt-2 text-sm text-zinc-600">{{ message }}</p>
+        <p class="mt-2 whitespace-pre-wrap text-sm text-zinc-600">{{ message }}</p>
 
         <div class="mt-5 flex justify-end gap-2">
           <button

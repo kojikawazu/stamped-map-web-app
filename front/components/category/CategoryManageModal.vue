@@ -102,7 +102,7 @@
   <ConfirmDialog
     v-model="showDeleteConfirm"
     title="カテゴリを削除"
-    :message="`「${deletingCategory?.name}」を削除しますか？\nこのカテゴリが設定されたスポットには影響があります。`"
+    :message="`「${deletingCategory?.name}」を削除しますか？\nスポットが紐づいているカテゴリは削除できません。`"
     confirm-label="削除"
     :loading="deleteLoading"
     @confirm="confirmDelete"

@@ -12,12 +12,12 @@ export const useSpotEdit = () => {
     loading.value = true;
     error.value = null;
     try {
-      const spot = await apiFetch<Spot>(`/api/spots/${id}`, {
+      const res = await apiFetch<{ data: Spot }>(`/api/spots/${id}`, {
         method: "PUT",
         body: payload,
       });
       toast.success("スポットを更新しました");
-      return spot;
+      return res.data;
     } catch {
       error.value = "スポットの更新に失敗しました";
       toast.error("更新に失敗しました");
