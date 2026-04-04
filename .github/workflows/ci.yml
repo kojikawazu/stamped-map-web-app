@@ -90,36 +90,18 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
 
-      - name: Prepare Nuxt
-        run: pnpm exec nuxt prepare
-        env:
-          NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
-          NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
-          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
-
-      - name: Start dev server
-        run: |
-          pnpm dev > /tmp/nuxt-dev.log 2>&1 &
-          echo "Dev server PID: $!"
+      - name: Build Nuxt
+        run: pnpm build
         env:
           NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
           NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
           DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
-      - name: Wait for dev server
-        run: |
-          echo "=== Running processes ===" && ps aux | grep -E "node|nuxt|pnpm" | grep -v grep || true
-          echo "=== Open ports ===" && ss -tlnp 2>/dev/null | grep -E "3000|LISTEN" || true
-          echo "=== Waiting for http://localhost:3000 ==="
-          timeout 180 bash -c 'until curl -sf http://localhost:3000 > /dev/null 2>&1; do sleep 3; echo "still waiting..."; done' \
-            || (echo "=== nuxt-dev.log ===" && cat /tmp/nuxt-dev.log && exit 1)
-
       - name: Run E2E tests
         run: pnpm test:e2e
         env:
           CI: "true"
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
           NUXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
           NUXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
