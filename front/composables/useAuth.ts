@@ -23,6 +23,19 @@ export const useAuth = () => {
     return { error: null };
   };
 
+  const loginWithGoogle = async (): Promise<void> => {
+    const siteUrl = useRuntimeConfig().public.siteUrl;
+    const redirectBase =
+      siteUrl || (import.meta.client ? window.location.origin : "");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${redirectBase}/`,
+      },
+    });
+    if (error) throw new Error("Googleログインに失敗しました");
+  };
+
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -32,5 +45,5 @@ export const useAuth = () => {
     await navigateTo("/login");
   };
 
-  return { user, session, isLoading, login, logout };
+  return { user, session, isLoading, login, loginWithGoogle, logout };
 };

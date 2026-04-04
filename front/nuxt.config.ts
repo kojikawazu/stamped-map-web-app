@@ -31,6 +31,7 @@ export default defineNuxtConfig({
     // クライアントに公開する変数（NUXT_PUBLIC_MAPTILER_KEY で実行時に上書きされる）
     public: {
       maptilerKey: "",
+      siteUrl: "",
     },
   },
 });
