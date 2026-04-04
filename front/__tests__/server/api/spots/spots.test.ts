@@ -22,6 +22,10 @@ const prismaMock = {
 vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1" }));
 vi.stubGlobal("prisma", prismaMock);
 
+// readBody は POST ハンドラーで使用されるため、テストごとに戻り値を設定できるよう差し替える
+const mockReadBody = vi.fn();
+vi.stubGlobal("readBody", mockReadBody);
+
 // --- テストヘルパー ---
 
 function makeEvent(
@@ -247,5 +251,87 @@ describe("GET /api/spots/markers", () => {
         where: { AND: [{ categoryId: { in: [VALID_UUID_2] } }] },
       })
     );
+  });
+});
+
+// --- POST /api/spots ---
+
+describe("POST /api/spots", () => {
+  const validBody = {
+    name: "東京スカイツリー",
+    categoryId: VALID_UUID_2,
+    latitude: 35.7101,
+    longitude: 139.8107,
+    visitedAt: "2025-01-01",
+    memo: "展望台から富士山が見えた",
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReadBody.mockReset();
+  });
+
+  it("N-1: 有効なリクエストボディでスポットを作成して 201 を返す", async () => {
+    mockReadBody.mockResolvedValue(validBody);
+    prismaMock.mapCategory.findUnique.mockResolvedValue(mockCategory);
+    const createdSpot = {
+      ...mockSpot,
+      id: "770e8400-e29b-41d4-a716-446655440000",
+      name: "東京スカイツリー",
+      latitude: 35.7101,
+      longitude: 139.8107,
+      categoryId: VALID_UUID_2,
+      category: mockCategory,
+    };
+    prismaMock.mapSpot.create.mockResolvedValue(createdSpot);
+
+    const handler = (
+      await import("../../../../server/api/spots/index.post")
+    ).default;
+    const event = makeEvent("POST", "/api/spots");
+    const result = await handler(event);
+
+    expect(result.data.name).toBe("東京スカイツリー");
+    expect(prismaMock.mapSpot.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: "東京スカイツリー",
+          categoryId: VALID_UUID_2,
+          latitude: 35.7101,
+          longitude: 139.8107,
+        }),
+      })
+    );
+  });
+
+  it("S-1: バリデーションエラー（必須フィールド欠如）のとき 400 をスローする", async () => {
+    mockReadBody.mockResolvedValue({ name: "", categoryId: VALID_UUID_2 });
+
+    const handler = (
+      await import("../../../../server/api/spots/index.post")
+    ).default;
+    const event = makeEvent("POST", "/api/spots");
+
+    await expect(handler(event)).rejects.toMatchObject({
+      statusCode: 400,
+      data: { code: "VALIDATION_ERROR" },
+    });
+    expect(prismaMock.mapSpot.create).not.toHaveBeenCalled();
+  });
+
+  it("S-2: 存在しないカテゴリ ID のとき 400 をスローする", async () => {
+    mockReadBody.mockResolvedValue(validBody);
+    prismaMock.mapCategory.findUnique.mockResolvedValue(null);
+
+    const handler = (
+      await import("../../../../server/api/spots/index.post")
+    ).default;
+    const event = makeEvent("POST", "/api/spots");
+
+    await expect(handler(event)).rejects.toMatchObject({
+      statusCode: 400,
+      data: { code: "VALIDATION_ERROR" },
+    });
+    expect(prismaMock.mapSpot.create).not.toHaveBeenCalled();
   });
 });

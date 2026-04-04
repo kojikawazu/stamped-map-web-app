@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { mockApiRoutes } from "./helpers/auth";
+import { injectSupabaseSession, mockApiRoutes } from "./helpers/auth";
 
 /**
  * 認証フローテスト: ログイン・ログアウトの動作を検証する。
@@ -96,32 +96,18 @@ test.describe("Authentication", () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });
   });
 
-  test("A-1: 認証済み状態でログインページにアクセスするとリダイレクトされる", async ({
+  test("A-1: 認証済み状態でログインページにアクセスしてもページが正常に表示される", async ({
     page,
   }) => {
-    // Supabase セッションを localStorage に注入
-    await page.addInitScript(() => {
-      const session = {
-        access_token: "valid-token",
-        token_type: "bearer",
-        expires_in: 3600,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        refresh_token: "refresh-token",
-        user: { id: "user-1", email: "test@example.com", role: "authenticated" },
-      };
-      localStorage.setItem("supabase.auth.token", JSON.stringify(session));
-    });
-
+    // 共有ヘルパーで正しいキー形式（sb-{project-ref}-auth-token）を使ってセッションを注入する
+    await injectSupabaseSession(page);
     await mockApiRoutes(page);
 
-    // 既に認証済みの場合、/login にアクセスすると / にリダイレクトされるべき
-    // （Nuxt の auth middleware が処理）
+    // auth middleware はログイン済みユーザーを /login から追い出す処理を持たない（未認証→/login のみ）
+    // そのためログインページがそのまま表示される
     await page.goto("/login");
-
-    // リダイレクトされるか、またはログインページのまま（実装依存）
-    // ここではページが正常に表示されることを確認
     await page.waitForLoadState("networkidle");
-    const url = page.url();
-    expect(url).toMatch(/\/(login)?$/);
+
+    await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });
   });
 });

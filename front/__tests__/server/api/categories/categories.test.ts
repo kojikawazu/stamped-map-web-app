@@ -20,6 +20,10 @@ const prismaMock = {
 vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1" }));
 vi.stubGlobal("prisma", prismaMock);
 
+// readBody は PUT などボディを読む必要があるハンドラーで使用されるため、テストごとに戻り値を設定できるよう差し替える
+const mockReadBody = vi.fn();
+vi.stubGlobal("readBody", mockReadBody);
+
 // --- テストヘルパー ---
 
 function makeEvent(
@@ -202,7 +206,43 @@ describe("DELETE /api/categories/:id", () => {
 // --- PUT /api/categories/:id ---
 
 describe("PUT /api/categories/:id", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReadBody.mockReset();
+  });
+
+  it("N-1: 有効なリクエストボディでカテゴリを更新できる", async () => {
+    mockReadBody.mockResolvedValue({ name: "新しいカフェ", color: "#00FF00" });
+    prismaMock.mapCategory.findUnique.mockResolvedValue(mockCategory);
+    prismaMock.mapCategory.findFirst.mockResolvedValue(null);
+    const updatedCategory = {
+      ...mockCategory,
+      name: "新しいカフェ",
+      color: "#00FF00",
+      _count: { mapSpots: 3 },
+    };
+    prismaMock.mapCategory.update.mockResolvedValue(updatedCategory);
+
+    const handler = (
+      await import("../../../../server/api/categories/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/categories/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+    const result = await handler(event);
+
+    expect(result.data).toMatchObject({
+      id: VALID_UUID,
+      name: "新しいカフェ",
+      color: "#00FF00",
+    });
+    expect(prismaMock.mapCategory.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: VALID_UUID },
+        data: { name: "新しいカフェ", color: "#00FF00" },
+      })
+    );
+  });
 
   it("S-1: 不正な UUID フォーマットのとき 400 をスローする", async () => {
     const handler = (
@@ -215,9 +255,10 @@ describe("PUT /api/categories/:id", () => {
     await expect(handler(event)).rejects.toMatchObject({ statusCode: 400 });
   });
 
-  it("S-2: 存在しない ID のとき readBody より先に 404 をスローしない（UUID は有効）", async () => {
-    // UUID は有効だが findUnique が null → readBody が先に失敗する可能性があるため
-    // ここでは 400 または 404 のいずれかが発生することを確認する
+  it("S-2: ボディが不正のとき、DB アクセス前に 400 をスローする", async () => {
+    // readBody は null を返す → updateCategorySchema.safeParse が失敗して 400 になる
+    // findUnique（404 判定）には到達しない
+    mockReadBody.mockResolvedValue(null);
     prismaMock.mapCategory.findUnique.mockResolvedValue(null);
 
     const handler = (
@@ -227,8 +268,44 @@ describe("PUT /api/categories/:id", () => {
       id: VALID_UUID,
     });
 
-    await expect(handler(event)).rejects.toMatchObject(
-      expect.objectContaining({ statusCode: expect.any(Number) })
-    );
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 400 });
+    expect(prismaMock.mapCategory.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("S-3: 存在しない ID のとき 404 をスローする", async () => {
+    mockReadBody.mockResolvedValue({ name: "更新後", color: "#AABBCC" });
+    prismaMock.mapCategory.findUnique.mockResolvedValue(null);
+
+    const handler = (
+      await import("../../../../server/api/categories/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/categories/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 404 });
+  });
+
+  it("S-4: 同名カテゴリが既に存在するとき 400 をスローする", async () => {
+    mockReadBody.mockResolvedValue({ name: "既存カフェ", color: "#AABBCC" });
+    prismaMock.mapCategory.findUnique.mockResolvedValue(mockCategory);
+    prismaMock.mapCategory.findFirst.mockResolvedValue({
+      ...mockCategory,
+      id: "different-id",
+      name: "既存カフェ",
+    });
+
+    const handler = (
+      await import("../../../../server/api/categories/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/categories/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({
+      statusCode: 400,
+      data: { code: "DUPLICATE_CATEGORY" },
+    });
+    expect(prismaMock.mapCategory.update).not.toHaveBeenCalled();
   });
 });

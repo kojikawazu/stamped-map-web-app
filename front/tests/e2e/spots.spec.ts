@@ -50,15 +50,12 @@ test.describe("Spot List & Filter", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    const searchInput = page.getByRole("searchbox").or(
-      page.getByPlaceholder(/スポットを検索|検索/i)
-    );
-    if (await searchInput.isVisible()) {
-      await searchInput.fill("東京");
-      // デバウンス（300ms）を待機
-      await page.waitForTimeout(500);
-      expect(searchApiCalled).toBe(true);
-    }
+    const searchInput = page.getByPlaceholder(/スポット名を検索/i);
+    await expect(searchInput).toBeVisible({ timeout: 5_000 });
+    await searchInput.fill("東京");
+    // デバウンス（300ms）を待機
+    await page.waitForTimeout(500);
+    expect(searchApiCalled).toBe(true);
   });
 
   test("N-4: ページネーションで次のページに移動できる", async ({ page }) => {
@@ -101,15 +98,12 @@ test.describe("Spot List & Filter", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // 次のページボタンが存在する場合にクリック
-    const nextButton = page
-      .getByRole("button", { name: /次|next|>/i })
-      .first();
-    if (await nextButton.isVisible()) {
-      await nextButton.click();
-      await page.waitForTimeout(500);
-      await expect(page.getByText("スポットB")).toBeVisible({ timeout: 5_000 });
-    }
+    // 次のページボタンが表示されていることを確認してからクリック
+    const nextButton = page.getByRole("button", { name: "次へ" }).first();
+    await expect(nextButton).toBeVisible({ timeout: 5_000 });
+    await nextButton.click();
+    await page.waitForTimeout(500);
+    await expect(page.getByText("スポットB")).toBeVisible({ timeout: 5_000 });
   });
 
   test("S-1: API エラー時にエラー状態が表示される", async ({ page }) => {
@@ -124,10 +118,8 @@ test.describe("Spot List & Filter", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // エラー状態またはロード失敗時の UI を確認
-    // スポット件数が 0 か、エラーメッセージが表示されること
-    const pageContent = await page.textContent("body");
-    expect(pageContent).toBeTruthy();
+    // API がエラーを返すとき、スポット一覧アイテムは表示されない
+    await expect(page.getByText("東京タワー")).not.toBeVisible({ timeout: 5_000 });
   });
 
   test("A-1: 未認証状態でメインページにアクセスするとログインページにリダイレクトされる", async ({
