@@ -125,12 +125,11 @@
 | `SUPABASE_KEY` | Supabase Anon Key（`@nuxtjs/supabase` が読む） | Vercel env / .env.local |
 | `NUXT_PUBLIC_MAPTILER_KEY` | MapTiler API Key（クライアントに公開） | Vercel env / .env.local |
 | `NUXT_PUBLIC_SITE_URL` | サイトURL（Google OAuth リダイレクト先ベースURL） | Vercel env / .env.local |
-| `GOOGLE_CLIENT_ID` | Google OAuth クライアントID | Vercel env / .env.local |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth クライアントシークレット | Vercel env / .env.local |
 
 > `NUXT_PUBLIC_` プレフィックスの変数はクライアントにも公開される（`nuxt.config.ts` の `runtimeConfig.public` にマップ）。
 > `DATABASE_URL` / `DIRECT_URL` はサーバー側のみ。クライアントバンドルに含めない。
 > `SUPABASE_URL` / `SUPABASE_KEY` は `@nuxtjs/supabase` モジュールが直接読む変数名のため `NUXT_PUBLIC_` プレフィックスは付けない。
+> Google OAuth の `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` はアプリが直接使用しない（Supabase ダッシュボード側で設定）。アプリの環境変数には不要。
 
 ## ログ・監視
 

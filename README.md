@@ -50,14 +50,14 @@ cp .env.example .env.local
 ### 3. データベースのセットアップ
 
 ```bash
+cd front
+
 # Prisma クライアント生成 + マイグレーション
-pnpm --filter front exec prisma migrate dev
+pnpm exec prisma migrate dev
 
 # シードデータ投入（デフォルトカテゴリ）
-cd front && pnpm db:seed
+pnpm db:seed
 ```
-
-> PostGIS の生成カラム・GIST インデックスは `prisma/migrations/` 内の SQL migration に含まれる。
 
 ### 4. ユーザーアカウントの作成
 
@@ -74,7 +74,11 @@ http://localhost:3000 でアクセスできる。
 
 ## Commands
 
+> すべてのコマンドは `front/` ディレクトリで実行する。
+
 ```bash
+cd front
+
 # 開発サーバー起動
 pnpm dev
 
