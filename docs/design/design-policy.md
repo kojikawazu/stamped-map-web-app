@@ -72,7 +72,7 @@
 - **.gitignore** — 以下を必ず除外する
   - `.env` / `.env.*` — 環境変数・シークレット
   - `node_modules/` — 依存パッケージ
-  - `.next/` — ビルド成果物
+  - `.nuxt/` — ビルド成果物
   - `*.pem` / `*.key` — 秘密鍵・証明書
   - クレデンシャル系ファイル（`credentials.json`, `serviceAccountKey.json` 等）
 
@@ -264,10 +264,10 @@ front/
 
 | 対象 | 選択肢 | 採用基準 |
 |---|---|---|
-| **フロントエンド** | Vercel | Next.jsとの親和性が高い・プレビューデプロイが必要・手軽にMVPを出したい場合 |
+| **フロントエンド** | Vercel | Nuxt.jsとの親和性が高い・プレビューデプロイが必要・手軽にMVPを出したい場合 |
 | **フロントエンド** | Cloud Run | GCPに統一したい・Vercelの制約（タイムアウト・リージョン等）を超えたい・SSRの細かい制御が必要な場合 |
 | **バックエンド** | Cloud Run | コンテナベースでスケーラブルなAPI基盤が必要な場合（デフォルト） |
-| **バックエンド** | なし（一体型） | Next.js App Router内で完結する場合（BFFのみ） |
+| **バックエンド** | なし（一体型） | Nuxt Server Routes内で完結する場合（一体型） |
 
 ### CI/CD 構成（Vercel + GitHub Actions）
 

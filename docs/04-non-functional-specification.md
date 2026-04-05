@@ -16,7 +16,7 @@
 
 ### フロントエンド
 
-- メイン画面は CSR（`'use client'`）で構成（MapLibre + 認証ガードのため）
+- メイン画面は CSR（`<ClientOnly>` / `definePageMeta({ ssr: false })`）で構成（MapLibre + 認証ガードのため）
 - 初回表示はローディングシェル → 認証確認 → コンテンツ表示 の順序
 - 地図コンポーネントは `dynamic import`（SSR対象外）
 - MapTiler タイルはブラウザキャッシュを活用
