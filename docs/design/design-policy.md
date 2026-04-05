@@ -1,7 +1,7 @@
-# 開発設計実装方針テンプレート（MVP開発レベル）
+# 開発設計実装方針（MVP開発レベル）
 
-> 本文書はMVP開発における**厳格な標準（ベースライン）**である。
-> メインスタックは Next.js + Go + GCP を想定するが、言語・クラウドが変わる場合はベンダー固有部分を適宜読み替えること。
+> 本文書はこのプロジェクト（Stamped Map Web App）における**開発方針のベースライン**である。
+> スタック：Nuxt.js 3 + TypeScript + Tailwind CSS v4 / Supabase (PostgreSQL + Auth) / Vercel
 
 ## 全体
 
@@ -53,20 +53,17 @@
 ### リポジトリ構成
 
 - **モノレポ（ルート管理）** を基本とする。
-  - フロントエンド・バックエンドを1つのリポジトリで管理する。
 
 ```
 /
 ├── docs/           # ドキュメント（設計書・仕様書など）
-├── front/          # フロントエンド（Next.js）※ BFF含む
-├── back/           # バックエンド（Go + Echo 等）※ 分離型の場合に作成
+├── front/          # フロントエンド（Nuxt.js 3）※ Server Routes含む
 ├── README.md       # プロジェクト概要（必須）
 ├── CLAUDE.md       # AI開発ガイド（必須）
 └── .gitignore      # Git除外設定（必須）
 ```
 
-- **一体型（MVP初期）** — `front/` のみ。BFFはNext.js App Router内で完結。`back/` は作成しない。
-- **分離型（スケール時）** — `back/` を追加し、バックエンドAPIを独立させる。
+- **一体型** — `front/` のみ。API は Nuxt Server Routes（Vercel Serverless）で完結。
 
 ### 必須ファイル
 
@@ -101,8 +98,7 @@
 - 以下のファイルはコード変更時に**修正漏れが発生しやすい**ため、特に注意する。
   - `/README.md` — ルート直下
   - `/CLAUDE.md` — ルート直下
-  - `/front/README.md` — フロント側
-  - `/back/README.md` — バックエンド側（分離型で存在する場合）
+  - `/docs/11-tasks.md` — タスク進捗
 - PRレビュー時に、これらのファイルが更新されているかをチェック項目とする。
 
 ### 必須運用
@@ -151,144 +147,47 @@ docs/
 
 ### サーバー/クライアント分離
 
-- **server-first** を基本とする。データ取得・SEOはサーバーコンポーネントで行う。
-- ページによってclient-heavyにすることも可（インタラクションが多いページ等）。
-- server/client境界の明確化とクライアントバンドル抑制のため、ファイルを分離する。
-  - `page.tsx` — サーバーコンポーネント（データ取得・SEO・props受け渡し）
-  - `client.tsx` — クライアントコンポーネント（インタラクション・状態管理）
+- 地図コンポーネント（MapLibre）は `<ClientOnly>` でラップし、SSRを回避する。
+- ページコンポーネントはCSRを基本とする（地図SPA全体が認証必須かつCSR）。
+- ロジックは **Composables** に切り出す。
+  - コンポーネントはUIの描画に専念し、状態管理・データ取得・イベント処理は composables に分離する。
+  - 例: `useSpots.ts` にフィルタ・ソート・ページネーションロジックを集約。
 
-### 拡張性
-
-- **クライアントコンポーネント**のロジックは **カスタムフック** に切り出す。
-  - コンポーネントはUIの描画に専念し、状態管理・イベント処理・クライアント側データ操作はhooksに分離する。
-  - 例: `useUserList.ts` にフィルタ・ソート・ページネーションロジックを集約。
-- **サーバーコンポーネント**のデータ取得は `page.tsx` や `lib/` 内のサーバー関数で行う（hooksは使用しない）。
-
-### ディレクトリ構成（Next.js）
-
-#### アトミックデザインの場合
+### ディレクトリ構成（Nuxt.js 3 / アトミックデザイン）
 
 ```
-src/
-├── app/            # App Router（ルーティング・ページ）
-├── components/     # UIコンポーネント（Atoms / Molecules / Organisms）
+front/
+├── pages/              # ルーティング（index.vue / login.vue）
+├── layouts/            # レイアウト（default.vue / empty.vue）
+├── components/         # アトミックデザイン
 │   ├── atoms/
 │   ├── molecules/
 │   └── organisms/
-├── hooks/          # カスタムフック
-├── lib/            # ユーティリティ・API クライアント・定数
-└── types/          # 型定義
-```
-
-#### ドメイン別構成の場合
-
-```
-src/
-├── app/            # App Router（ルーティング・ページ）
-├── features/       # ドメイン別機能
-│   ├── users/
-│   │   ├── components/   # ドメイン固有のUI
-│   │   ├── hooks/        # ドメイン固有のフック
-│   │   └── types/        # ドメイン固有の型
-│   └── orders/
-│       ├── components/
-│       ├── hooks/
-│       └── types/
-├── components/     # 共通UIコンポーネント
-│   └── common/
-├── hooks/          # 共通カスタムフック
-├── lib/            # ユーティリティ・API クライアント・定数
-└── types/          # 共通型定義
+├── composables/        # Composables（状態管理・データ取得）
+├── lib/                # ユーティリティ・バリデーション
+├── types/              # 型定義
+├── middleware/         # ルートミドルウェア
+└── server/
+    ├── api/            # Server Routes（API エンドポイント）
+    └── utils/          # サーバー側ユーティリティ
 ```
 
 ---
 
 ## API設計方針
 
-### 構成パターン
+### 構成
 
-プロジェクト規模・要件に応じて以下のいずれかを選択する。
-
-| パターン | 構成 | 採用基準 |
-|---|---|---|
-| **一体型** | Next.js App Router（Route Handlers） | 小規模・素早くMVPを出したい場合 |
-| **一体型 + Hono** | Next.js + Hono（BFF層） | 一体型だがルーティング・ミドルウェアを強化したい場合 |
-| **分離型** | Next.js（フロント） + Go + Echo（API） | バックエンドを独立させたい・スケール要件がある場合 |
-
-- 初期はApp Routerの一体型で始め、必要に応じて分離型へ移行できるよう設計する。
-- BFF層のロジックを薄く保つことで、分離時の移行コストを最小限にする。
+- **Nuxt Server Routes**（`server/api/`）で完結。追加インフラ不要。
+- Vercel Serverless Functions として自動デプロイされる。
 
 ### 共通方針
 
 - RESTful設計を基本とする。
-- エンドポイントの命名は **リソース指向**（例: `/api/users`, `/api/orders/:id`）。
-- レスポンス形式は JSON で統一する。
-
----
-
-## BFF（Backend for Frontend）
-
-### 設計方針
-
-- Next.js App Routerの Route Handlers を使用する。
-- Honoを採用する場合、Route Handlers の代わりに Hono のルーティングを利用する。
-- API層はフロントエンドとバックエンドの橋渡しに徹する。
-- バックエンドAPIの呼び出し・レスポンス整形・認証トークン付与を担当する。
-- API呼び出しロジックは共通関数やユーティリティに切り出し、Route Handler自体は薄く保つ。
-  - 例: `lib/api-client.ts` にバックエンドへのリクエスト処理を集約する。
-
-### ディレクトリ構成（Next.js App Router）
-
-```
-src/
-└── app/
-    └── api/        # Route Handlers
-        ├── auth/   # 認証関連API
-        └── ...     # ドメイン別API
-```
-
----
-
-## バックエンド
-
-### 設計方針
-
-- **軽量DDD** を採用する（ドメインクラス・値オブジェクトのみ）。
-- **小規模の場合** — レイヤードアーキテクチャを採用する。
-- **それ以外の場合** — クリーンアーキテクチャを採用する。
-- 各層の責務を明確に分離し、拡張性を意識する。
-  - ハンドラーは薄く保ち、ビジネスロジックはService / Usecase層に集約する。
-  - リポジトリはインターフェースを定義し、実装を差し替え可能にする。
-
-### ディレクトリ構成（レイヤード / 小規模）
-
-```
-src/
-├── handler/        # リクエストハンドラー（Controller層）
-├── service/        # ビジネスロジック（Service層）
-├── repository/     # データアクセス（Repository層）
-├── domain/         # ドメインモデル・値オブジェクト
-├── dto/            # リクエスト/レスポンスのデータ構造
-├── config/         # 設定・DI
-└── middleware/     # ミドルウェア（認証・ログなど）
-```
-
-### ディレクトリ構成（クリーンアーキテクチャ / 中〜大規模）
-
-```
-src/
-├── domain/             # エンティティ・値オブジェクト・リポジトリインターフェース
-├── usecase/            # ユースケース（アプリケーションロジック）
-├── interface/          # 外部とのインターフェース
-│   ├── handler/        #   リクエストハンドラー
-│   ├── presenter/      #   レスポンス整形
-│   └── dto/            #   データ変換オブジェクト
-├── infrastructure/     # 外部依存の実装
-│   ├── repository/     #   DB実装
-│   ├── external/       #   外部API連携
-│   └── config/         #   設定・DI
-└── middleware/         # ミドルウェア
-```
+- エンドポイントの命名は **リソース指向**（例: `/api/spots`, `/api/spots/:id`）。
+- レスポンス形式は JSON で統一する（`{ data: ... }` または `{ error: ... }` 形式）。
+- 全エンドポイントで `verifyAuth()` による JWT 検証を必須とする。
+- `defineEventHandler` でハンドラーを定義し、ロジックは `server/utils/` に切り出して薄く保つ。
 
 ---
 
@@ -359,73 +258,30 @@ src/
 | **バックエンド** | Cloud Run | コンテナベースでスケーラブルなAPI基盤が必要な場合（デフォルト） |
 | **バックエンド** | なし（一体型） | Next.js App Router内で完結する場合（BFFのみ） |
 
-### フロントエンド CI/CD
+### CI/CD 構成（Vercel + GitHub Actions）
 
-#### Vercel の場合
+- Vercel のデフォルトビルド・デプロイを利用する（`nuxt build` → Vercel Serverless）。
+- GitHub Actions で CI を実行する。
 
-- Vercelのデフォルトのビルド・デプロイを利用する。
-- CI上で **E2Eテスト** を実行する（Playwright等）。
-- プレビューデプロイでPR単位の動作確認を行う。
+**CI（Push / PR 時）**
+- ユニットテスト（Vitest）
+- E2E テスト（Playwright）
 
-#### Cloud Run の場合
-
-- GitHub Actions等でCI/CDパイプラインを構築する。
-- **CI（Push / PR時）**
-  - リント・フォーマットチェック
-  - ユニットテスト・E2Eテスト
-  - ビルド確認
-- **CD（mainマージ時）**
-  - コンテナイメージのビルド・プッシュ（Artifact Registry）
-  - Cloud Runへの自動デプロイ
-- Dockerfileで `next build` → `next start` を実行する構成とする。
-
-### 共通
-
-- ドキュメントのみの変更（`*.md` 等）では**ビルド・デプロイのCI/CDは実行しない**。
-  - パスフィルターで除外する。
-- ただし、以下の**軽量チェックは実行する**。
-  - markdownリント
-  - リンク切れチェック
-  - 必須ファイル（README.md, CLAUDE.md）の存在検証
-
-### バックエンド CI/CD（Cloud Run）
-
-- GitHub Actions等でCI/CDパイプラインを構築する。
-- **CI（Push / PR時）**
-  - リント・フォーマットチェック
-  - ユニットテスト
-  - ビルド確認
-- **CD（mainマージ時）**
-  - コンテナイメージのビルド・プッシュ（Artifact Registry）
-  - Cloud Runへの自動デプロイ
+**CD（main マージ時）**
+- Vercel が自動デプロイ
 
 ---
 
-## クラウド・ホスティング設計方針
+## クラウド・ホスティング構成
 
-プロジェクト要件に応じて構成を選択する。
+| 対象 | サービス |
+|------|---------|
+| フロントエンド + API | Vercel（Nuxt.js 一体デプロイ） |
+| データベース | Supabase（PostgreSQL + PostGIS） |
+| 認証 | Supabase Auth |
+| 地図タイル | MapTiler Cloud |
 
-| 構成パターン | フロントエンド | バックエンド | 採用基準 |
-|---|---|---|---|
-| **Vercel + Cloud Run** | Vercel | Cloud Run（Go等） | フロントの手軽さとバックエンドの柔軟性を両立したい場合 |
-| **Vercel一体型** | Vercel | なし（App Router内で完結） | 小規模MVP・バックエンド分離が不要な場合 |
-| **GCP統一型** | Cloud Run | Cloud Run | GCPに統一したい・Vercelの制約を超えたい場合 |
-
-### Vercel
-
-- Next.jsのフロントエンドホスティングに使用する。
-- Vercel固有の機能（Edge Functions, Image Optimization等）を活用する場合はベンダーロックインに注意する。
-  - 移行コストを最小化するため、Vercel固有APIへの依存は最小限にする。
-
-### Cloud Run
-
-- バックエンドのホスティングに使用する。フロントエンドをCloud Runでホストする場合も同様。
-- コンテナイメージは Artifact Registry で管理する。
-
-### Artifact Registry
-
-- コンテナイメージは**過去3世代分のみ保持**する。
-  - クリーンアップポリシーまたはCI/CDパイプライン内で古いイメージを削除する。
+- Vercel 固有 API への依存は最小限にする（将来の移行コスト抑制）。
 
 ---
 

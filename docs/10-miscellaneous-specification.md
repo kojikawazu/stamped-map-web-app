@@ -33,77 +33,20 @@
 | MapTiler + MapLibre ガイド | https://docs.maptiler.com/maplibre/ |
 | Prisma + PostgreSQL | https://www.prisma.io/docs/concepts/database-connectors/postgresql |
 | Supabase Auth (JS SDK) | https://supabase.com/docs/reference/javascript/auth-signup |
-| Next.js App Router | https://nextjs.org/docs/app |
+| Nuxt.js 3 ドキュメント | https://nuxt.com/docs |
+| @nuxtjs/supabase | https://supabase.nuxtjs.org/ |
 | Vercel デプロイ | https://vercel.com/docs |
 
-## 開発ツール・ライブラリ（想定）
+## 開発ツール・ライブラリ
 
 | ツール | 用途 |
 |--------|------|
 | Zod | バリデーションスキーマ（クライアント・サーバー共有） |
-| Sonner | トースト通知 |
-| Tailwind CSS | スタイリング |
-| ESLint + Prettier | コード品質 |
-| Vitest | テスト |
+| vue-sonner | トースト通知 |
+| Tailwind CSS v4 | スタイリング |
+| ESLint | コード品質 |
+| Vitest + @nuxt/test-utils | テスト |
+| Playwright | E2Eテスト |
 | GitHub Actions | CI/CD |
 
-## Next.js ディレクトリ構成（想定）
-
-```
-app/
-├── login/
-│   └── page.tsx              ← ログイン画面
-├── (main)/
-│   └── page.tsx              ← メイン画面（地図 + リスト、CSR）
-├── api/
-│   ├── spots/
-│   │   ├── route.ts          ← GET(一覧), POST(登録)
-│   │   ├── markers/
-│   │   │   └── route.ts      ← GET(マーカー用軽量データ)
-│   │   └── [id]/
-│   │       └── route.ts      ← GET(詳細), PUT(更新), DELETE(削除)
-│   └── categories/
-│       ├── route.ts          ← GET(一覧), POST(追加)
-│       └── [id]/
-│           └── route.ts      ← PUT(更新), DELETE(削除)
-├── layout.tsx
-└── globals.css
-
-components/
-├── map/
-│   ├── MapView.tsx           ← MapLibre GL JS 地図コンポーネント
-│   ├── MapMarkers.tsx        ← マーカー描画
-│   └── MapCluster.tsx        ← クラスタリング
-├── spots/
-│   ├── SpotList.tsx          ← スポット一覧
-│   ├── SpotModal.tsx         ← 登録・編集モーダル
-│   └── SpotDetail.tsx        ← スポット詳細
-├── categories/
-│   └── CategorySelect.tsx    ← カテゴリ選択・追加UI
-├── auth/
-│   └── AuthGuard.tsx         ← クライアント側認証ガード
-├── ui/
-│   ├── Toast.tsx
-│   ├── Loading.tsx
-│   ├── Pagination.tsx
-│   └── EmptyState.tsx
-└── layout/
-    ├── Header.tsx
-    └── Sidebar.tsx
-
-lib/
-├── api-client.ts             ← API呼び出し集約（Go移行時にURL変更するだけ）
-├── supabase.ts               ← Supabase クライアント（認証用のみ）
-├── prisma.ts                 ← Prisma クライアント
-├── validations/
-│   ├── spot.ts               ← Zodスキーマ（クライアント・サーバー共有）
-│   └── category.ts           ← Zodスキーマ（クライアント・サーバー共有）
-└── utils/
-    └── date.ts
-
-prisma/
-├── schema.prisma
-├── seed.ts                   ← デフォルトカテゴリ投入
-└── migrations/
-    └── 001_add_location_column.sql  ← PostGIS 生成カラム + GISTインデックス
-```
+> ディレクトリ構成の詳細は `docs/09-architecture-specification.md` を参照。
