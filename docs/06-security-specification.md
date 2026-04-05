@@ -82,67 +82,57 @@ API が 401 を返した場合のクライアント側対応：
 
 ### JWT 検証の共通化
 
-全 API Route で JWT 検証を漏れなく実行するため、共通ヘルパーに抽出する。
+全 Server Route で JWT 検証を漏れなく実行するため、共通ヘルパーに抽出する。
 
 ```typescript
-// lib/auth.ts
+// server/utils/auth.ts
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { H3Event } from 'h3';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+// singleton クライアント（リクエストごとの生成を避ける）
+let _supabaseAuth: SupabaseClient | null = null;
 
-export class AuthError extends Error {
-  constructor() {
-    super('Unauthorized');
+function getSupabaseAuth(): SupabaseClient {
+  if (!_supabaseAuth) {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_KEY;
+    if (!url || !key) {
+      throw createError({ statusCode: 500, message: 'サーバー設定エラー' });
+    }
+    _supabaseAuth = createClient(url, key);
   }
+  return _supabaseAuth;
 }
 
-export async function verifyAuth(request: Request) {
-  const token = request.headers.get('Authorization')?.replace('Bearer ', '');
-
+export async function verifyAuth(event: H3Event) {
+  const token = getHeader(event, 'authorization')?.replace('Bearer ', '');
   if (!token) {
-    throw new AuthError();
+    throw createError({ statusCode: 401, message: '認証が必要です' });
   }
-
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-
+  const { data: { user }, error } = await getSupabaseAuth().auth.getUser(token);
   if (error || !user) {
-    throw new AuthError();
+    throw createError({ statusCode: 401, message: '認証が無効です' });
   }
-
   return user;
 }
 ```
 
-### API Route での使用パターン
+### Server Route での使用パターン
 
 ```typescript
-// app/api/spots/route.ts
-import { verifyAuth, AuthError } from '@/lib/auth';
+// server/api/spots/index.get.ts
+import { verifyAuth } from '~/server/utils/auth';
 
-export async function GET(request: Request) {
-  try {
-    await verifyAuth(request);
-    // ... Prisma でDB操作
-  } catch (e) {
-    if (e instanceof AuthError) {
-      return Response.json(
-        { error: { code: 'UNAUTHORIZED', message: '認証が必要です' } },
-        { status: 401 }
-      );
-    }
-    return Response.json(
-      { error: { code: 'INTERNAL_ERROR', message: 'サーバーエラー' } },
-      { status: 500 }
-    );
-  }
-}
+export default defineEventHandler(async (event) => {
+  await verifyAuth(event);
+  // ... Prisma でDB操作
+});
 ```
 
-> **重要：JWT 検証を1つの API Route でも忘れるとセキュリティホールになる。**
-> 全 API Route で `verifyAuth()` を呼び出すこと。
+> **重要：JWT 検証を1つの Server Route でも忘れるとセキュリティホールになる。**
+> 全 Server Route で `verifyAuth()` を呼び出すこと。
+> `createError()` は H3 のグローバル関数として自動 import される（Nuxt Server Routes 内）。
 
 ## データアクセス制御
 
@@ -169,7 +159,7 @@ export async function GET(request: Request) {
 | 脅威 | 対策 |
 |------|------|
 | SQLインジェクション | Prisma のパラメータ化クエリ / `$queryRaw` のテンプレートリテラル |
-| XSS | Next.js の自動エスケープ + CSP ヘッダー |
+| XSS | Vue.js / Nuxt.js の自動エスケープ + CSP ヘッダー |
 | CSRF | API Routes は Cookie 認証ではなく Bearer トークン方式のため軽減 |
 | 不正アクセス | JWT 検証を全 API Routes で実施（共通ヘルパー） |
 | 不正サインアップ | Supabase 側で公開サインアップを無効化 |

@@ -16,7 +16,7 @@
 
 ### フロントエンド
 
-- メイン画面は CSR（`'use client'`）で構成（MapLibre + 認証ガードのため）
+- メイン画面は CSR（`<ClientOnly>` / `definePageMeta({ ssr: false })`）で構成（MapLibre + 認証ガードのため）
 - 初回表示はローディングシェル → 認証確認 → コンテンツ表示 の順序
 - 地図コンポーネントは `dynamic import`（SSR対象外）
 - MapTiler タイルはブラウザキャッシュを活用
@@ -121,12 +121,15 @@
 |------|------|----------|
 | `DATABASE_URL` | Supabase 接続文字列（プーリング） | Vercel env / .env.local |
 | `DIRECT_URL` | Supabase 直接接続（Prisma Migrate用） | Vercel env / .env.local |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase プロジェクトURL | Vercel env / .env.local |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Anon Key（クライアント認証用） | Vercel env / .env.local |
-| `NEXT_PUBLIC_MAPTILER_KEY` | MapTiler API Key | Vercel env / .env.local |
+| `SUPABASE_URL` | Supabase プロジェクトURL（`@nuxtjs/supabase` が読む） | Vercel env / .env.local |
+| `SUPABASE_KEY` | Supabase Anon Key（`@nuxtjs/supabase` が読む） | Vercel env / .env.local |
+| `NUXT_PUBLIC_MAPTILER_KEY` | MapTiler API Key（クライアントに公開） | Vercel env / .env.local |
+| `NUXT_PUBLIC_SITE_URL` | サイトURL（Google OAuth リダイレクト先ベースURL） | Vercel env / .env.local |
 
-> `NEXT_PUBLIC_` プレフィックスの変数はクライアントに公開される。
-> DB接続文字列やService Role Keyは絶対に `NEXT_PUBLIC_` にしない。
+> `NUXT_PUBLIC_` プレフィックスの変数はクライアントにも公開される（`nuxt.config.ts` の `runtimeConfig.public` にマップ）。
+> `DATABASE_URL` / `DIRECT_URL` はサーバー側のみ。クライアントバンドルに含めない。
+> `SUPABASE_URL` / `SUPABASE_KEY` は `@nuxtjs/supabase` モジュールが直接読む変数名のため `NUXT_PUBLIC_` プレフィックスは付けない。
+> Google OAuth の `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` はアプリが直接使用しない（Supabase ダッシュボード側で設定）。アプリの環境変数には不要。
 
 ## ログ・監視
 
