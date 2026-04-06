@@ -72,8 +72,16 @@ export async function verifyOwner(event: H3Event) {
 
 ### フロントエンド側の対応
 
-APIが 403 を返した場合、既存の `useApiClient.ts` のエラーハンドリングで対応する。
-追加の UI 変更は不要（Write操作ボタンはオーナーのみ表示する対応は将来フェーズで検討）。
+#### ボタン表示制御
+
+`GET /api/me/is-owner` でサーバー側の `ALLOWED_EMAILS` を使って判定し、クライアントには `true`/`false` だけ返す。メールアドレスをクライアントに渡さない設計。
+
+- `server/api/me/is-owner.get.ts` — `verifyAuth` + `ALLOWED_EMAILS` 照合 → `{ data: { isOwner } }` を返す
+- `composables/useIsOwner.ts` — `useState("isOwner")` でグローバル状態管理、`fetchIsOwner()` でAPI呼び出し
+- `SpotPanel.vue` — `onMounted` で `fetchIsOwner()` を呼び、「登録」「カテゴリ管理」ボタンを `v-if="isOwner"` で制御
+- `SpotDetailDrawer.vue` — 共有状態 `isOwner` を参照し、「編集」「削除」ボタンを `v-if="isOwner"` で制御
+
+APIが 403 を返した場合は、既存の `useApiClient.ts` のエラーハンドリングで素通りする（表示上は操作できないため実用上問題なし）。
 
 ## テスト設計
 

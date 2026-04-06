@@ -55,8 +55,8 @@
         <p class="text-xs text-slate-400">登録: {{ formatDateTime(spot.createdAt) }}</p>
       </div>
 
-      <!-- フッターボタン -->
-      <div class="border-t border-slate-200 p-3 flex gap-2">
+      <!-- フッターボタン（オーナーのみ表示） -->
+      <div v-if="isOwner" class="border-t border-slate-200 p-3 flex gap-2">
         <button
           type="button"
           class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#4CAF6F] px-3 py-2 text-sm font-medium text-white shadow-sm transition-all duration-150 hover:bg-[#388E54] hover:shadow-md"
@@ -83,6 +83,8 @@
 import type { Spot } from "~/types/spot";
 
 defineProps<{ spot: Spot | null }>();
+
+const { isOwner } = useIsOwner();
 
 const emit = defineEmits<{
   close: [];

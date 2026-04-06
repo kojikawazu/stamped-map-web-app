@@ -46,6 +46,7 @@ cp .env.example .env.local
 | `DIRECT_URL` | Supabase 直接接続（Prisma Migrate 用） |
 | `NUXT_PUBLIC_MAPTILER_KEY` | MapTiler API Key |
 | `NUXT_PUBLIC_SITE_URL` | サイト URL（Google OAuth リダイレクト先） |
+| `ALLOWED_EMAILS` | Write操作を許可するメールアドレス（カンマ区切り） |
 
 ### 3. データベースのセットアップ
 
