@@ -1,7 +1,7 @@
 import { createSpotSchema } from "~/lib/validations/spot";
 
 export default defineEventHandler(async (event) => {
-  await verifyAuth(event);
+  await verifyOwner(event);
 
   const body = await readBody(event);
   const result = createSpotSchema.safeParse(body);

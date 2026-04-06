@@ -19,7 +19,8 @@ const prismaMock = {
   },
 };
 
-vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1" }));
+vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }));
+vi.stubGlobal("verifyOwner", vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }));
 vi.stubGlobal("prisma", prismaMock);
 
 // readBody は POST ハンドラーで使用されるため、テストごとに戻り値を設定できるよう差し替える

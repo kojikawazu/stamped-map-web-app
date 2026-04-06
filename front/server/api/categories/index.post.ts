@@ -1,7 +1,7 @@
 import { createCategorySchema } from "~/lib/validations/category";
 
 export default defineEventHandler(async (event) => {
-  await verifyAuth(event);
+  await verifyOwner(event);
 
   const body = await readBody(event);
   const result = createCategorySchema.safeParse(body);
