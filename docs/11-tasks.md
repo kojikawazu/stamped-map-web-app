@@ -128,3 +128,4 @@
 | 2026-04-04 | M4: スポット登録モーダル内インラインカテゴリ追加 |
 | 2026-04-04 | CI: E2E テスト（Playwright）を CI に追加、Prisma 遅延初期化 |
 | 2026-04-04 | Vercel デプロイ完了、ダミーデータ投入 |
+| 2026-04-06 | Security: CRUD操作をオーナーのみに制限（verifyOwner + ALLOWED_EMAILS、Issue #33） |
