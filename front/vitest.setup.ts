@@ -39,3 +39,6 @@ vi.stubGlobal("formatMarkerResponse", formatMarkerResponse);
 // verifyAuth・prisma のデフォルトスタブ（各テストファイルで vi.stubGlobal で上書き可能）
 vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1" }));
 vi.stubGlobal("prisma", {});
+
+// getAllowedEmails のデフォルトスタブ（is-owner.get.ts でオートインポート）
+vi.stubGlobal("getAllowedEmails", () => []);

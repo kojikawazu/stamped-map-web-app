@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createEvent } from "h3";
 import { IncomingMessage, ServerResponse } from "node:http";
+import { getAllowedEmails } from "../../../../server/utils/auth";
 
 const verifyAuthMock = vi.fn();
 vi.stubGlobal("verifyAuth", verifyAuthMock);
+// getAllowedEmails は実際の実装を使用（process.env.ALLOWED_EMAILS を読む）
+vi.stubGlobal("getAllowedEmails", getAllowedEmails);
 
 function makeEvent() {
   const req = Object.assign(new IncomingMessage(null as never), {
