@@ -108,4 +108,37 @@ describe("verifyOwner", () => {
 
     expect(user.email).toBe("admin@example.com");
   });
+
+  it("N-3: ALLOWED_EMAILS が大文字でも小文字のメールと一致すると通過する", async () => {
+    process.env.SUPABASE_URL = "https://dummy.supabase.co";
+    process.env.SUPABASE_KEY = "dummy-key";
+    process.env.ALLOWED_EMAILS = "Owner@Example.COM";
+
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "user-1", email: "owner@example.com" } },
+      error: null,
+    });
+
+    const { verifyOwner } = await import("../../../server/utils/auth");
+    const event = makeEvent("valid-token");
+    const user = await verifyOwner(event);
+
+    expect(user.email).toBe("owner@example.com");
+  });
+
+  it("A-3: user.email が null の場合は 403 を返す", async () => {
+    process.env.SUPABASE_URL = "https://dummy.supabase.co";
+    process.env.SUPABASE_KEY = "dummy-key";
+    process.env.ALLOWED_EMAILS = "owner@example.com";
+
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: "user-1", email: null } },
+      error: null,
+    });
+
+    const { verifyOwner } = await import("../../../server/utils/auth");
+    const event = makeEvent("valid-token");
+
+    await expect(verifyOwner(event)).rejects.toMatchObject({ statusCode: 403 });
+  });
 });
