@@ -129,3 +129,4 @@
 | 2026-04-04 | CI: E2E テスト（Playwright）を CI に追加、Prisma 遅延初期化 |
 | 2026-04-04 | Vercel デプロイ完了、ダミーデータ投入 |
 | 2026-04-06 | Security: CRUD操作をオーナーのみに制限（verifyOwner + ALLOWED_EMAILS、Issue #33） |
+| 2026-04-06 | UI: 非オーナーにWrite操作ボタンを非表示（/api/me/is-owner + useIsOwner） |
