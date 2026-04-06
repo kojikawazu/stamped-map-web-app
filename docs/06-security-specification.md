@@ -68,17 +68,19 @@ API が 401 を返した場合のクライアント側対応：
 
 | 方式 | 対応 | 備考 |
 |------|------|------|
-| メール/パスワード | MVP | 事前作成アカウントのみ |
-| Google OAuth | Phase 2 | |
+| メール/パスワード | 対応済み | 事前作成アカウントのみ |
+| Google OAuth | 対応済み | `ALLOWED_EMAILS` でWrite操作を制限 |
 
 ## 認可
 
 ### 方針
 
-- 単一ユーザーアプリのため、認可設計は最小限
-- 認証済み = 全操作可能（CRUD）
+- Google OAuth 導入により、任意の Gmail ユーザーがログイン可能
+- **閲覧（GET）**: 認証済みユーザー全員が可能
+- **Write操作（POST / PUT / DELETE）**: 環境変数 `ALLOWED_EMAILS` に登録されたオーナーのみ許可
 - 未認証リクエストは API Routes で 401 を返却
-- データモデルに user_id は持たない（単一ユーザー前提）
+- 非オーナーによる Write操作は 403 を返却
+- データモデルに user_id は持たない（単一オーナー前提）
 
 ### JWT 検証の共通化
 
@@ -118,20 +120,43 @@ export async function verifyAuth(event: H3Event) {
 }
 ```
 
+### オーナー制限ヘルパー
+
+Write系操作はオーナー確認を追加した `verifyOwner()` を使用する。
+
+```typescript
+// server/utils/auth.ts に追加
+export async function verifyOwner(event: H3Event) {
+  const user = await verifyAuth(event);
+  const allowedEmails = (process.env.ALLOWED_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+  if (!allowedEmails.includes(user.email ?? "")) {
+    throw createError({ statusCode: 403, message: "操作が許可されていません" });
+  }
+  return user;
+}
+```
+
 ### Server Route での使用パターン
 
 ```typescript
-// server/api/spots/index.get.ts
-import { verifyAuth } from '~/server/utils/auth';
-
+// GET系（閲覧）: verifyAuth のみ
 export default defineEventHandler(async (event) => {
   await verifyAuth(event);
-  // ... Prisma でDB操作
+  // ...
+});
+
+// POST / PUT / DELETE（Write系）: verifyOwner を使用
+export default defineEventHandler(async (event) => {
+  await verifyOwner(event);
+  // ...
 });
 ```
 
 > **重要：JWT 検証を1つの Server Route でも忘れるとセキュリティホールになる。**
-> 全 Server Route で `verifyAuth()` を呼び出すこと。
+> GET系は `verifyAuth()`、Write系は `verifyOwner()` を必ず呼び出すこと。
 > `createError()` は H3 のグローバル関数として自動 import される（Nuxt Server Routes 内）。
 
 ## データアクセス制御
@@ -163,3 +188,4 @@ export default defineEventHandler(async (event) => {
 | CSRF | API Routes は Cookie 認証ではなく Bearer トークン方式のため軽減 |
 | 不正アクセス | JWT 検証を全 API Routes で実施（共通ヘルパー） |
 | 不正サインアップ | Supabase 側で公開サインアップを無効化 |
+| 非オーナーによるWrite操作 | `verifyOwner()` で 403 を返却（`ALLOWED_EMAILS` による制限） |

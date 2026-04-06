@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  await verifyAuth(event);
+  await verifyOwner(event);
 
   const id = getRouterParam(event, "id");
   if (!id || !isValidUuid(id)) {

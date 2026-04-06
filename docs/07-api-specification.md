@@ -13,13 +13,15 @@
 | GET | `/api/spots` | スポット一覧取得（ページネーション付き） | 必須 |
 | GET | `/api/spots/markers` | 地図マーカー用の軽量データ全件取得 | 必須 |
 | GET | `/api/spots/:id` | スポット詳細取得 | 必須 |
-| POST | `/api/spots` | スポット登録 | 必須 |
-| PUT | `/api/spots/:id` | スポット更新 | 必須 |
-| DELETE | `/api/spots/:id` | スポット削除 | 必須 |
+| POST | `/api/spots` | スポット登録 | 必須（オーナーのみ） |
+| PUT | `/api/spots/:id` | スポット更新 | 必須（オーナーのみ） |
+| DELETE | `/api/spots/:id` | スポット削除 | 必須（オーナーのみ） |
 | GET | `/api/categories` | カテゴリ一覧取得 | 必須 |
-| POST | `/api/categories` | カテゴリ追加 | 必須 |
-| PUT | `/api/categories/:id` | カテゴリ更新 | 必須 |
-| DELETE | `/api/categories/:id` | カテゴリ削除 | 必須 |
+| POST | `/api/categories` | カテゴリ追加 | 必須（オーナーのみ） |
+| PUT | `/api/categories/:id` | カテゴリ更新 | 必須（オーナーのみ） |
+| DELETE | `/api/categories/:id` | カテゴリ削除 | 必須（オーナーのみ） |
+
+> **オーナーのみ**: 環境変数 `ALLOWED_EMAILS` に登録されたユーザーのみ許可。非オーナーは 403 を返す。
 
 ## Spots API
 
@@ -339,6 +341,7 @@ JWT が無効・期限切れ・未送信の場合:
 | 201 | 成功（新規作成） |
 | 400 | バリデーションエラー / リクエスト不正 |
 | 401 | 認証エラー |
+| 403 | 認可エラー（オーナー以外による Write操作） |
 | 404 | リソースが見つからない |
 | 500 | サーバー内部エラー |
 
@@ -347,6 +350,7 @@ JWT が無効・期限切れ・未送信の場合:
 | コード | 説明 |
 |--------|------|
 | `UNAUTHORIZED` | 認証が必要 / トークン無効 |
+| `FORBIDDEN` | 操作が許可されていない（非オーナーによる Write操作） |
 | `VALIDATION_ERROR` | バリデーションエラー |
 | `NOT_FOUND` | リソースが見つからない |
 | `DUPLICATE_CATEGORY` | カテゴリ名が重複 |
