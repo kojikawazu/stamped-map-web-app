@@ -9,7 +9,7 @@
             class="rounded-full bg-[#C8EDD4] px-2 py-0.5 text-xs font-semibold text-[#1E6040]"
           >{{ pagination?.total ?? spots.length }}</span>
         </div>
-        <div class="flex items-center gap-1.5">
+        <div v-if="isOwner" class="flex items-center gap-1.5">
           <button
             class="rounded-lg border border-slate-200 p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
             title="カテゴリ管理"
@@ -92,6 +92,8 @@
 <script setup lang="ts">
 import type { Spot } from "~/types/spot";
 
+const { isOwner, fetchIsOwner } = useIsOwner();
+
 const filter = useSpotFilter();
 const { setSearch, toggleCategory, setSort, setPage } = filter;
 const searchQuery = computed(() => filter.searchQuery.value);
@@ -154,7 +156,7 @@ async function onCategoryUpdated() {
 }
 
 onMounted(async () => {
-  await Promise.all([spotsData.fetchSpots(), categoriesData.fetchCategories()]);
+  await Promise.all([spotsData.fetchSpots(), categoriesData.fetchCategories(), fetchIsOwner()]);
 });
 
 // 外部から編集・削除ダイアログを開くための expose
