@@ -1,10 +1,7 @@
 export default defineEventHandler(async (event) => {
   const user = await verifyAuth(event);
 
-  const allowedEmails = (process.env.ALLOWED_EMAILS ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
+  const allowedEmails = getAllowedEmails();
 
   const isOwner =
     allowedEmails.length > 0 &&

@@ -66,4 +66,14 @@ describe("GET /api/me/is-owner", () => {
 
     expect(result.data.isOwner).toBe(true);
   });
+
+  it("A-3: verifyAuth がエラーを throw したとき、エンドポイントはそのエラーを伝播する", async () => {
+    process.env.ALLOWED_EMAILS = "owner@example.com";
+    verifyAuthMock.mockRejectedValue(
+      Object.assign(new Error("認証が無効です"), { statusCode: 401 })
+    );
+
+    const handler = (await import("../../../../server/api/me/is-owner.get")).default;
+    await expect(handler(makeEvent())).rejects.toThrow("認証が無効です");
+  });
 });

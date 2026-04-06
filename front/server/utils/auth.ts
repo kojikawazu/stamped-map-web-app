@@ -42,13 +42,17 @@ export async function verifyAuth(event: H3Event) {
   return user;
 }
 
-export async function verifyOwner(event: H3Event) {
-  const user = await verifyAuth(event);
-
-  const allowedEmails = (process.env.ALLOWED_EMAILS ?? "")
+export function getAllowedEmails(): string[] {
+  return (process.env.ALLOWED_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
+}
+
+export async function verifyOwner(event: H3Event) {
+  const user = await verifyAuth(event);
+
+  const allowedEmails = getAllowedEmails();
 
   if (!allowedEmails.includes((user.email ?? "").toLowerCase())) {
     throw createError({ statusCode: 403, message: "操作が許可されていません" });
