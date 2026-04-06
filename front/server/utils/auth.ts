@@ -47,10 +47,10 @@ export async function verifyOwner(event: H3Event) {
 
   const allowedEmails = (process.env.ALLOWED_EMAILS ?? "")
     .split(",")
-    .map((e) => e.trim())
+    .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
-  if (!allowedEmails.includes(user.email ?? "")) {
+  if (!allowedEmails.includes((user.email ?? "").toLowerCase())) {
     throw createError({ statusCode: 403, message: "操作が許可されていません" });
   }
 
