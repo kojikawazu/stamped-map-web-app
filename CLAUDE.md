@@ -2,8 +2,6 @@
 
 ## Project Instructions
 
-<!-- Add project-specific instructions for Claude Code here -->
-
 ## Instruction Shortcuts
 
 以下の短い指示は、対応するフルアクションとして解釈・実行してください。
