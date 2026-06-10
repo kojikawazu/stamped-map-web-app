@@ -1,5 +1,32 @@
 # Nuxt.js 3 移行設計書
 
+## 目次
+
+- [移行理由](#移行理由)
+- [移行対象](#移行対象)
+- [技術スタック変更](#技術スタック変更)
+- [ディレクトリ構成（移行後）](#ディレクトリ構成移行後)
+- [`nuxt.config.ts` 設計](#nuxtconfigts-設計)
+- [`@nuxtjs/supabase` モジュールの採用方針](#nuxtjssupabase-モジュールの採用方針)
+- [コンポーネント設計の対応関係](#コンポーネント設計の対応関係)
+  - [認証](#認証)
+  - [サーバー側](#サーバー側)
+  - [フロントエンド](#フロントエンド)
+- [Nuxt Server Routes の実装パターン](#nuxt-server-routes-の実装パターン)
+  - [イベントハンドラー（`defineEventHandler`）](#イベントハンドラーdefineeventhandler)
+  - [認証ヘルパー（`server/utils/auth.ts`）](#認証ヘルパーserverutilsauthts)
+  - [Prisma クライアント（`server/utils/prisma.ts`）](#prisma-クライアントserverutilsprismats)
+  - [エラーヘルパー（`server/utils/api-helpers.ts`）](#エラーヘルパーserverutilsapi-helpersts)
+- [`app.vue` の実装パターン](#appvue-の実装パターン)
+- [`useApiClient.ts` の実装パターン（リトライ戦略）](#useapiclientts-の実装パターンリトライ戦略)
+- [`useAuth.ts` の実装パターン](#useauthts-の実装パターン)
+- [`middleware/auth.ts` の実装パターン](#middlewareauthts-の実装パターン)
+- [テスト移行方針](#テスト移行方針)
+  - [パッケージ変更](#パッケージ変更)
+  - [`vitest.config.ts` の変更](#vitestconfigts-の変更)
+- [環境変数の変更](#環境変数の変更)
+- [実装ステップ](#実装ステップ)
+
 ## 移行理由
 
 - 地図表示がメインの機能であり、フロントエンド比重が高い

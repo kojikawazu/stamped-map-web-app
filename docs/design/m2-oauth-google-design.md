@@ -1,5 +1,23 @@
 # M2 OAuth認証（Google）設計書
 
+## 目次
+
+- [対象フェーズ](#対象フェーズ)
+- [背景・目的](#背景目的)
+- [認証フロー](#認証フロー)
+- [変更ファイル](#変更ファイル)
+- [Composable 設計](#composable-設計)
+  - [`composables/useAuth.ts` 追加メソッド](#composablesuseauthts-追加メソッド)
+- [UI設計](#ui設計)
+  - [ログイン画面レイアウト](#ログイン画面レイアウト)
+  - [Google ボタン仕様](#google-ボタン仕様)
+- [環境変数](#環境変数)
+- [Google Cloud Console 設定（事前作業）](#google-cloud-console-設定事前作業)
+- [Supabase ダッシュボード設定（事前作業）](#supabase-ダッシュボード設定事前作業)
+- [nuxt.config.ts 追加設定](#nuxtconfigts-追加設定)
+- [.env / .env.example 追加内容](#env--envexample-追加内容)
+- [実装順序](#実装順序)
+
 ## 対象フェーズ
 
 | フェーズ | 内容 |

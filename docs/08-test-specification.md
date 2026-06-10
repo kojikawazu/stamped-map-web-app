@@ -1,5 +1,32 @@
 # Test Specification (テスト仕様書)
 
+## 目次
+
+- [テスト戦略](#テスト戦略)
+  - [テストピラミッド](#テストピラミッド)
+  - [テスト方針](#テスト方針)
+- [テストツール](#テストツール)
+- [テストケース](#テストケース)
+  - [Server API: Spots](#server-api-spots)
+    - [GET /api/spots（一覧取得）](#get-apispots一覧取得)
+    - [GET /api/spots/markers（マーカー用データ取得）](#get-apispotsmarkersマーカー用データ取得)
+    - [POST /api/spots（登録）](#post-apispots登録)
+    - [GET /api/spots/:id（詳細取得）](#get-apispotsid詳細取得)
+    - [PUT /api/spots/:id（更新）](#put-apispotsid更新)
+    - [DELETE /api/spots/:id（削除）](#delete-apispotsid削除)
+  - [Server API: Categories](#server-api-categories)
+    - [GET /api/categories（一覧取得）](#get-apicategories一覧取得)
+    - [POST /api/categories（追加）](#post-apicategories追加)
+    - [PUT /api/categories/:id（更新）](#put-apicategoriesid更新)
+    - [DELETE /api/categories/:id（削除）](#delete-apicategoriesid削除)
+  - [バリデーション（Zodスキーマ）](#バリデーションzodスキーマ)
+- [カバレッジ目標](#カバレッジ目標)
+- [テスト環境](#テスト環境)
+  - [認証のテスト方針](#認証のテスト方針)
+  - [テスト構成・実行環境](#テスト構成実行環境)
+  - [テスト用DB](#テスト用db)
+  - [CI/CD](#cicd)
+
 ## テスト戦略
 
 ### テストピラミッド
@@ -8,7 +35,7 @@
          ┌─────┐
          │ E2E │        少数（重要フローのみ）
         ┌┴─────┴┐
-        │結合テスト│      API Routes + Prisma
+        │結合テスト│      Server API + Prisma
        ┌┴───────┴┐
        │ 単体テスト │    ユーティリティ、バリデーション
       └───────────┘
@@ -20,24 +47,24 @@
 
 | レイヤー | テスト対象 | 優先度 |
 |----------|-----------|--------|
-| API Routes | CRUD操作の正常系・異常系 | 高 |
+| Server API | CRUD操作の正常系・異常系 | 高 |
 | バリデーション | Zodスキーマのバリデーションロジック | 高 |
 | ユーティリティ | 日付処理等の純粋関数 | 中 |
-| フロントエンド | コンポーネント単体テスト | 低（MVP後） |
-| E2E | 主要ユーザーフロー | 低（MVP後） |
+| composables | API クライアント・状態管理ロジック | 中 |
+| E2E | 主要ユーザーフロー（auth / smoke / spots） | 実装済み |
 
 ## テストツール
 
 | ツール | 用途 |
 |--------|------|
 | Vitest | ユニットテスト・結合テスト |
-| Testing Library | コンポーネントテスト（Phase 2） |
-| Playwright | E2Eテスト（Phase 2） |
+| @vue/test-utils + @nuxt/test-utils | composables・Nuxt 環境テスト |
+| Playwright | E2Eテスト（実装済み） |
 | Prisma (テストDB) | テスト用DBでの結合テスト |
 
 ## テストケース
 
-### API Routes: Spots
+### Server API: Spots
 
 #### GET /api/spots（一覧取得）
 
@@ -101,7 +128,7 @@
 | 1 | 存在するIDで削除 | 200, 削除成功メッセージ |
 | 2 | 存在しないIDで削除 | 404, NOT_FOUND |
 
-### API Routes: Categories
+### Server API: Categories
 
 #### GET /api/categories（一覧取得）
 
@@ -154,26 +181,35 @@
 
 | 対象 | 目標 | 備考 |
 |------|------|------|
-| API Routes | 80%+ | 正常系・主要異常系をカバー |
+| Server API | 80%+ | 正常系・主要異常系をカバー |
 | バリデーション | 90%+ | 全ルールをテスト |
 | ユーティリティ | 80%+ | 純粋関数は高カバレッジ |
-| フロントエンド | - | MVP では測定しない |
+| composables | - | 主要ロジックを優先的にカバー |
 
 ## テスト環境
 
 ### 認証のテスト方針
 
-- **`verifyAuth()` をモックして API ロジックのみテストする**
+- **`verifyAuth()` / `verifyOwner()` をモックして Server API ロジックのみテストする**
+- これらは `server/utils/auth.ts` で定義され、Nuxt の auto-import により各ハンドラーへグローバル注入される。テストでは `vi.stubGlobal` でスタブする
+- 認証失敗は `createError`（H3）で送出するため、専用の `AuthError` クラスは存在しない
 - テスト用 Supabase ユーザーの作成・管理は行わない
 - 認証フロー自体（Supabase Auth SDK）は外部サービスの責務として信頼する
 
 ```typescript
-// テスト例
-vi.mock('@/lib/auth', () => ({
-  verifyAuth: vi.fn().mockResolvedValue({ id: 'test-user-id', email: 'test@example.com' }),
-  AuthError: class AuthError extends Error {},
-}));
+// テスト例（auto-import 前提のため stubGlobal を使用）
+vi.stubGlobal(
+  "verifyAuth",
+  vi.fn().mockResolvedValue({ id: "test-user-id", email: "test@example.com" })
+);
 ```
+
+### テスト構成・実行環境
+
+| 種別 | ツール | 対象ディレクトリ | 備考 |
+|------|--------|-----------------|------|
+| ユニット/結合 | Vitest | `front/__tests__/**` | `tests/e2e/**` は exclude（`vitest.config.ts`） |
+| E2E | Playwright | `front/tests/e2e/**` | `testDir: ./tests/e2e`、Base URL `http://localhost:3000`（`playwright.config.ts`） |
 
 ### テスト用DB
 

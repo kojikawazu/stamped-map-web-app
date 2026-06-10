@@ -21,6 +21,7 @@
 | ファイル | スコープ | 内容 |
 |---------|---------|------|
 | `workflow.md` | 全体 | ブランチ運用・セルフレビュー・ドキュメント更新 |
+| `documentation.md` | 全体 | ドキュメント更新の影響マップ・opt-out 完了条件 |
 | `coding-standards.md` | 全体 | TypeScript strict / pnpm / ESLint + Prettier 規約 |
 | `error-handling.md` | 全体 | バリデーション・HTTP ステータスコード・ログ方針 |
 | `security.md` | 全体 | Supabase Auth / ALLOWED_EMAILS / Prisma インジェクション対策 |

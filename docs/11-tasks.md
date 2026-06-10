@@ -1,5 +1,18 @@
 # Task List (タスク)
 
+## 目次
+
+- [マイルストーン](#マイルストーン)
+- [M1: 環境構築（完了）](#m1-環境構築完了)
+- [M2: 認証（完了）](#m2-認証完了)
+  - [M2 追加: Google OAuth認証（完了）](#m2-追加-google-oauth認証完了)
+- [M4: CRUD実装（進行中）](#m4-crud実装進行中)
+  - [Server API（完了）](#server-api完了)
+  - [フロントエンドUI（進行中）](#フロントエンドui進行中)
+- [M0: Nuxt.js 3 移行（完了）](#m0-nuxtjs-3-移行完了)
+- [M3: 地図表示（進行中）](#m3-地図表示進行中)
+- [進捗](#進捗)
+
 ## マイルストーン
 
 | # | マイルストーン | 内容 | 状態 |
@@ -63,7 +76,7 @@
 
 ## M4: CRUD実装（進行中）
 
-### API Routes（完了）
+### Server API（完了）
 - [x] 共通ヘルパー（`server/utils/api-helpers.ts` — レスポンス整形、バリデーションエラー変換、WHERE句ビルダー）
 - [x] `GET /api/categories` — カテゴリ一覧（spotCount付き）
 - [x] `POST /api/categories` — カテゴリ追加（重複チェック付き）
@@ -123,7 +136,7 @@
 | 2026-03-24 | M1: タスクファイル更新、進捗を実態に合わせて反映 |
 | 2026-03-24 | M2: ログイン画面、認証ガード、ログアウト、useAuthフック実装 |
 | 2026-03-24 | Prisma スキーマを実DB（map_categories, map_spots）に同期 |
-| 2026-03-24 | M4: API Routes 全10エンドポイント実装（Categories CRUD + Spots CRUD + markers） |
+| 2026-03-24 | M4: Server API 全10エンドポイント実装（Categories CRUD + Spots CRUD + markers） |
 | 2026-04-04 | M2: Google OAuth 認証実装・設定完了 |
 | 2026-04-04 | M4: スポット登録モーダル内インラインカテゴリ追加 |
 | 2026-04-04 | CI: E2E テスト（Playwright）を CI に追加、Prisma 遅延初期化 |
