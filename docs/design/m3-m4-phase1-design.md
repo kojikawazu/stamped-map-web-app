@@ -1,5 +1,32 @@
 # M3/M4 フェーズ①設計書 — 地図マーカー + スポット一覧パネル
 
+## 目次
+
+- [対象フェーズ](#対象フェーズ)
+- [全体方針](#全体方針)
+- [状態設計](#状態設計)
+  - [フィルター状態（`useSpotFilter`）](#フィルター状態usespotfilter)
+  - [フィルターから生成するクエリパラメータ](#フィルターから生成するクエリパラメータ)
+- [Composables 設計](#composables-設計)
+  - [`composables/useSpotFilter.ts`](#composablesusespotfilterts)
+  - [`composables/useSpots.ts`](#composablesusespotsts)
+  - [`composables/useMarkers.ts`](#composablesusemarkersts)
+  - [`composables/useCategories.ts`](#composablesusecategoriests)
+- [型定義](#型定義)
+  - [`types/spot.ts`](#typesspotts)
+  - [`types/marker.ts`](#typesmarkerts)
+  - [`types/category.ts`](#typescategoryts)
+- [コンポーネント設計](#コンポーネント設計)
+  - [`components/spot/SpotPanel.vue`](#componentsspotspotpanelvue)
+  - [`components/spot/SpotFilter.vue`](#componentsspotspotfiltervue)
+  - [`components/spot/SpotList.vue`](#componentsspotspotlistvue)
+  - [`components/spot/SpotListItem.vue`](#componentsspotspotlistitemvue)
+  - [`components/spot/SpotPagination.vue`](#componentsspotspotpaginationvue)
+  - [`components/map/MapView.vue`（拡張）](#componentsmapmapviewvue拡張)
+- [ファイル作成リスト](#ファイル作成リスト)
+- [データフロー図](#データフロー図)
+- [実装順序](#実装順序)
+
 ## 対象フェーズ
 
 | フェーズ | 内容 |

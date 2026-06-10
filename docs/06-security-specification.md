@@ -1,5 +1,24 @@
 # Security Specification (セキュリティ仕様書)
 
+## 目次
+
+- [認証](#認証)
+  - [方式：Supabase Auth（クライアント側）](#方式supabase-authクライアント側)
+  - [Supabase 側の設定（必須）](#supabase-側の設定必須)
+  - [認証フロー](#認証フロー)
+  - [認証ガード（クライアント側）](#認証ガードクライアント側)
+  - [トークンリフレッシュ戦略](#トークンリフレッシュ戦略)
+  - [アカウント管理](#アカウント管理)
+  - [対応する認証方式](#対応する認証方式)
+- [認可](#認可)
+  - [方針](#方針)
+  - [JWT 検証の共通化](#jwt-検証の共通化)
+  - [オーナー制限ヘルパー](#オーナー制限ヘルパー)
+  - [Server Route での使用パターン](#server-route-での使用パターン)
+- [データアクセス制御](#データアクセス制御)
+- [暗号化](#暗号化)
+- [脆弱性対策](#脆弱性対策)
+
 ## 認証
 
 ### 方式：Supabase Auth（クライアント側）
@@ -25,7 +44,7 @@
 3. 成功 → JWT トークンをクライアントに返却
 4. クライアントはトークンを保持（Supabase SDK が自動管理）
 5. API リクエスト時にトークンを Authorization ヘッダーに付与
-6. API Routes でトークンを検証（共通ヘルパー）
+6. Server API（Server Routes）でトークンを検証（共通ヘルパー `verifyAuth`）
 7. 検証OK → Prisma でDB操作を実行
 ```
 
@@ -33,13 +52,13 @@
 
 ```
 メイン画面（/）ロード時：
-  1. ローディングシェルを表示
-  2. Supabase Auth SDK で getSession() を呼び出し
-  3. セッションなし → /login にリダイレクト（クライアント側）
-  4. セッションあり → メインコンテンツを表示
+  1. Nuxt ルートミドルウェア（middleware/auth.ts）が発動
+  2. useSupabaseUser() で認証状態を判定
+  3. 未認証 → navigateTo("/login") でリダイレクト（クライアント側）
+  4. 認証済み → メインコンテンツを表示
 
-※ Server Components によるサーバー側リダイレクトは行わない
-※ メイン画面は MapLibre（'use client' 必須）のため CSR で完結
+※ SSR では import.meta.server でガードをスキップし、ハイドレーション後に評価する
+※ 地図 SPA（全ページ要認証）のため、このクライアント側ガードで完結
 ```
 
 ### トークンリフレッシュ戦略
@@ -78,7 +97,7 @@ API が 401 を返した場合のクライアント側対応：
 - Google OAuth 導入により、任意の Gmail ユーザーがログイン可能
 - **閲覧（GET）**: 認証済みユーザー全員が可能
 - **Write操作（POST / PUT / DELETE）**: 環境変数 `ALLOWED_EMAILS` に登録されたオーナーのみ許可
-- 未認証リクエストは API Routes で 401 を返却
+- 未認証リクエストは Server API で 401 を返却
 - 非オーナーによる Write操作は 403 を返却
 - データモデルに user_id は持たない（単一オーナー前提）
 
@@ -164,12 +183,12 @@ export default defineEventHandler(async (event) => {
 | レイヤー | 制御 |
 |----------|------|
 | クライアント → DB | **直接アクセス禁止** |
-| クライアント → API Routes | JWT 必須 |
-| API Routes → DB | Prisma 経由（サーバー側のみ） |
+| クライアント → Server API | JWT 必須 |
+| Server API → DB | Prisma 経由（サーバー側のみ） |
 | Supabase 公開サインアップ | **無効化必須** |
 
 > Supabase の RLS（Row Level Security）は補助的に設定可能だが、
-> 主たるアクセス制御は API Routes の JWT 検証 + Prisma で行う。
+> 主たるアクセス制御は Server API の JWT 検証 + Prisma で行う。
 
 ## 暗号化
 
@@ -183,9 +202,9 @@ export default defineEventHandler(async (event) => {
 
 | 脅威 | 対策 |
 |------|------|
-| SQLインジェクション | Prisma のパラメータ化クエリ / `$queryRaw` のテンプレートリテラル |
-| XSS | Vue.js / Nuxt.js の自動エスケープ + CSP ヘッダー |
-| CSRF | API Routes は Cookie 認証ではなく Bearer トークン方式のため軽減 |
-| 不正アクセス | JWT 検証を全 API Routes で実施（共通ヘルパー） |
+| SQLインジェクション | Prisma のパラメータ化クエリ（`$queryRaw` の文字列結合は禁止） |
+| XSS | Vue.js / Nuxt.js の自動エスケープ（CSP ヘッダーは未実装・将来予定） |
+| CSRF | Server API は Cookie 認証ではなく Bearer トークン方式のため軽減 |
+| 不正アクセス | JWT 検証を全 Server API で実施（共通ヘルパー `verifyAuth` / `verifyOwner`） |
 | 不正サインアップ | Supabase 側で公開サインアップを無効化 |
 | 非オーナーによるWrite操作 | `verifyOwner()` で 403 を返却（`ALLOWED_EMAILS` による制限） |

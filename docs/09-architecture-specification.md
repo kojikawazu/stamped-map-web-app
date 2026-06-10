@@ -1,43 +1,50 @@
 # Architecture Specification (アーキテクチャ仕様書)
 
+## 目次
+
+- [システム構成図](#システム構成図)
+- [技術スタック](#技術スタック)
+- [認証アーキテクチャ](#認証アーキテクチャ)
+  - [方式：クライアント側認証（Bearer トークン）](#方式クライアント側認証bearer-トークン)
+  - [SSR ガードの設計](#ssr-ガードの設計)
+- [ディレクトリ構成（`front/`）](#ディレクトリ構成front)
+- [データアクセス層](#データアクセス層)
+  - [Spot の永続化方式](#spot-の永続化方式)
+  - [JWT 検証の共通化](#jwt-検証の共通化)
+  - [DB制約・インデックス](#db制約インデックス)
+- [地図タイル](#地図タイル)
+  - [MapTiler Cloud](#maptiler-cloud)
+- [デプロイ構成](#デプロイ構成)
+- [将来の拡張パス](#将来の拡張パス)
+  - [バックエンド分離（必要になった場合）](#バックエンド分離必要になった場合)
+  - [コンポーネント設計](#コンポーネント設計)
+
 ## システム構成図
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Client (Browser)                      │
-│  Nuxt.js 3 + TypeScript + MapLibre GL JS                 │
-│  ┌──────────┐  ┌──────────────┐  ┌──────────────────┐   │
-│  │ Pages    │  │ Map Component│  │ MapTiler Tiles   │   │
-│  │ (CSR)    │  │ (<ClientOnly>)│  │                  │   │
-│  └──────────┘  └──────────────┘  └──────────────────┘   │
-│  ┌──────────────────────────────┐                        │
-│  │ @nuxtjs/supabase (認証)      │                        │
-│  │ useSupabaseClient / Session  │                        │
-│  └──────────┬───────────────────┘                        │
-└─────────────┼───────────────────┬────────────────────────┘
-              │ JWT Bearer        │ タイルリクエスト
-              ▼                   ▼
-┌──────────────────────────┐  ┌───────────────────────┐
-│   Nuxt Server Routes     │  │  MapTiler Cloud       │
-│   (Vercel Serverless)    │  │  ベクタータイル配信    │
-│  ┌────────────────────┐  │  └───────────────────────┘
-│  │ JWT検証             │  │
-│  │ ↓                  │  │
-│  │ Zod バリデーション   │  │
-│  │ ↓                  │  │
-│  │ Prisma ORM         │  │
-│  └────────┬───────────┘  │
-└───────────┼──────────────┘
-            │ PostgreSQL接続 (SSL)
-            ▼
-┌─────────────────────────────────────────────────────────┐
-│                    Supabase                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ PostgreSQL   │  │ PostGIS ext  │  │ Auth service │  │
-│  │ spots        │  │ location     │  │ JWT発行      │  │
-│  │ categories   │  │ GIST index   │  │              │  │
-│  └──────────────┘  └──────────────┘  └──────────────┘  │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Client["Client (Browser) — Nuxt.js 3 + TypeScript"]
+        Pages["Pages (CSR)"]
+        Map["Map Component<br/>&lt;ClientOnly&gt; + MapLibre GL JS"]
+        Auth["@nuxtjs/supabase<br/>useSupabaseClient / Session"]
+    end
+
+    subgraph Server["Nuxt Server Routes (Vercel Serverless)"]
+        Handler["JWT検証 → Zod バリデーション → Prisma ORM"]
+    end
+
+    Tiles["MapTiler Cloud<br/>ベクタータイル配信"]
+
+    subgraph Supabase["Supabase"]
+        PG["PostgreSQL<br/>map_categories / map_spots"]
+        PostGIS["PostGIS ext<br/>location / GIST ※未実装"]
+        AuthSvc["Auth service<br/>JWT発行"]
+    end
+
+    Client -- "JWT Bearer" --> Server
+    Map -- "タイルリクエスト" --> Tiles
+    Auth -. "認証" .-> AuthSvc
+    Server -- "PostgreSQL接続 (SSL)" --> PG
 ```
 
 ## 技術スタック
@@ -45,6 +52,8 @@
 | レイヤー | 技術 | 選定理由 |
 |----------|------|----------|
 | フロントエンド | Nuxt.js 3 + TypeScript | Vue.js エコシステム、地図SPA開発に適した CSR/SSR ハイブリッド構成 |
+| スタイリング | Tailwind CSS v4（`@tailwindcss/vite`） | ユーティリティファースト、Vite ネイティブ統合 |
+| トースト通知 | vue-sonner | API 失敗・操作完了の通知 |
 | 地図ライブラリ | MapLibre GL JS | MapTiler推奨、TS製、WebGL描画、ベクタータイルネイティブ対応 |
 | 地図タイル | MapTiler Cloud | 無料枠100,000タイル/月、日本語地名対応、MapLibre相性◎ |
 | バックエンドAPI | Nuxt Server Routes (`defineEventHandler`) | Vercel一体デプロイ、追加インフラ不要 |
@@ -134,7 +143,8 @@ front/
 │   ├── useSpotEdit.ts         # スポット更新
 │   ├── useSpotDelete.ts       # スポット削除
 │   ├── useCategoryCreate.ts   # カテゴリ追加（インライン）
-│   └── useCategoryManage.ts   # カテゴリ編集・削除
+│   ├── useCategoryManage.ts   # カテゴリ編集・削除
+│   └── useIsOwner.ts          # オーナー判定（/api/me/is-owner 取得・useState 共有）
 ├── types/
 │   ├── spot.ts                # Spot / Pagination / SpotsResponse 型
 │   ├── marker.ts              # Marker / MarkersResponse 型
@@ -148,17 +158,21 @@ front/
 │   │   └── api-helpers.ts     # レスポンス整形・WHERE句ビルダー・バリデーション
 │   └── api/
 │       ├── categories/        # GET, POST, PUT/:id, DELETE/:id
-│       └── spots/             # GET, POST, GET/markers, GET/:id, PUT/:id, DELETE/:id
+│       ├── spots/             # GET, POST, GET/markers, GET/:id, PUT/:id, DELETE/:id
+│       └── me/                # GET /is-owner（オーナー判定）
 ├── lib/
 │   ├── map-utils.ts           # 地図ユーティリティ（escapeHtml / buildCategoryMap / markersToGeoJSON）
 │   └── validations/
 │       ├── spot.ts            # Zod スキーマ（スポット）
 │       └── category.ts        # Zod スキーマ（カテゴリ）
-├── __tests__/
+├── __tests__/                 # Vitest（ユニット・結合）
 │   ├── composables/           # composable ユニットテスト
-│   ├── server/utils/          # api-helpers ユニットテスト
-│   ├── server/api/            # Server Routes ユニットテスト
+│   ├── server/utils/          # auth・api-helpers ユニットテスト
+│   ├── server/api/            # Server Routes ユニットテスト（categories, spots, me/is-owner）
 │   └── lib/                   # Zod バリデーション・map-utils テスト
+├── tests/
+│   └── e2e/                   # Playwright E2E（auth, smoke, spots + helpers）
+├── playwright.config.ts       # Playwright 設定（testDir: ./tests/e2e, Base URL :3000）
 └── prisma/
     ├── schema.prisma
     └── seed.ts

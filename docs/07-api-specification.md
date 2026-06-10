@@ -1,5 +1,32 @@
 # API Specification (API仕様書)
 
+## 目次
+
+- [概要](#概要)
+- [エンドポイント一覧](#エンドポイント一覧)
+- [Spots API](#spots-api)
+  - [GET /api/spots — スポット一覧取得](#get-apispots--スポット一覧取得)
+  - [GET /api/spots/markers — 地図マーカー用データ取得](#get-apispotsmarkers--地図マーカー用データ取得)
+  - [GET /api/spots/:id — スポット詳細取得](#get-apispotsid--スポット詳細取得)
+  - [POST /api/spots — スポット登録](#post-apispots--スポット登録)
+  - [PUT /api/spots/:id — スポット更新](#put-apispotsid--スポット更新)
+  - [DELETE /api/spots/:id — スポット削除](#delete-apispotsid--スポット削除)
+- [Categories API](#categories-api)
+  - [GET /api/categories — カテゴリ一覧取得](#get-apicategories--カテゴリ一覧取得)
+  - [POST /api/categories — カテゴリ追加](#post-apicategories--カテゴリ追加)
+  - [PUT /api/categories/:id — カテゴリ更新](#put-apicategoriesid--カテゴリ更新)
+  - [DELETE /api/categories/:id — カテゴリ削除](#delete-apicategoriesid--カテゴリ削除)
+- [Me API](#me-api)
+  - [GET /api/me/is-owner — オーナー判定](#get-apimeis-owner--オーナー判定)
+- [認証](#認証)
+  - [リクエストヘッダー](#リクエストヘッダー)
+  - [認証エラー](#認証エラー)
+- [エラーハンドリング](#エラーハンドリング)
+  - [エラーレスポンス形式](#エラーレスポンス形式)
+  - [HTTPステータスコード](#httpステータスコード)
+  - [エラーコード一覧](#エラーコード一覧)
+  - [バリデーションエラーの例](#バリデーションエラーの例)
+
 ## 概要
 
 - ベースパス: `/api`
@@ -20,6 +47,7 @@
 | POST | `/api/categories` | カテゴリ追加 | 必須（オーナーのみ） |
 | PUT | `/api/categories/:id` | カテゴリ更新 | 必須（オーナーのみ） |
 | DELETE | `/api/categories/:id` | カテゴリ削除 | 必須（オーナーのみ） |
+| GET | `/api/me/is-owner` | ログインユーザーがオーナーか判定 | 必須 |
 
 > **オーナーのみ**: 環境変数 `ALLOWED_EMAILS` に登録されたユーザーのみ許可。非オーナーは 403 を返す。
 
@@ -295,6 +323,22 @@
 }
 ```
 
+## Me API
+
+### GET /api/me/is-owner — オーナー判定
+
+ログイン中のユーザーが `ALLOWED_EMAILS` に含まれる（＝Write操作を許可されたオーナー）かどうかを返す。フロントが非オーナーに Write 操作ボタンを出さないために使用する。
+
+**レスポンス: 200 OK**
+
+```json
+{
+  "data": {
+    "isOwner": true
+  }
+}
+```
+
 ## 認証
 
 ### リクエストヘッダー
@@ -305,15 +349,23 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ### 認証エラー
 
-JWT が無効・期限切れ・未送信の場合:
+JWT が無効・期限切れ・未送信の場合（`verifyAuth` / `verifyOwner` が送出）。認証・認可エラーは `createError` に `message` のみを渡すため、本体に `code` フィールドは含まれない:
 
 ```json
 // 401 Unauthorized
 {
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "認証が必要です"
-  }
+  "statusCode": 401,
+  "statusMessage": "...",
+  "message": "認証が必要です"
+}
+```
+
+```json
+// 403 Forbidden（非オーナーの Write 操作）
+{
+  "statusCode": 403,
+  "statusMessage": "...",
+  "message": "操作が許可されていません"
 }
 ```
 
@@ -321,17 +373,22 @@ JWT が無効・期限切れ・未送信の場合:
 
 ### エラーレスポンス形式
 
-全エンドポイントで統一:
+本プロジェクトは Nuxt（Nitro）の `createError` を使用する。各ハンドラーは業務エラーを `createError({ statusCode, data: { code, message, details } })` で送出し、Nitro が以下の形でシリアライズする（トップレベルキーは `error` ではなく `data`）:
 
 ```json
 {
-  "error": {
+  "statusCode": 400,
+  "statusMessage": "...",
+  "data": {
     "code": "ERROR_CODE",
     "message": "人間が読めるエラーメッセージ",
     "details": {}
   }
 }
 ```
+
+> フロントは `useApiClient` 経由で受け取ったエラーを `err.data.message` / `err.data.code` で参照する。
+> 認証・認可エラー（401/403）のみ `data` を持たず、`message` だけを返す（上記「認証エラー」参照）。
 
 ### HTTPステータスコード
 
@@ -363,7 +420,9 @@ JWT が無効・期限切れ・未送信の場合:
 ```json
 // 400 Bad Request
 {
-  "error": {
+  "statusCode": 400,
+  "statusMessage": "...",
+  "data": {
     "code": "VALIDATION_ERROR",
     "message": "入力内容に誤りがあります",
     "details": {

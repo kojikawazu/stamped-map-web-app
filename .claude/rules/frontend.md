@@ -7,8 +7,10 @@ globs: "front/components/**,front/pages/**,front/composables/**,front/layouts/**
 
 ## コンポーネント設計
 
-- 共通 UI は `components/ui/`（Atoms）+ `components/common/`（Molecules）に配置
-- 機能別コンポーネントは feature ディレクトリに配置（例: `components/spot/`, `components/map/`）
+- アトミックデザインの3層 `components/atoms/` ・ `components/molecules/` ・ `components/organisms/` に配置する（Issue #7 で採用）。
+- 各層の配下に feature サブディレクトリを切る（例: `molecules/spot/`・`molecules/common/`・`organisms/spot/`・`organisms/map/`・`organisms/category/`）。
+- `nuxt.config.ts` で `pathPrefix: false` を設定しているため、コンポーネント名はパスを含まずフラットに使用する（例: `<SpotPanel />`）。
+- atoms は将来拡張用（現状は `.gitkeep` のみ）。
 
 ## ロジック分離
 

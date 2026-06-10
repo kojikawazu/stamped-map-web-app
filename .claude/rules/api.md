@@ -8,20 +8,23 @@ globs: "front/server/**"
 ## 設計方針
 
 - Nuxt.js 3 の Nitro サーバーエンジンによる Server API を使用する。
-- ビジネスロジックは `server/services/` に集約し、API ハンドラーは薄く保つ。
 - すべての DB 読み書きは Server API + Prisma 経由で行う（クライアントから直接 DB にアクセスしない）。
+- 共通処理（認証・レスポンス整形・WHERE 句ビルダー等）は `server/utils/` に切り出し、ハンドラーから再利用する。
+- ハンドラーが肥大化したら `server/services/` を新設してビジネスロジックを分離する（現状は未作成。ロジックはハンドラー内に記述）。
 
 ## ディレクトリ構成
 
 ```
 server/
 ├── api/               # API エンドポイント
-│   ├── categories/
-│   ├── spots/
-│   └── me/
-├── services/          # ビジネスロジック（将来的に分離推奨）
-├── middleware/         # サーバーミドルウェア
-└── utils/             # サーバーユーティリティ（auth, api-helpers 等）
+│   ├── categories/    # GET, POST, PUT/:id, DELETE/:id
+│   ├── spots/         # GET, POST, markers, GET/:id, PUT/:id, DELETE/:id
+│   └── me/            # GET /is-owner
+└── utils/             # サーバーユーティリティ（auth, prisma, api-helpers）
+
+# 将来拡張（未作成）:
+#   services/          # ビジネスロジック分離先
+#   middleware/        # サーバーミドルウェア（レートリミット等）
 ```
 
 ## 共通方針
