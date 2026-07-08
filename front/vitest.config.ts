@@ -3,7 +3,9 @@ import { defineVitestConfig } from "@nuxt/test-utils/config";
 export default defineVitestConfig({
   test: {
     environment: "nuxt",
-    exclude: ["tests/e2e/**", "node_modules/**"],
+    // IT（*.it.test.ts）は実 DB コンテナが必要なため、ユニット実行からは除外する
+    // （専用の vitest.config.it.ts / pnpm test:it で実行する）。
+    exclude: ["tests/e2e/**", "node_modules/**", "**/*.it.test.ts"],
     setupFiles: ["./vitest.setup.ts"],
     env: {
       SUPABASE_URL: "https://dummy.supabase.co",

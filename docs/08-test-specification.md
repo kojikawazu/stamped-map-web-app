@@ -57,11 +57,13 @@
 
 | ツール | 用途 |
 |--------|------|
-| Vitest | ユニットテスト・結合テスト |
+| Vitest | ユニットテスト・結合テスト（prisma モック） |
+| Testcontainers（`@testcontainers/postgresql` + PostGIS） | 統合テスト（IT）で実 DB を起動（`pnpm test:it`） |
 | @vitest/coverage-v8 | カバレッジ計測（`pnpm test:coverage`） |
 | @vue/test-utils + @nuxt/test-utils | composables・Nuxt 環境テスト |
 | Playwright | E2Eテスト（実装済み） |
-| Prisma (テストDB) | テスト用DBでの結合テスト |
+
+> **テストレイヤー**: ユニット（`pnpm test`、prisma モック・高速）/ **統合(IT)**（`pnpm test:it`、実 PostGIS を Testcontainers で起動し実 Prisma を検証。Supabase 認証のみモック）/ E2E（`pnpm test:e2e`）。IT は `front/__tests__/it/**/*.it.test.ts`、実行に Docker が必要。
 
 > テストケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。書き込み系エンドポイントは認可の異常系（オーナー限定=403）と DB 例外伝播を必須とする。分類規約の詳細は [`.claude/rules/testing.md`](../.claude/rules/testing.md)。
 
@@ -230,6 +232,8 @@ GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動�
 2. `pnpm type-check`（`nuxt typecheck` = vue-tsc、`tsc --noEmit` 相当）
 3. `pnpm lint`（ESLint。JSDoc/TSDoc ルールを含む）
 4. `pnpm format:check`（Prettier 整形チェック）
-5. `pnpm test`（Vitest ユニット・結合）
+5. `pnpm test`（Vitest ユニット・結合、prisma モック）
+
+**it ジョブ**（統合テスト）: `prisma generate` → `pnpm test:it`。Testcontainers が PostGIS コンテナを起動し実 Prisma を検証する（ubuntu-latest の Docker を利用、services 定義不要）。
 
 **e2e ジョブ**: `pnpm build` → 本番サーバー起動 → `pnpm test:e2e`（Playwright）。失敗時は `playwright-report` を artifact 保存。
