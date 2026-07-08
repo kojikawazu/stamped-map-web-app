@@ -23,6 +23,7 @@
 | `workflow.md` | 全体 | ブランチ運用・セルフレビュー・ドキュメント更新 |
 | `documentation.md` | 全体 | ドキュメント更新の影響マップ・opt-out 完了条件 |
 | `coding-standards.md` | 全体 | TypeScript strict / pnpm / ESLint + Prettier 規約 |
+| `jsdoc.md` | `front/components/**`, `front/composables/**`, `front/server/**`, `front/lib/**`, `front/middleware/**` | TypeScript 公開シンボルへの JSDoc（TSDoc）必須・型ブレース禁止 |
 | `error-handling.md` | 全体 | バリデーション・HTTP ステータスコード・ログ方針 |
 | `security.md` | 全体 | Supabase Auth / ALLOWED_EMAILS / Prisma インジェクション対策 |
 | `testing.md` | `front/__tests__/**`, `front/tests/**` | Vitest + Playwright テスト方針 |
