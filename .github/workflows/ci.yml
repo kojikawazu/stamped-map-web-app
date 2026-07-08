@@ -65,12 +65,50 @@ jobs:
       - name: Format check (Prettier)
         run: pnpm format:check
 
-      - name: Unit & integration tests
+      - name: Unit tests (mocked)
         run: pnpm test
         env:
           SUPABASE_URL: https://dummy.supabase.co
           SUPABASE_KEY: dummy-anon-key
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
+
+  it:
+    name: Integration tests (real DB)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: front
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: front/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # IT は実 @prisma/client を使うため生成が必須（ユニットは prisma をモックするため不要）
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+
+      # Testcontainers が PostGIS コンテナを起動し db push → 実 DB でハンドラを検証する。
+      # ubuntu-latest には Docker が同梱されているため services 定義は不要。
+      - name: Integration tests (Testcontainers + PostGIS)
+        run: pnpm test:it
 
   e2e:
     runs-on: ubuntu-latest

@@ -75,6 +75,12 @@
       └──────────────────┘
 ```
 
+### テストレイヤー
+
+- **ユニット/結合**（`pnpm test`）: `prisma` をモックしてハンドラ・composable のロジックを高速に検証。
+- **統合（IT）**（`pnpm test:it`）: Testcontainers で **実 PostGIS** を起動し、`server/**` ハンドラ + **実 Prisma** を検証（実クエリの集計・ソート・ページング・検索、DB 制約・削除ガードの実データ挙動）。認証（Supabase）のみモック維持。ファイルは `front/__tests__/it/**/*.it.test.ts`、実行に Docker が必要。
+- **E2E**（`pnpm test:e2e`）: Playwright で主要ユーザーフロー。
+
 ### ケース分類とカバレッジ
 
 - 各ケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。
