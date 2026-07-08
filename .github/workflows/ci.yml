@@ -45,6 +45,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 型チェックは @prisma/client の型に依存する（IT ファイルが PrismaClient を import）。
+      # install の build script 依存は非決定的なため、明示的に生成する。
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+
       - name: Prepare Nuxt
         run: pnpm exec nuxt prepare
         env:
