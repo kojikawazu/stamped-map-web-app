@@ -24,8 +24,10 @@ export async function injectSupabaseSession(
     },
   };
   const supabaseUrl = process.env.SUPABASE_URL ?? "https://dummy.supabase.co";
-  const supabaseHost = new URL(supabaseUrl).hostname.replace(/\./g, "-");
-  const cookieName = `sb-${supabaseHost}-auth-token`;
+  // supabase-js の storageKey は「プロジェクト ref（ホスト名の先頭ラベル）」から
+  // `sb-<ref>-auth-token` を生成する。ホスト全体をダッシュ化するのは誤り。
+  const projectRef = new URL(supabaseUrl).hostname.split(".")[0];
+  const cookieName = `sb-${projectRef}-auth-token`;
   // playwright.config.ts の baseURL のホスト名を取得
   const url = new URL(
     process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",

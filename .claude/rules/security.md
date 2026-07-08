@@ -11,6 +11,15 @@ globs:
 - API エンドポイントごとにアクセス制御を設定する（公開 / 認証必須 / オーナー限定）。
 - Write 操作（POST/PUT/DELETE）は `ALLOWED_EMAILS` によるオーナー検証を必須とする。
 
+### E2E 認証バイパス（テスト専用シーム）
+
+- 実 DB E2E のため、`server/utils/auth.ts` は `E2E_AUTH_BYPASS=1` のとき Supabase 検証を
+  スキップして固定オーナーを返す **テスト専用シーム** を持つ。
+- **本番では絶対に有効化しない。** 二重ガード:
+  1. `E2E_AUTH_BYPASS === "1"`（本番 Vercel には設定しない）
+  2. `VERCEL_ENV !== "production"`（万一設定されても本番ランタイムでは無効）
+- 有効時はサーバーログに警告を出力する。設定するのは E2E（CI / ローカル）のみ。
+
 ## 通信・アクセス制御
 
 - 全通信は **HTTPS** を必須とする（Vercel / Supabase ともにデフォルト）。

@@ -98,18 +98,17 @@ test.describe("Authentication", () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });
   });
 
-  test("A-1: 認証済み状態でログインページにアクセスしてもページが正常に表示される", async ({
+  test("A-1: 認証済み状態でログインページにアクセスするとメイン画面にリダイレクトされる", async ({
     page,
   }) => {
     // 共有ヘルパーで正しいキー形式（sb-{project-ref}-auth-token）を使ってセッションを注入する
     await injectSupabaseSession(page);
     await mockApiRoutes(page);
 
-    // auth middleware はログイン済みユーザーを /login から追い出す処理を持たない（未認証→/login のみ）
-    // そのためログインページがそのまま表示される
+    // login.vue は watch(session) で認証済みを検知したら navigateTo("/") で
+    // メイン画面へ送り出す。そのため /login に留まらず / へ遷移する。
     await page.goto("/login");
-    await page.waitForLoadState("networkidle");
 
-    await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });
+    await expect(page).toHaveURL("/", { timeout: 5_000 });
   });
 });

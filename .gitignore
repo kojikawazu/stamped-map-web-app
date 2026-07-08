@@ -45,3 +45,7 @@ next-env.d.ts
 coverage/
 front/.nuxtrc
 front/package-lock.json
+
+# Playwright 成果物
+playwright-report/
+test-results/
