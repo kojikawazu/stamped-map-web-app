@@ -19,15 +19,21 @@ const prismaMock = {
   },
 };
 
-vi.stubGlobal(
-  "verifyAuth",
-  vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }),
-);
-vi.stubGlobal(
-  "verifyOwner",
-  vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }),
-);
+// verifyAuth / verifyOwner はハンドルを保持し、異常系（401/403）テストで
+// mockRejectedValueOnce により1回だけ失敗させられるようにする。
+const verifyAuthMock = vi
+  .fn()
+  .mockResolvedValue({ id: "user-1", email: "owner@example.com" });
+const verifyOwnerMock = vi
+  .fn()
+  .mockResolvedValue({ id: "user-1", email: "owner@example.com" });
+vi.stubGlobal("verifyAuth", verifyAuthMock);
+vi.stubGlobal("verifyOwner", verifyOwnerMock);
 vi.stubGlobal("prisma", prismaMock);
+
+// 403（オーナー限定違反）を表す createError 相当のエラー。
+const forbiddenError = () =>
+  Object.assign(new Error("オーナー権限が必要です"), { statusCode: 403 });
 
 // readBody は POST ハンドラーで使用されるため、テストごとに戻り値を設定できるよう差し替える
 const mockReadBody = vi.fn();
@@ -112,6 +118,32 @@ describe("GET /api/spots", () => {
     const result = await handler(event);
 
     expect(result.pagination.page).toBe(1);
+  });
+
+  it("A-1: verifyAuth が 401 をスローするとハンドラが伝播する", async () => {
+    verifyAuthMock.mockRejectedValueOnce(
+      Object.assign(new Error("認証が無効です"), { statusCode: 401 }),
+    );
+
+    const handler = (await import("../../../../server/api/spots/index.get"))
+      .default;
+    const event = makeEvent("GET", "/api/spots");
+
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 401 });
+    expect(prismaMock.mapSpot.findMany).not.toHaveBeenCalled();
+  });
+
+  it("A-2: DB アクセスが失敗すると例外が伝播する", async () => {
+    prismaMock.mapSpot.findMany.mockRejectedValue(
+      new Error("DB connection failed"),
+    );
+    prismaMock.mapSpot.count.mockResolvedValue(0);
+
+    const handler = (await import("../../../../server/api/spots/index.get"))
+      .default;
+    const event = makeEvent("GET", "/api/spots");
+
+    await expect(handler(event)).rejects.toThrow("DB connection failed");
   });
 });
 
@@ -205,6 +237,20 @@ describe("DELETE /api/spots/:id", () => {
     });
 
     await expect(handler(event)).rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  it("A-1: 非オーナー（verifyOwner が 403）のとき削除せず 403 を伝播する", async () => {
+    verifyOwnerMock.mockRejectedValueOnce(forbiddenError());
+
+    const handler = (
+      await import("../../../../server/api/spots/[id]/index.delete")
+    ).default;
+    const event = makeEvent("DELETE", `/api/spots/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 403 });
+    expect(prismaMock.mapSpot.delete).not.toHaveBeenCalled();
   });
 });
 
@@ -335,5 +381,148 @@ describe("POST /api/spots", () => {
       data: { code: "VALIDATION_ERROR" },
     });
     expect(prismaMock.mapSpot.create).not.toHaveBeenCalled();
+  });
+
+  it("A-1: 非オーナー（verifyOwner が 403）のとき作成せず 403 を伝播する", async () => {
+    verifyOwnerMock.mockRejectedValueOnce(forbiddenError());
+
+    const handler = (await import("../../../../server/api/spots/index.post"))
+      .default;
+    const event = makeEvent("POST", "/api/spots");
+
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 403 });
+    expect(mockReadBody).not.toHaveBeenCalled();
+    expect(prismaMock.mapSpot.create).not.toHaveBeenCalled();
+  });
+
+  it("A-2: DB 書き込みが失敗すると例外が伝播する", async () => {
+    mockReadBody.mockResolvedValue(validBody);
+    prismaMock.mapCategory.findUnique.mockResolvedValue(mockCategory);
+    prismaMock.mapSpot.create.mockRejectedValue(new Error("DB write failed"));
+
+    const handler = (await import("../../../../server/api/spots/index.post"))
+      .default;
+    const event = makeEvent("POST", "/api/spots");
+
+    await expect(handler(event)).rejects.toThrow("DB write failed");
+  });
+});
+
+// --- PUT /api/spots/:id ---
+
+describe("PUT /api/spots/:id", () => {
+  const validBody = {
+    name: "更新後スポット",
+    categoryId: VALID_UUID_2,
+    latitude: 35.6812,
+    longitude: 139.7671,
+    visitedAt: "2025-02-01",
+    memo: "更新メモ",
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReadBody.mockReset();
+  });
+
+  it("N-1: 有効なボディでスポットを更新する", async () => {
+    mockReadBody.mockResolvedValue(validBody);
+    prismaMock.mapSpot.findUnique.mockResolvedValue(mockSpot);
+    prismaMock.mapCategory.findUnique.mockResolvedValue(mockCategory);
+    prismaMock.mapSpot.update.mockResolvedValue({
+      ...mockSpot,
+      name: "更新後スポット",
+      category: mockCategory,
+    });
+
+    const handler = (
+      await import("../../../../server/api/spots/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/spots/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+    const result = await handler(event);
+
+    expect(result.data.name).toBe("更新後スポット");
+    expect(prismaMock.mapSpot.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: VALID_UUID } }),
+    );
+  });
+
+  it("S-1: 不正な UUID フォーマットのとき 400 をスローする", async () => {
+    const handler = (
+      await import("../../../../server/api/spots/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", "/api/spots/invalid-id", {
+      id: "invalid-id",
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  it("S-2: 存在しない ID のとき 404 をスローする", async () => {
+    mockReadBody.mockResolvedValue(validBody);
+    prismaMock.mapSpot.findUnique.mockResolvedValue(null);
+
+    const handler = (
+      await import("../../../../server/api/spots/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/spots/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 404 });
+    expect(prismaMock.mapSpot.update).not.toHaveBeenCalled();
+  });
+
+  it("S-3: 存在しないカテゴリ ID のとき 400 をスローする", async () => {
+    mockReadBody.mockResolvedValue(validBody);
+    prismaMock.mapSpot.findUnique.mockResolvedValue(mockSpot);
+    prismaMock.mapCategory.findUnique.mockResolvedValue(null);
+
+    const handler = (
+      await import("../../../../server/api/spots/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/spots/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({
+      statusCode: 400,
+      data: { code: "VALIDATION_ERROR" },
+    });
+    expect(prismaMock.mapSpot.update).not.toHaveBeenCalled();
+  });
+
+  it("S-4: バリデーションエラー（必須フィールド欠如）のとき DB 到達前に 400 をスローする", async () => {
+    mockReadBody.mockResolvedValue({ name: "" });
+
+    const handler = (
+      await import("../../../../server/api/spots/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/spots/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({
+      statusCode: 400,
+      data: { code: "VALIDATION_ERROR" },
+    });
+    expect(prismaMock.mapSpot.findUnique).not.toHaveBeenCalled();
+    expect(prismaMock.mapSpot.update).not.toHaveBeenCalled();
+  });
+
+  it("A-1: 非オーナー（verifyOwner が 403）のとき更新せず 403 を伝播する", async () => {
+    verifyOwnerMock.mockRejectedValueOnce(forbiddenError());
+
+    const handler = (
+      await import("../../../../server/api/spots/[id]/index.put")
+    ).default;
+    const event = makeEvent("PUT", `/api/spots/${VALID_UUID}`, {
+      id: VALID_UUID,
+    });
+
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 403 });
+    expect(prismaMock.mapSpot.update).not.toHaveBeenCalled();
   });
 });

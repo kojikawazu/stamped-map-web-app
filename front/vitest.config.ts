@@ -22,5 +22,14 @@ export default defineVitestConfig({
         },
       },
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "text-summary", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      // ユニットテストが対象とするロジック層のみ計測する。
+      // .vue コンポーネントの描画は E2E（Playwright）で担保するため対象外。
+      include: ["server/**", "composables/**", "lib/**", "middleware/**"],
+      exclude: ["**/*.test.ts", "**/*.config.*", "generated/**"],
+    },
   },
 });
