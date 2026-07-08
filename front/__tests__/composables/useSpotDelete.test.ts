@@ -29,7 +29,9 @@ describe("useSpotDelete", () => {
     const result = await deleteSpot("spot-1");
 
     expect(result).toBe(true);
-    expect(mockApiFetch).toHaveBeenCalledWith("/api/spots/spot-1", { method: "DELETE" });
+    expect(mockApiFetch).toHaveBeenCalledWith("/api/spots/spot-1", {
+      method: "DELETE",
+    });
     expect(mockToastSuccess).toHaveBeenCalledWith("スポットを削除しました");
     expect(loading.value).toBe(false);
   });

@@ -6,7 +6,9 @@ export const useIsOwner = () => {
     // 取得前にリセットし、エラー時やログイン切り替え時に前の状態が残らないようにする
     isOwner.value = false;
     try {
-      const res = await apiFetch<{ data: { isOwner: boolean } }>("/api/me/is-owner");
+      const res = await apiFetch<{ data: { isOwner: boolean } }>(
+        "/api/me/is-owner",
+      );
       isOwner.value = res.data.isOwner;
     } catch {
       isOwner.value = false;

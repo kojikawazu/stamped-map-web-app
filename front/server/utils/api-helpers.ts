@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 // --- Response Formatters ---
 
@@ -58,7 +58,7 @@ export function formatCategoryResponse(
     isDefault: boolean;
     sortOrder: number;
   },
-  spotCount: number
+  spotCount: number,
 ) {
   return {
     id: category.id,

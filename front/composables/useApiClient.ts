@@ -14,7 +14,7 @@ export const useApiClient = () => {
   // リトライは try/catch でラップした独自ラッパー関数として実装する
   const apiFetch = async <T = unknown>(
     url: string,
-    options: Parameters<typeof $fetch>[1] = {}
+    options: Parameters<typeof $fetch>[1] = {},
   ): Promise<T> => {
     const token = await getAccessToken();
     // options.headers は $fetch 独自型のため HeadersInit へキャスト
@@ -44,7 +44,10 @@ export const useApiClient = () => {
       }
       const retryHeaders = new Headers(options.headers as HeadersInit); // 同上
       retryHeaders.set("Authorization", `Bearer ${newToken}`);
-      return await ($fetch<T>(url, { ...options, headers: retryHeaders }) as Promise<T>);
+      return await ($fetch<T>(url, {
+        ...options,
+        headers: retryHeaders,
+      }) as Promise<T>);
     }
   };
 

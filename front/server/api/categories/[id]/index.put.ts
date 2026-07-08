@@ -5,7 +5,10 @@ export default defineEventHandler(async (event) => {
 
   const id = getRouterParam(event, "id");
   if (!id || !isValidUuid(id)) {
-    throw createError({ statusCode: 400, data: { code: "VALIDATION_ERROR", message: "無効なID形式です" } });
+    throw createError({
+      statusCode: 400,
+      data: { code: "VALIDATION_ERROR", message: "無効なID形式です" },
+    });
   }
 
   const body = await readBody(event);
@@ -26,7 +29,10 @@ export default defineEventHandler(async (event) => {
 
   const existing = await prisma.mapCategory.findUnique({ where: { id } });
   if (!existing) {
-    throw createError({ statusCode: 404, data: { code: "NOT_FOUND", message: "カテゴリが見つかりません" } });
+    throw createError({
+      statusCode: 404,
+      data: { code: "NOT_FOUND", message: "カテゴリが見つかりません" },
+    });
   }
 
   const duplicate = await prisma.mapCategory.findFirst({
@@ -35,7 +41,10 @@ export default defineEventHandler(async (event) => {
   if (duplicate) {
     throw createError({
       statusCode: 400,
-      data: { code: "DUPLICATE_CATEGORY", message: "同じ名前のカテゴリが既に存在します" },
+      data: {
+        code: "DUPLICATE_CATEGORY",
+        message: "同じ名前のカテゴリが既に存在します",
+      },
     });
   }
 

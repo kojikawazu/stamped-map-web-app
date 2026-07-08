@@ -76,7 +76,7 @@ flowchart TD
 
 ### 前提条件
 
-- Node.js 20+（CI は Node 20 で検証）
+- Node.js 22+（CI は Node 22 で検証。ESLint 10 / @nuxt/eslint が Node 22 以上を要求）
 - pnpm 10+
 - Supabase プロジェクト（PostgreSQL + PostGIS 有効化済み）
 - MapTiler Cloud アカウント（API Key 発行済み）
@@ -159,7 +159,10 @@ pnpm dev          # 開発サーバー起動
 pnpm build        # ビルド
 pnpm test         # ユニット/結合テスト（Vitest）
 pnpm test:e2e     # E2E テスト（Playwright）
-pnpm lint         # Lint（ESLint）
+pnpm type-check   # 型チェック（nuxt typecheck = vue-tsc）
+pnpm lint         # Lint（ESLint。JSDoc ルール含む）
+pnpm format       # フォーマット適用（Prettier）
+pnpm format:check # フォーマットチェック（Prettier）
 pnpm db:seed      # シードデータ投入
 ```
 

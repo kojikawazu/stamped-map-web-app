@@ -24,7 +24,10 @@ export default defineEventHandler(async (event) => {
   if (existing) {
     throw createError({
       statusCode: 400,
-      data: { code: "DUPLICATE_CATEGORY", message: "同じ名前のカテゴリが既に存在します" },
+      data: {
+        code: "DUPLICATE_CATEGORY",
+        message: "同じ名前のカテゴリが既に存在します",
+      },
     });
   }
 

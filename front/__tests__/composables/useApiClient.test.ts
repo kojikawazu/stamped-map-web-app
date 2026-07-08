@@ -24,8 +24,7 @@ describe("useApiClient", () => {
     // 初期化済みの Supabase クライアントの auth メソッドをスタブで差し替える
     const nuxtApp = useNuxtApp();
     const supabase = (nuxtApp as Record<string, unknown>).$supabase as
-      | { client: { auth: Record<string, unknown> } }
-      | undefined;
+      { client: { auth: Record<string, unknown> } } | undefined;
     if (supabase?.client?.auth) {
       supabase.client.auth.getSession = mockGetSession;
       supabase.client.auth.refreshSession = mockRefreshSession;
@@ -94,8 +93,12 @@ describe("useApiClient", () => {
 
     mockRefreshSession.mockResolvedValue({ error: null });
     mockGetSession
-      .mockResolvedValueOnce({ data: { session: { access_token: "old-token" } } })
-      .mockResolvedValueOnce({ data: { session: { access_token: "new-token" } } });
+      .mockResolvedValueOnce({
+        data: { session: { access_token: "old-token" } },
+      })
+      .mockResolvedValueOnce({
+        data: { session: { access_token: "new-token" } },
+      });
 
     const { useApiClient } = await import("../../composables/useApiClient");
     const { apiFetch } = useApiClient();
@@ -105,7 +108,7 @@ describe("useApiClient", () => {
     expect(result).toEqual({ data: [] });
     const [, retryOptions] = mockFetch.mock.calls[1];
     expect((retryOptions.headers as Headers).get("Authorization")).toBe(
-      "Bearer new-token"
+      "Bearer new-token",
     );
   });
 
@@ -118,7 +121,9 @@ describe("useApiClient", () => {
     const mockFetch = vi.fn().mockRejectedValue(error401);
     vi.stubGlobal("$fetch", mockFetch);
 
-    mockRefreshSession.mockResolvedValue({ error: new Error("refresh failed") });
+    mockRefreshSession.mockResolvedValue({
+      error: new Error("refresh failed"),
+    });
 
     const { useApiClient } = await import("../../composables/useApiClient");
     const { apiFetch } = useApiClient();

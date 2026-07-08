@@ -54,6 +54,12 @@ export async function resolveDisplayName(
 }
 ```
 
-## Lint による強制（推奨）
+## Lint による強制
 
-`eslint-plugin-jsdoc` を導入し、公開シンボルへの JSDoc 欠落・`@param` / `@returns` 漏れを CI で検出する。TypeScript プロジェクトでは型ブレース系ルールを無効化する（`jsdoc/require-param-type` / `jsdoc/require-returns-type` を off）。
+`eslint-plugin-jsdoc` を `front/eslint.config.mjs`（`@nuxt/eslint` の flat config）に組み込み済み。有効ルールの唯一の真実は同ファイルの JSDoc ブロックとする。
+
+- 対象 glob（この rule の `globs` に対応）: `components/**/*.vue` / `composables/**/*.ts` / `server/**/*.ts` / `lib/**/*.ts` / `middleware/**/*.ts`
+- 型は TS シグネチャに委ねる（`settings.jsdoc.mode = "typescript"`、`jsdoc/no-types` で型ブレースを禁止）。
+- `@param` の欠落・名前ズレは `jsdoc/require-param` / `jsdoc/check-param-names` で検出する。
+- `@returns` は `.ts`（composable / lib / server）で必須。テンプレートを描画する `.vue` コンポーネントは除外（`jsdoc/require-returns` を off）。
+- **JSDoc ブロックの有無自体は強制しない**（`require-jsdoc` は行コメントを誤検知するため未採用）。ブロックの要否・質はレビューで担保する。

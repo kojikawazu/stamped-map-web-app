@@ -22,7 +22,9 @@ describe("buildSpotWhereClause", () => {
   });
 
   it("category が配列のとき最初の要素を使用する", () => {
-    const result = buildSpotWhereClause({ category: ["cat-1,cat-2", "ignored"] });
+    const result = buildSpotWhereClause({
+      category: ["cat-1,cat-2", "ignored"],
+    });
     expect(result).toEqual({
       AND: [{ categoryId: { in: ["cat-1", "cat-2"] } }],
     });

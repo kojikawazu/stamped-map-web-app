@@ -5,16 +5,13 @@ export const useSpotFilter = () => {
   const searchQuery = useState<string>("spotFilter:search", () => "");
   const selectedCategories = useState<string[]>(
     "spotFilter:categories",
-    () => []
+    () => [],
   );
   const sortField = useState<SortField>(
     "spotFilter:sortField",
-    () => "visited_at"
+    () => "visited_at",
   );
-  const sortOrder = useState<SortOrder>(
-    "spotFilter:sortOrder",
-    () => "desc"
-  );
+  const sortOrder = useState<SortOrder>("spotFilter:sortOrder", () => "desc");
   const page = useState<number>("spotFilter:page", () => 1);
 
   const spotsQuery = computed(() => {
@@ -55,7 +52,7 @@ export const useSpotFilter = () => {
       selectedCategories.value = [...selectedCategories.value, id];
     } else {
       selectedCategories.value = selectedCategories.value.filter(
-        (c) => c !== id
+        (c) => c !== id,
       );
     }
     page.value = 1;

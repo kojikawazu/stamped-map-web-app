@@ -11,7 +11,7 @@ export const useAuth = () => {
   // 成功時の navigateTo('/') は呼び出し側の pages/login.vue が行う
   const login = async (
     email: string,
-    password: string
+    password: string,
   ): Promise<{ error: string | null }> => {
     const { error } = await supabase.auth.signInWithPassword({
       email,

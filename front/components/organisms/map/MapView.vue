@@ -1,14 +1,20 @@
 <template>
-  <div class="w-full h-full">
+  <div class="h-full w-full">
     <div
       v-if="!maptilerKey"
-      class="w-full h-full flex items-center justify-center bg-zinc-100"
+      class="flex h-full w-full items-center justify-center bg-zinc-100"
     >
-      <p class="text-zinc-400 text-sm">
-        MapTiler API Key が未設定です。.env に NUXT_PUBLIC_MAPTILER_KEY を設定してください。
+      <p class="text-sm text-zinc-400">
+        MapTiler API Key が未設定です。.env に NUXT_PUBLIC_MAPTILER_KEY
+        を設定してください。
       </p>
     </div>
-    <div v-else ref="mapContainerRef" class="w-full h-full" style="min-height: 400px" />
+    <div
+      v-else
+      ref="mapContainerRef"
+      class="h-full w-full"
+      style="min-height: 400px"
+    />
   </div>
 </template>
 
@@ -17,7 +23,11 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Marker } from "~/types/marker";
 import type { Category } from "~/types/category";
-import { escapeHtml, buildCategoryMap, markersToGeoJSON } from "~/lib/map-utils";
+import {
+  escapeHtml,
+  buildCategoryMap,
+  markersToGeoJSON,
+} from "~/lib/map-utils";
 
 const props = defineProps<{
   markers: Marker[];
@@ -123,16 +133,24 @@ function addSpotLayers(map: maplibregl.Map) {
 
   // クラスタークリック → ズームイン
   map.on("click", "spots-cluster", (e) => {
-    const features = map.queryRenderedFeatures(e.point, { layers: ["spots-cluster"] });
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ["spots-cluster"],
+    });
     const clusterId = features[0]?.properties?.cluster_id as number | undefined;
     if (clusterId == null) return;
 
     const source = map.getSource("spots") as maplibregl.GeoJSONSource;
-    const coords = (features[0].geometry as GeoJSON.Point).coordinates as [number, number];
-    source.getClusterExpansionZoom(clusterId).then((zoom) => {
-      if (zoom == null) return;
-      map.easeTo({ center: coords, zoom });
-    }).catch(() => {});
+    const coords = (features[0].geometry as GeoJSON.Point).coordinates as [
+      number,
+      number,
+    ];
+    source
+      .getClusterExpansionZoom(clusterId)
+      .then((zoom) => {
+        if (zoom == null) return;
+        map.easeTo({ center: coords, zoom });
+      })
+      .catch(() => {});
   });
 
   map.on("mouseenter", "spots-cluster", () => {
@@ -156,7 +174,7 @@ function addSpotLayers(map: maplibregl.Map) {
         `<div class="text-sm">
           <p class="font-medium">${escapeHtml(name)}</p>
           <p class="text-zinc-500 text-xs">${escapeHtml(categoryName)}</p>
-        </div>`
+        </div>`,
       )
       .addTo(map);
   });
@@ -194,7 +212,7 @@ onMounted(() => {
       data: markersToGeoJSON(props.markers, buildCategoryMap(props.categories)),
       cluster: true,
       clusterMaxZoom: 14, // ズーム14以上では個別表示
-      clusterRadius: 50,  // クラスタリング半径（px）
+      clusterRadius: 50, // クラスタリング半径（px）
     });
 
     addSpotLayers(map);
@@ -209,12 +227,15 @@ watch(
   () => {
     const map = mapRef.value;
     if (!map) return;
-    const source = map.getSource("spots") as maplibregl.GeoJSONSource | undefined;
+    const source = map.getSource("spots") as
+      maplibregl.GeoJSONSource | undefined;
     if (source) {
-      source.setData(markersToGeoJSON(props.markers, buildCategoryMap(props.categories)));
+      source.setData(
+        markersToGeoJSON(props.markers, buildCategoryMap(props.categories)),
+      );
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 onUnmounted(() => {

@@ -13,11 +13,14 @@ vi.mock("@supabase/supabase-js", () => ({
   })),
 }));
 
-vi.stubGlobal("createError", ({ statusCode, message }: { statusCode: number; message: string }) => {
-  const err = new Error(message) as Error & { statusCode: number };
-  err.statusCode = statusCode;
-  return err;
-});
+vi.stubGlobal(
+  "createError",
+  ({ statusCode, message }: { statusCode: number; message: string }) => {
+    const err = new Error(message) as Error & { statusCode: number };
+    err.statusCode = statusCode;
+    return err;
+  },
+);
 
 function makeEvent(token?: string) {
   const req = Object.assign(new IncomingMessage(null as never), {

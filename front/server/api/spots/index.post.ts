@@ -17,7 +17,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { name, categoryId, latitude, longitude, visitedAt, memo } = result.data;
+  const { name, categoryId, latitude, longitude, visitedAt, memo } =
+    result.data;
 
   const categoryExists = await prisma.mapCategory.findUnique({
     where: { id: categoryId },

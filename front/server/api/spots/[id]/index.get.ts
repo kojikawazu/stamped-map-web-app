@@ -3,7 +3,10 @@ export default defineEventHandler(async (event) => {
 
   const id = getRouterParam(event, "id");
   if (!id || !isValidUuid(id)) {
-    throw createError({ statusCode: 400, data: { code: "VALIDATION_ERROR", message: "無効なID形式です" } });
+    throw createError({
+      statusCode: 400,
+      data: { code: "VALIDATION_ERROR", message: "無効なID形式です" },
+    });
   }
 
   const spot = await prisma.mapSpot.findUnique({
@@ -12,7 +15,10 @@ export default defineEventHandler(async (event) => {
   });
 
   if (!spot) {
-    throw createError({ statusCode: 404, data: { code: "NOT_FOUND", message: "スポットが見つかりません" } });
+    throw createError({
+      statusCode: 404,
+      data: { code: "NOT_FOUND", message: "スポットが見つかりません" },
+    });
   }
 
   return { data: formatSpotResponse(spot) };

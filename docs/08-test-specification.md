@@ -58,9 +58,12 @@
 | ツール | 用途 |
 |--------|------|
 | Vitest | ユニットテスト・結合テスト |
+| @vitest/coverage-v8 | カバレッジ計測（`pnpm test:coverage`） |
 | @vue/test-utils + @nuxt/test-utils | composables・Nuxt 環境テスト |
 | Playwright | E2Eテスト（実装済み） |
 | Prisma (テストDB) | テスト用DBでの結合テスト |
+
+> テストケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。書き込み系エンドポイントは認可の異常系（オーナー限定=403）と DB 例外伝播を必須とする。分類規約の詳細は [`.claude/rules/testing.md`](../.claude/rules/testing.md)。
 
 ## テストケース
 
@@ -219,5 +222,14 @@ vi.stubGlobal(
 
 ### CI/CD
 
-- GitHub Actions でプッシュ時に自動テスト実行
-- テスト失敗時はデプロイをブロック
+GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動実行する。いずれかのゲート失敗で PR をブロックする。
+
+**test ジョブ**（品質ゲート）:
+
+1. `nuxt prepare`（型定義・ESLint flat config を生成）
+2. `pnpm type-check`（`nuxt typecheck` = vue-tsc、`tsc --noEmit` 相当）
+3. `pnpm lint`（ESLint。JSDoc/TSDoc ルールを含む）
+4. `pnpm format:check`（Prettier 整形チェック）
+5. `pnpm test`（Vitest ユニット・結合）
+
+**e2e ジョブ**: `pnpm build` → 本番サーバー起動 → `pnpm test:e2e`（Playwright）。失敗時は `playwright-report` を artifact 保存。

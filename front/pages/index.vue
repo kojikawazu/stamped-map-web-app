@@ -4,7 +4,7 @@
     <ClientOnly>
       <MapView :markers="markers" :categories="categories" />
       <template #fallback>
-        <div class="w-full h-full flex items-center justify-center bg-zinc-100">
+        <div class="flex h-full w-full items-center justify-center bg-zinc-100">
           <p class="text-zinc-500">地図を読み込み中...</p>
         </div>
       </template>
@@ -29,7 +29,9 @@ const categoriesData = useCategories();
 const categories = computed(() => [...categoriesData.categories.value]);
 
 const selectedSpot = ref<Spot | null>(null);
-const spotPanel = ref<{ openEdit: () => void; openDelete: () => void } | null>(null);
+const spotPanel = ref<{ openEdit: () => void; openDelete: () => void } | null>(
+  null,
+);
 
 onMounted(() => {
   markersData.fetchMarkers();

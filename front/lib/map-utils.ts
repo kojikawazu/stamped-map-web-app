@@ -14,7 +14,10 @@ export function buildCategoryMap(cats: Category[]): Map<string, string> {
   return new Map(cats.map((c) => [c.id, c.name]));
 }
 
-export function markersToGeoJSON(items: Marker[], categoryMap: Map<string, string>): GeoJSON.FeatureCollection {
+export function markersToGeoJSON(
+  items: Marker[],
+  categoryMap: Map<string, string>,
+): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
     features: items.map((m) => ({

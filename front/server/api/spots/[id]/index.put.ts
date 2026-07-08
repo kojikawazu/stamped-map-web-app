@@ -5,7 +5,10 @@ export default defineEventHandler(async (event) => {
 
   const id = getRouterParam(event, "id");
   if (!id || !isValidUuid(id)) {
-    throw createError({ statusCode: 400, data: { code: "VALIDATION_ERROR", message: "無効なID形式です" } });
+    throw createError({
+      statusCode: 400,
+      data: { code: "VALIDATION_ERROR", message: "無効なID形式です" },
+    });
   }
 
   const body = await readBody(event);
@@ -24,10 +27,14 @@ export default defineEventHandler(async (event) => {
 
   const existing = await prisma.mapSpot.findUnique({ where: { id } });
   if (!existing) {
-    throw createError({ statusCode: 404, data: { code: "NOT_FOUND", message: "スポットが見つかりません" } });
+    throw createError({
+      statusCode: 404,
+      data: { code: "NOT_FOUND", message: "スポットが見つかりません" },
+    });
   }
 
-  const { name, categoryId, latitude, longitude, visitedAt, memo } = result.data;
+  const { name, categoryId, latitude, longitude, visitedAt, memo } =
+    result.data;
 
   const categoryExists = await prisma.mapCategory.findUnique({
     where: { id: categoryId },

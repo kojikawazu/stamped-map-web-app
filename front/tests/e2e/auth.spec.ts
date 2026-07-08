@@ -11,12 +11,14 @@ test.describe("Authentication", () => {
     await page.goto("/login");
 
     await expect(
-      page.getByRole("textbox", { name: /メール|email/i })
+      page.getByRole("textbox", { name: /メール|email/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("textbox", { name: /パスワード|password/i })
+      page.getByRole("textbox", { name: /パスワード|password/i }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: "ログイン", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "ログイン", exact: true }),
+    ).toBeVisible();
   });
 
   test("N-2: Supabase 認証成功後にメイン画面に遷移する", async ({ page }) => {
@@ -64,8 +66,8 @@ test.describe("Authentication", () => {
     // HTML5 バリデーションまたはカスタムエラーメッセージが表示されること
     const emailInput = page.getByRole("textbox", { name: /メール|email/i });
     const isInvalid =
-      (await emailInput.evaluate((el) =>
-        (el as HTMLInputElement).validity.valid
+      (await emailInput.evaluate(
+        (el) => (el as HTMLInputElement).validity.valid,
       )) === false;
     expect(isInvalid).toBe(true);
   });

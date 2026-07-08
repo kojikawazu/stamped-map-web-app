@@ -13,7 +13,9 @@ test.describe.skip("Spot List & Filter", () => {
     await mockApiRoutes(page);
   });
 
-  test("N-1: メインページでスポット一覧パネルが表示される", async ({ page }) => {
+  test("N-1: メインページでスポット一覧パネルが表示される", async ({
+    page,
+  }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
@@ -110,17 +112,27 @@ test.describe.skip("Spot List & Filter", () => {
   test("S-1: API エラー時にエラー状態が表示される", async ({ page }) => {
     await page.route("**/api/spots**", (route) => {
       if (route.request().url().includes("markers")) {
-        route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [] }) });
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ data: [] }),
+        });
         return;
       }
-      route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "Internal Server Error" }) });
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Internal Server Error" }),
+      });
     });
 
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
     // API がエラーを返すとき、スポット一覧アイテムは表示されない
-    await expect(page.getByText("東京タワー")).not.toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("東京タワー")).not.toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   test("A-1: 未認証状態でメインページにアクセスするとログインページにリダイレクトされる", async ({

@@ -1,5 +1,7 @@
 <template>
-  <aside class="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-slate-50">
+  <aside
+    class="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-slate-50"
+  >
     <div class="border-b border-slate-200 bg-white px-3 pt-3 pb-2 shadow-sm">
       <div class="mb-2.5 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -7,7 +9,8 @@
           <span
             v-if="spots.length > 0"
             class="rounded-full bg-[#C8EDD4] px-2 py-0.5 text-xs font-semibold text-[#1E6040]"
-          >{{ pagination?.total ?? spots.length }}</span>
+            >{{ pagination?.total ?? spots.length }}</span
+          >
         </div>
         <div v-if="isOwner" class="flex items-center gap-1.5">
           <button
@@ -16,7 +19,9 @@
             @click="showCategoryManage = true"
           >
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"/>
+              <path
+                d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"
+              />
             </svg>
           </button>
           <button
@@ -24,7 +29,9 @@
             @click="showCreateModal = true"
           >
             <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
+              <path
+                d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"
+              />
             </svg>
             登録
           </button>
@@ -156,12 +163,20 @@ async function onCategoryUpdated() {
 }
 
 onMounted(async () => {
-  await Promise.all([spotsData.fetchSpots(), categoriesData.fetchCategories(), fetchIsOwner()]);
+  await Promise.all([
+    spotsData.fetchSpots(),
+    categoriesData.fetchCategories(),
+    fetchIsOwner(),
+  ]);
 });
 
 // 外部から編集・削除ダイアログを開くための expose
 defineExpose({
-  openEdit: () => { showEditModal.value = true; },
-  openDelete: () => { showDeleteConfirm.value = true; },
+  openEdit: () => {
+    showEditModal.value = true;
+  },
+  openDelete: () => {
+    showDeleteConfirm.value = true;
+  },
 });
 </script>

@@ -6,7 +6,7 @@ import type { Page } from "@playwright/test";
  */
 export async function injectSupabaseSession(
   page: Page,
-  options: { accessToken?: string; userId?: string } = {}
+  options: { accessToken?: string; userId?: string } = {},
 ) {
   const accessToken = options.accessToken ?? "dummy-access-token";
   const userId = options.userId ?? "dummy-user-id";
@@ -27,7 +27,9 @@ export async function injectSupabaseSession(
   const supabaseHost = new URL(supabaseUrl).hostname.replace(/\./g, "-");
   const cookieName = `sb-${supabaseHost}-auth-token`;
   // playwright.config.ts の baseURL のホスト名を取得
-  const url = new URL(process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000");
+  const url = new URL(
+    process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
+  );
 
   // SSR 用: @nuxtjs/supabase がサーバー側で読む cookie にセッションを注入
   await page.context().addCookies([
@@ -44,7 +46,7 @@ export async function injectSupabaseSession(
     ({ sess, key }) => {
       localStorage.setItem(key, JSON.stringify(sess));
     },
-    { sess: session, key: cookieName }
+    { sess: session, key: cookieName },
   );
 
   // Supabase Auth API のモック: getUser / getSession を成功レスポンスにする
