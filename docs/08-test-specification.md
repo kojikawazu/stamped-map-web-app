@@ -58,9 +58,12 @@
 | ツール | 用途 |
 |--------|------|
 | Vitest | ユニットテスト・結合テスト |
+| @vitest/coverage-v8 | カバレッジ計測（`pnpm test:coverage`） |
 | @vue/test-utils + @nuxt/test-utils | composables・Nuxt 環境テスト |
 | Playwright | E2Eテスト（実装済み） |
 | Prisma (テストDB) | テスト用DBでの結合テスト |
+
+> テストケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。書き込み系エンドポイントは認可の異常系（オーナー限定=403）と DB 例外伝播を必須とする。分類規約の詳細は [`.claude/rules/testing.md`](../.claude/rules/testing.md)。
 
 ## テストケース
 
