@@ -19,8 +19,7 @@ describe("useAuth - loginWithGoogle", () => {
 
     const nuxtApp = useNuxtApp();
     const supabase = (nuxtApp as Record<string, unknown>).$supabase as
-      | { client: { auth: Record<string, unknown> } }
-      | undefined;
+      { client: { auth: Record<string, unknown> } } | undefined;
     if (supabase?.client?.auth) {
       supabase.client.auth.signInWithOAuth = mockSignInWithOAuth;
     }
@@ -33,7 +32,7 @@ describe("useAuth - loginWithGoogle", () => {
     await loginWithGoogle();
 
     expect(mockSignInWithOAuth).toHaveBeenCalledWith(
-      expect.objectContaining({ provider: "google" })
+      expect.objectContaining({ provider: "google" }),
     );
   });
 
@@ -44,6 +43,8 @@ describe("useAuth - loginWithGoogle", () => {
     });
 
     const { loginWithGoogle } = useAuth();
-    await expect(loginWithGoogle()).rejects.toThrow("Googleログインに失敗しました");
+    await expect(loginWithGoogle()).rejects.toThrow(
+      "Googleログインに失敗しました",
+    );
   });
 });

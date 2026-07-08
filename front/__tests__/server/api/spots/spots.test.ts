@@ -19,8 +19,14 @@ const prismaMock = {
   },
 };
 
-vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }));
-vi.stubGlobal("verifyOwner", vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }));
+vi.stubGlobal(
+  "verifyAuth",
+  vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }),
+);
+vi.stubGlobal(
+  "verifyOwner",
+  vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }),
+);
 vi.stubGlobal("prisma", prismaMock);
 
 // readBody は POST ハンドラーで使用されるため、テストごとに戻り値を設定できるよう差し替える
@@ -32,7 +38,7 @@ vi.stubGlobal("readBody", mockReadBody);
 function makeEvent(
   method: string,
   path: string,
-  params?: Record<string, string>
+  params?: Record<string, string>,
 ) {
   const req = Object.assign(new IncomingMessage(null as never), {
     method,
@@ -73,9 +79,8 @@ describe("GET /api/spots", () => {
     prismaMock.mapSpot.findMany.mockResolvedValue([mockSpot]);
     prismaMock.mapSpot.count.mockResolvedValue(1);
 
-    const handler = (
-      await import("../../../../server/api/spots/index.get")
-    ).default;
+    const handler = (await import("../../../../server/api/spots/index.get"))
+      .default;
     const event = makeEvent("GET", "/api/spots");
     const result = await handler(event);
 
@@ -88,9 +93,8 @@ describe("GET /api/spots", () => {
     prismaMock.mapSpot.findMany.mockResolvedValue([]);
     prismaMock.mapSpot.count.mockResolvedValue(50);
 
-    const handler = (
-      await import("../../../../server/api/spots/index.get")
-    ).default;
+    const handler = (await import("../../../../server/api/spots/index.get"))
+      .default;
     const event = makeEvent("GET", "/api/spots?page=2&limit=10");
     const result = await handler(event);
 
@@ -102,9 +106,8 @@ describe("GET /api/spots", () => {
     prismaMock.mapSpot.findMany.mockResolvedValue([]);
     prismaMock.mapSpot.count.mockResolvedValue(0);
 
-    const handler = (
-      await import("../../../../server/api/spots/index.get")
-    ).default;
+    const handler = (await import("../../../../server/api/spots/index.get"))
+      .default;
     const event = makeEvent("GET", "/api/spots?page=abc");
     const result = await handler(event);
 
@@ -223,9 +226,8 @@ describe("GET /api/spots/markers", () => {
     ];
     prismaMock.mapSpot.findMany.mockResolvedValue(mockMarkerData);
 
-    const handler = (
-      await import("../../../../server/api/spots/markers.get")
-    ).default;
+    const handler = (await import("../../../../server/api/spots/markers.get"))
+      .default;
     const event = makeEvent("GET", "/api/spots/markers");
     const result = await handler(event);
 
@@ -241,16 +243,18 @@ describe("GET /api/spots/markers", () => {
   it("N-2: カテゴリフィルターを渡すと where 条件が適用される", async () => {
     prismaMock.mapSpot.findMany.mockResolvedValue([]);
 
-    const handler = (
-      await import("../../../../server/api/spots/markers.get")
-    ).default;
-    const event = makeEvent("GET", `/api/spots/markers?category=${VALID_UUID_2}`);
+    const handler = (await import("../../../../server/api/spots/markers.get"))
+      .default;
+    const event = makeEvent(
+      "GET",
+      `/api/spots/markers?category=${VALID_UUID_2}`,
+    );
     await handler(event);
 
     expect(prismaMock.mapSpot.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { AND: [{ categoryId: { in: [VALID_UUID_2] } }] },
-      })
+      }),
     );
   });
 });
@@ -286,9 +290,8 @@ describe("POST /api/spots", () => {
     };
     prismaMock.mapSpot.create.mockResolvedValue(createdSpot);
 
-    const handler = (
-      await import("../../../../server/api/spots/index.post")
-    ).default;
+    const handler = (await import("../../../../server/api/spots/index.post"))
+      .default;
     const event = makeEvent("POST", "/api/spots");
     const result = await handler(event);
 
@@ -301,16 +304,15 @@ describe("POST /api/spots", () => {
           latitude: 35.7101,
           longitude: 139.8107,
         }),
-      })
+      }),
     );
   });
 
   it("S-1: バリデーションエラー（必須フィールド欠如）のとき 400 をスローする", async () => {
     mockReadBody.mockResolvedValue({ name: "", categoryId: VALID_UUID_2 });
 
-    const handler = (
-      await import("../../../../server/api/spots/index.post")
-    ).default;
+    const handler = (await import("../../../../server/api/spots/index.post"))
+      .default;
     const event = makeEvent("POST", "/api/spots");
 
     await expect(handler(event)).rejects.toMatchObject({
@@ -324,9 +326,8 @@ describe("POST /api/spots", () => {
     mockReadBody.mockResolvedValue(validBody);
     prismaMock.mapCategory.findUnique.mockResolvedValue(null);
 
-    const handler = (
-      await import("../../../../server/api/spots/index.post")
-    ).default;
+    const handler = (await import("../../../../server/api/spots/index.post"))
+      .default;
     const event = makeEvent("POST", "/api/spots");
 
     await expect(handler(event)).rejects.toMatchObject({

@@ -63,6 +63,8 @@ flowchart TD
 | 認証 | Supabase Auth（`@nuxtjs/supabase`） | JWT発行、`useSupabaseClient/User/Session` auto-import |
 | ホスティング | Vercel | Nuxt.js 対応、自動デプロイ |
 | テスト | Vitest + `@nuxt/test-utils` + `@vue/test-utils` | ESM対応、Nuxt環境テスト |
+| Lint / コード品質 | ESLint（`@nuxt/eslint` flat config）+ `eslint-plugin-jsdoc` + Prettier（`prettier-plugin-tailwindcss`） | JSDoc/TSDoc の機械強制、`eslint-config-prettier` で整形ルール競合を回避 |
+| 型チェック | `nuxt typecheck`（vue-tsc） | `tsc --noEmit` 相当。CI 品質ゲートに含む |
 
 ## 認証アーキテクチャ
 

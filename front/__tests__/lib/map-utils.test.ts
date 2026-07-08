@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { escapeHtml, buildCategoryMap, markersToGeoJSON } from "../../lib/map-utils";
+import {
+  escapeHtml,
+  buildCategoryMap,
+  markersToGeoJSON,
+} from "../../lib/map-utils";
 import type { Category } from "../../types/category";
 import type { Marker } from "../../types/marker";
 
@@ -42,8 +46,8 @@ describe("escapeHtml", () => {
   });
 
   it("複数の特殊文字が混在している場合にすべてエスケープする", () => {
-    expect(escapeHtml("<p class=\"test\">A & B</p>")).toBe(
-      "&lt;p class=&quot;test&quot;&gt;A &amp; B&lt;/p&gt;"
+    expect(escapeHtml('<p class="test">A & B</p>')).toBe(
+      "&lt;p class=&quot;test&quot;&gt;A &amp; B&lt;/p&gt;",
     );
   });
 });
@@ -51,8 +55,22 @@ describe("escapeHtml", () => {
 describe("buildCategoryMap", () => {
   it("カテゴリIDと名前のマップを返す", () => {
     const categories: Category[] = [
-      { id: "cat-1", name: "カフェ", color: "#FF0000", isDefault: false, sortOrder: 1, spotCount: 0 },
-      { id: "cat-2", name: "レストラン", color: "#00FF00", isDefault: false, sortOrder: 2, spotCount: 0 },
+      {
+        id: "cat-1",
+        name: "カフェ",
+        color: "#FF0000",
+        isDefault: false,
+        sortOrder: 1,
+        spotCount: 0,
+      },
+      {
+        id: "cat-2",
+        name: "レストラン",
+        color: "#00FF00",
+        isDefault: false,
+        sortOrder: 2,
+        spotCount: 0,
+      },
     ];
     const result = buildCategoryMap(categories);
     expect(result.get("cat-1")).toBe("カフェ");
@@ -66,7 +84,14 @@ describe("buildCategoryMap", () => {
 
   it("存在しないIDはundefinedを返す", () => {
     const categories: Category[] = [
-      { id: "cat-1", name: "カフェ", color: "#FF0000", isDefault: false, sortOrder: 1, spotCount: 0 },
+      {
+        id: "cat-1",
+        name: "カフェ",
+        color: "#FF0000",
+        isDefault: false,
+        sortOrder: 1,
+        spotCount: 0,
+      },
     ];
     const result = buildCategoryMap(categories);
     expect(result.get("nonexistent")).toBeUndefined();
@@ -93,7 +118,13 @@ describe("markersToGeoJSON", () => {
   it("マーカー数分の Feature が含まれる", () => {
     const markers: Marker[] = [
       baseMarker,
-      { ...baseMarker, id: "spot-2", name: "大阪カフェ", latitude: 34.6937, longitude: 135.5023 },
+      {
+        ...baseMarker,
+        id: "spot-2",
+        name: "大阪カフェ",
+        latitude: 34.6937,
+        longitude: 135.5023,
+      },
     ];
     const result = markersToGeoJSON(markers, categoryMap);
     expect(result.features).toHaveLength(2);
@@ -116,7 +147,10 @@ describe("markersToGeoJSON", () => {
   });
 
   it("categoryId がマップに存在しない場合は categoryName が空文字になる", () => {
-    const markerWithUnknownCategory: Marker = { ...baseMarker, categoryId: "unknown" };
+    const markerWithUnknownCategory: Marker = {
+      ...baseMarker,
+      categoryId: "unknown",
+    };
     const result = markersToGeoJSON([markerWithUnknownCategory], categoryMap);
     expect(result.features[0].properties!.categoryName).toBe("");
   });

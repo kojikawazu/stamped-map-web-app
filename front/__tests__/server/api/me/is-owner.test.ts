@@ -32,9 +32,13 @@ describe("GET /api/me/is-owner", () => {
 
   it("N-1: ALLOWED_EMAILS に含まれるメールのとき isOwner: true を返す", async () => {
     process.env.ALLOWED_EMAILS = "owner@example.com";
-    verifyAuthMock.mockResolvedValue({ id: "user-1", email: "owner@example.com" });
+    verifyAuthMock.mockResolvedValue({
+      id: "user-1",
+      email: "owner@example.com",
+    });
 
-    const handler = (await import("../../../../server/api/me/is-owner.get")).default;
+    const handler = (await import("../../../../server/api/me/is-owner.get"))
+      .default;
     const result = await handler(makeEvent());
 
     expect(result.data.isOwner).toBe(true);
@@ -42,9 +46,13 @@ describe("GET /api/me/is-owner", () => {
 
   it("A-1: ALLOWED_EMAILS に含まれないメールのとき isOwner: false を返す", async () => {
     process.env.ALLOWED_EMAILS = "owner@example.com";
-    verifyAuthMock.mockResolvedValue({ id: "user-2", email: "other@example.com" });
+    verifyAuthMock.mockResolvedValue({
+      id: "user-2",
+      email: "other@example.com",
+    });
 
-    const handler = (await import("../../../../server/api/me/is-owner.get")).default;
+    const handler = (await import("../../../../server/api/me/is-owner.get"))
+      .default;
     const result = await handler(makeEvent());
 
     expect(result.data.isOwner).toBe(false);
@@ -52,9 +60,13 @@ describe("GET /api/me/is-owner", () => {
 
   it("A-2: ALLOWED_EMAILS が未設定のとき isOwner: false を返す", async () => {
     delete process.env.ALLOWED_EMAILS;
-    verifyAuthMock.mockResolvedValue({ id: "user-1", email: "owner@example.com" });
+    verifyAuthMock.mockResolvedValue({
+      id: "user-1",
+      email: "owner@example.com",
+    });
 
-    const handler = (await import("../../../../server/api/me/is-owner.get")).default;
+    const handler = (await import("../../../../server/api/me/is-owner.get"))
+      .default;
     const result = await handler(makeEvent());
 
     expect(result.data.isOwner).toBe(false);
@@ -62,9 +74,13 @@ describe("GET /api/me/is-owner", () => {
 
   it("N-2: メールアドレスの大文字小文字を区別しない", async () => {
     process.env.ALLOWED_EMAILS = "Owner@Example.com";
-    verifyAuthMock.mockResolvedValue({ id: "user-1", email: "owner@example.com" });
+    verifyAuthMock.mockResolvedValue({
+      id: "user-1",
+      email: "owner@example.com",
+    });
 
-    const handler = (await import("../../../../server/api/me/is-owner.get")).default;
+    const handler = (await import("../../../../server/api/me/is-owner.get"))
+      .default;
     const result = await handler(makeEvent());
 
     expect(result.data.isOwner).toBe(true);
@@ -73,10 +89,11 @@ describe("GET /api/me/is-owner", () => {
   it("A-3: verifyAuth がエラーを throw したとき、エンドポイントはそのエラーを伝播する", async () => {
     process.env.ALLOWED_EMAILS = "owner@example.com";
     verifyAuthMock.mockRejectedValue(
-      Object.assign(new Error("認証が無効です"), { statusCode: 401 })
+      Object.assign(new Error("認証が無効です"), { statusCode: 401 }),
     );
 
-    const handler = (await import("../../../../server/api/me/is-owner.get")).default;
+    const handler = (await import("../../../../server/api/me/is-owner.get"))
+      .default;
     await expect(handler(makeEvent())).rejects.toThrow("認証が無効です");
   });
 });

@@ -7,7 +7,10 @@ export const createCategorySchema = z.object({
     .max(50, "カテゴリ名は50文字以内で入力してください"),
   color: z
     .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, "有効なカラーコード（#RRGGBB）を入力してください"),
+    .regex(
+      /^#[0-9A-Fa-f]{6}$/,
+      "有効なカラーコード（#RRGGBB）を入力してください",
+    ),
 });
 
 export const updateCategorySchema = createCategorySchema;

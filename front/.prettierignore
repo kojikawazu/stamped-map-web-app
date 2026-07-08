@@ -1,0 +1,16 @@
+# 生成物・ビルド成果物
+.nuxt
+.output
+dist
+node_modules
+generated
+prisma/generated
+
+# ロックファイル・レポート
+pnpm-lock.yaml
+coverage
+playwright-report
+test-results
+
+# 静的アセット
+public

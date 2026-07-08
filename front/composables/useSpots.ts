@@ -5,7 +5,10 @@ export const useSpots = () => {
   const { spotsQuery } = useSpotFilter();
 
   const spots = useState<Spot[]>("spots:list", () => []);
-  const pagination = useState<Pagination | null>("spots:pagination", () => null);
+  const pagination = useState<Pagination | null>(
+    "spots:pagination",
+    () => null,
+  );
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -18,7 +21,7 @@ export const useSpots = () => {
         params.set(key, String(value));
       }
       const res = await apiFetch<SpotsResponse>(
-        `/api/spots?${params.toString()}`
+        `/api/spots?${params.toString()}`,
       );
       spots.value = res.data;
       pagination.value = res.pagination;

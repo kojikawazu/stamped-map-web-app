@@ -6,12 +6,16 @@ export const useCategoryCreate = () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  async function createCategory(input: { name: string; color: string }): Promise<Category | null> {
+  async function createCategory(input: {
+    name: string;
+    color: string;
+  }): Promise<Category | null> {
     error.value = null;
 
     const result = createCategorySchema.safeParse(input);
     if (!result.success) {
-      error.value = result.error.issues[0]?.message ?? "入力内容に誤りがあります";
+      error.value =
+        result.error.issues[0]?.message ?? "入力内容に誤りがあります";
       return null;
     }
 
@@ -34,5 +38,10 @@ export const useCategoryCreate = () => {
     error.value = null;
   }
 
-  return { loading: readonly(loading), error: readonly(error), createCategory, clearError };
+  return {
+    loading: readonly(loading),
+    error: readonly(error),
+    createCategory,
+    clearError,
+  };
 };

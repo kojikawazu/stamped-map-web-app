@@ -9,12 +9,16 @@ export const useCategoryManage = () => {
   const deleteLoading = ref(false);
   const editError = ref<string | null>(null);
 
-  async function updateCategory(id: string, input: { name: string; color: string }): Promise<Category | null> {
+  async function updateCategory(
+    id: string,
+    input: { name: string; color: string },
+  ): Promise<Category | null> {
     editError.value = null;
 
     const result = updateCategorySchema.safeParse(input);
     if (!result.success) {
-      editError.value = result.error.issues[0]?.message ?? "入力内容に誤りがあります";
+      editError.value =
+        result.error.issues[0]?.message ?? "入力内容に誤りがあります";
       return null;
     }
 

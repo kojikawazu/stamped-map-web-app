@@ -24,53 +24,87 @@ describe("createSpotSchema", () => {
   });
 
   it("name が101文字以上のときバリデーションエラーになる", () => {
-    const result = createSpotSchema.safeParse({ ...validSpot, name: "a".repeat(101) });
+    const result = createSpotSchema.safeParse({
+      ...validSpot,
+      name: "a".repeat(101),
+    });
     expect(result.success).toBe(false);
   });
 
   it("categoryId が UUID 形式でないときバリデーションエラーになる", () => {
-    const result = createSpotSchema.safeParse({ ...validSpot, categoryId: "not-uuid" });
+    const result = createSpotSchema.safeParse({
+      ...validSpot,
+      categoryId: "not-uuid",
+    });
     expect(result.success).toBe(false);
   });
 
   it("latitude が範囲外のときバリデーションエラーになる", () => {
-    expect(createSpotSchema.safeParse({ ...validSpot, latitude: -91 }).success).toBe(false);
-    expect(createSpotSchema.safeParse({ ...validSpot, latitude: 91 }).success).toBe(false);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, latitude: -91 }).success,
+    ).toBe(false);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, latitude: 91 }).success,
+    ).toBe(false);
   });
 
   it("longitude が範囲外のときバリデーションエラーになる", () => {
-    expect(createSpotSchema.safeParse({ ...validSpot, longitude: -181 }).success).toBe(false);
-    expect(createSpotSchema.safeParse({ ...validSpot, longitude: 181 }).success).toBe(false);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, longitude: -181 }).success,
+    ).toBe(false);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, longitude: 181 }).success,
+    ).toBe(false);
   });
 
   it("visitedAt が YYYY-MM-DD 形式でないときバリデーションエラーになる", () => {
-    const result = createSpotSchema.safeParse({ ...validSpot, visitedAt: "2026/01/01" });
+    const result = createSpotSchema.safeParse({
+      ...validSpot,
+      visitedAt: "2026/01/01",
+    });
     expect(result.success).toBe(false);
   });
 
   it("visitedAt が存在しない日付のときバリデーションエラーになる", () => {
-    const result = createSpotSchema.safeParse({ ...validSpot, visitedAt: "2026-02-30" });
+    const result = createSpotSchema.safeParse({
+      ...validSpot,
+      visitedAt: "2026-02-30",
+    });
     expect(result.success).toBe(false);
   });
 
   it("visitedAt が未来の日付のときバリデーションエラーになる", () => {
-    const result = createSpotSchema.safeParse({ ...validSpot, visitedAt: "2099-12-31" });
+    const result = createSpotSchema.safeParse({
+      ...validSpot,
+      visitedAt: "2099-12-31",
+    });
     expect(result.success).toBe(false);
   });
 
   it("name が100文字のとき許容する（上限境界値）", () => {
-    const result = createSpotSchema.safeParse({ ...validSpot, name: "a".repeat(100) });
+    const result = createSpotSchema.safeParse({
+      ...validSpot,
+      name: "a".repeat(100),
+    });
     expect(result.success).toBe(true);
   });
 
   it("latitude がちょうど ±90 のとき許容する（境界値）", () => {
-    expect(createSpotSchema.safeParse({ ...validSpot, latitude: 90 }).success).toBe(true);
-    expect(createSpotSchema.safeParse({ ...validSpot, latitude: -90 }).success).toBe(true);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, latitude: 90 }).success,
+    ).toBe(true);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, latitude: -90 }).success,
+    ).toBe(true);
   });
 
   it("longitude がちょうど ±180 のとき許容する（境界値）", () => {
-    expect(createSpotSchema.safeParse({ ...validSpot, longitude: 180 }).success).toBe(true);
-    expect(createSpotSchema.safeParse({ ...validSpot, longitude: -180 }).success).toBe(true);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, longitude: 180 }).success,
+    ).toBe(true);
+    expect(
+      createSpotSchema.safeParse({ ...validSpot, longitude: -180 }).success,
+    ).toBe(true);
   });
 
   it("memo が空文字のとき許容する", () => {
@@ -79,7 +113,10 @@ describe("createSpotSchema", () => {
   });
 
   it("memo が1001文字以上のときバリデーションエラーになる", () => {
-    const result = createSpotSchema.safeParse({ ...validSpot, memo: "a".repeat(1001) });
+    const result = createSpotSchema.safeParse({
+      ...validSpot,
+      memo: "a".repeat(1001),
+    });
     expect(result.success).toBe(false);
   });
 });

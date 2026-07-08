@@ -8,7 +8,10 @@ export const useSpotEdit = () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  async function updateSpot(id: string, payload: UpdateSpotInput): Promise<Spot | null> {
+  async function updateSpot(
+    id: string,
+    payload: UpdateSpotInput,
+  ): Promise<Spot | null> {
     loading.value = true;
     error.value = null;
     try {

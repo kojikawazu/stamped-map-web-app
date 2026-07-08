@@ -12,12 +12,17 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
 
   const page = Math.max(1, parseInt(String(query.page ?? "1"), 10) || 1);
-  const limit = Math.min(100, Math.max(1, parseInt(String(query.limit ?? "20"), 10) || 20));
+  const limit = Math.min(
+    100,
+    Math.max(1, parseInt(String(query.limit ?? "20"), 10) || 20),
+  );
   const sortParam = String(query.sort ?? "visited_at");
   const order = query.order === "asc" ? "asc" : "desc";
 
   const sortField = SORT_FIELD_MAP[sortParam] ?? "visitedAt";
-  const where = buildSpotWhereClause(query as Record<string, string | string[]>);
+  const where = buildSpotWhereClause(
+    query as Record<string, string | string[]>,
+  );
 
   const [spots, total] = await Promise.all([
     prisma.mapSpot.findMany({

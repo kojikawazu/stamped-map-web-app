@@ -16,11 +16,46 @@ const defaultCategories = [
 ];
 
 const dummySpots = [
-  { name: "渋谷スクランブル交差点", categoryName: "観光", latitude: 35.6595, longitude: 139.7004, visitedAt: new Date("2026-03-01"), memo: "すごい人混みだった" },
-  { name: "新宿御苑", categoryName: "自然", latitude: 35.6851, longitude: 139.7100, visitedAt: new Date("2026-03-10"), memo: "桜が綺麗だった" },
-  { name: "築地場外市場", categoryName: "食事", latitude: 35.6654, longitude: 139.7706, visitedAt: new Date("2026-03-15"), memo: "マグロが最高" },
-  { name: "浅草寺", categoryName: "観光", latitude: 35.7148, longitude: 139.7967, visitedAt: new Date("2026-03-20"), memo: "雷門を初めて見た" },
-  { name: "吉祥寺 ハモニカ横丁", categoryName: "食事", latitude: 35.7028, longitude: 139.5797, visitedAt: new Date("2026-03-25"), memo: "居酒屋めぐり" },
+  {
+    name: "渋谷スクランブル交差点",
+    categoryName: "観光",
+    latitude: 35.6595,
+    longitude: 139.7004,
+    visitedAt: new Date("2026-03-01"),
+    memo: "すごい人混みだった",
+  },
+  {
+    name: "新宿御苑",
+    categoryName: "自然",
+    latitude: 35.6851,
+    longitude: 139.71,
+    visitedAt: new Date("2026-03-10"),
+    memo: "桜が綺麗だった",
+  },
+  {
+    name: "築地場外市場",
+    categoryName: "食事",
+    latitude: 35.6654,
+    longitude: 139.7706,
+    visitedAt: new Date("2026-03-15"),
+    memo: "マグロが最高",
+  },
+  {
+    name: "浅草寺",
+    categoryName: "観光",
+    latitude: 35.7148,
+    longitude: 139.7967,
+    visitedAt: new Date("2026-03-20"),
+    memo: "雷門を初めて見た",
+  },
+  {
+    name: "吉祥寺 ハモニカ横丁",
+    categoryName: "食事",
+    latitude: 35.7028,
+    longitude: 139.5797,
+    visitedAt: new Date("2026-03-25"),
+    memo: "居酒屋めぐり",
+  },
 ];
 
 async function main() {
@@ -43,7 +78,9 @@ async function main() {
   const spotCount = await prisma.mapSpot.count();
   if (spotCount === 0) {
     for (const spot of dummySpots) {
-      const category = await prisma.mapCategory.findUnique({ where: { name: spot.categoryName } });
+      const category = await prisma.mapCategory.findUnique({
+        where: { name: spot.categoryName },
+      });
       if (!category) continue;
       await prisma.mapSpot.create({
         data: {

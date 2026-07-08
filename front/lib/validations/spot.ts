@@ -27,7 +27,7 @@ export const createSpotSchema = z.object({
           d.getDate() === day
         );
       },
-      { message: "存在しない日付です" }
+      { message: "存在しない日付です" },
     )
     .refine(
       (date) => {
@@ -37,7 +37,7 @@ export const createSpotSchema = z.object({
         const todayUtc = new Date().toISOString().split("T")[0];
         return date <= todayUtc;
       },
-      { message: "未来の日付は指定できません" }
+      { message: "未来の日付は指定できません" },
     ),
   memo: z
     .string()

@@ -52,6 +52,19 @@ jobs:
           SUPABASE_KEY: dummy-anon-key
           NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
 
+      - name: Type check
+        run: pnpm type-check
+        env:
+          SUPABASE_URL: https://dummy.supabase.co
+          SUPABASE_KEY: dummy-anon-key
+          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
+
+      - name: Lint (ESLint / JSDoc)
+        run: pnpm lint
+
+      - name: Format check (Prettier)
+        run: pnpm format:check
+
       - name: Unit & integration tests
         run: pnpm test
         env:

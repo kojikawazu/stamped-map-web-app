@@ -14,7 +14,14 @@ describe("useCategoryCreate", () => {
   });
 
   it("正常系: カテゴリを作成して返す", async () => {
-    const created = { id: "cat-1", name: "グルメ", color: "#EF4444", isDefault: false, sortOrder: 6, spotCount: 0 };
+    const created = {
+      id: "cat-1",
+      name: "グルメ",
+      color: "#EF4444",
+      isDefault: false,
+      sortOrder: 6,
+      spotCount: 0,
+    };
     mockApiFetch.mockResolvedValue({ data: created });
 
     const { createCategory, loading, error } = useCategoryCreate();
@@ -60,7 +67,16 @@ describe("useCategoryCreate", () => {
     const { createCategory, loading } = useCategoryCreate();
     const promise = createCategory({ name: "グルメ", color: "#EF4444" });
     expect(loading.value).toBe(true);
-    resolveFn({ data: { id: "cat-1", name: "グルメ", color: "#EF4444", isDefault: false, sortOrder: 6, spotCount: 0 } });
+    resolveFn({
+      data: {
+        id: "cat-1",
+        name: "グルメ",
+        color: "#EF4444",
+        isDefault: false,
+        sortOrder: 6,
+        spotCount: 0,
+      },
+    });
     await promise;
     expect(loading.value).toBe(false);
   });

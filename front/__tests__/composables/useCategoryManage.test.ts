@@ -24,11 +24,21 @@ describe("useCategoryManage", () => {
 
   describe("updateCategory", () => {
     it("更新成功時: Category を返し、成功トーストを表示する", async () => {
-      const cat = { id: "cat-1", name: "カフェ", color: "#FF5733", isDefault: false, sortOrder: 1, spotCount: 3 };
+      const cat = {
+        id: "cat-1",
+        name: "カフェ",
+        color: "#FF5733",
+        isDefault: false,
+        sortOrder: 1,
+        spotCount: 3,
+      };
       mockApiFetch.mockResolvedValue({ data: cat });
 
       const { updateCategory, editLoading, editError } = useCategoryManage();
-      const result = await updateCategory("cat-1", { name: "カフェ", color: "#FF5733" });
+      const result = await updateCategory("cat-1", {
+        name: "カフェ",
+        color: "#FF5733",
+      });
 
       expect(result).toEqual(cat);
       expect(mockToastSuccess).toHaveBeenCalledWith("カテゴリを更新しました");
@@ -38,7 +48,10 @@ describe("useCategoryManage", () => {
 
     it("バリデーション失敗時: null を返し、editError を設定する", async () => {
       const { updateCategory, editError } = useCategoryManage();
-      const result = await updateCategory("cat-1", { name: "", color: "#FF5733" });
+      const result = await updateCategory("cat-1", {
+        name: "",
+        color: "#FF5733",
+      });
 
       expect(result).toBeNull();
       expect(mockApiFetch).not.toHaveBeenCalled();
@@ -49,7 +62,10 @@ describe("useCategoryManage", () => {
       mockApiFetch.mockRejectedValue(new Error("Network error"));
 
       const { updateCategory, editError } = useCategoryManage();
-      const result = await updateCategory("cat-1", { name: "カフェ", color: "#FF5733" });
+      const result = await updateCategory("cat-1", {
+        name: "カフェ",
+        color: "#FF5733",
+      });
 
       expect(result).toBeNull();
       expect(mockToastError).toHaveBeenCalledWith("更新に失敗しました");
@@ -65,7 +81,9 @@ describe("useCategoryManage", () => {
       const result = await deleteCategory("cat-1");
 
       expect(result).toBe(true);
-      expect(mockApiFetch).toHaveBeenCalledWith("/api/categories/cat-1", { method: "DELETE" });
+      expect(mockApiFetch).toHaveBeenCalledWith("/api/categories/cat-1", {
+        method: "DELETE",
+      });
       expect(mockToastSuccess).toHaveBeenCalledWith("カテゴリを削除しました");
     });
 

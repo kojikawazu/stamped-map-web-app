@@ -11,10 +11,10 @@ test.describe("Smoke Tests", () => {
 
     await expect(page).toHaveTitle(/Stamped Map|スタンプマップ/i);
     await expect(
-      page.getByRole("textbox", { name: /メール|email/i })
+      page.getByRole("textbox", { name: /メール|email/i }),
     ).toBeVisible();
     await expect(
-      page.getByRole("textbox", { name: /パスワード|password/i })
+      page.getByRole("textbox", { name: /パスワード|password/i }),
     ).toBeVisible();
   });
 
@@ -52,7 +52,7 @@ test.describe("Smoke Tests", () => {
       (e) =>
         !e.includes("supabase") &&
         !e.includes("NUXT_PUBLIC") &&
-        !e.includes("favicon")
+        !e.includes("favicon"),
     );
     expect(jsErrors).toHaveLength(0);
   });

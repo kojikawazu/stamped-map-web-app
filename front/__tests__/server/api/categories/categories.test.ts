@@ -17,8 +17,14 @@ const prismaMock = {
   },
 };
 
-vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }));
-vi.stubGlobal("verifyOwner", vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }));
+vi.stubGlobal(
+  "verifyAuth",
+  vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }),
+);
+vi.stubGlobal(
+  "verifyOwner",
+  vi.fn().mockResolvedValue({ id: "user-1", email: "owner@example.com" }),
+);
 vi.stubGlobal("prisma", prismaMock);
 
 // readBody は PUT などボディを読む必要があるハンドラーで使用されるため、テストごとに戻り値を設定できるよう差し替える
@@ -30,7 +36,7 @@ vi.stubGlobal("readBody", mockReadBody);
 function makeEvent(
   method: string,
   path: string,
-  params?: Record<string, string>
+  params?: Record<string, string>,
 ) {
   const req = Object.assign(new IncomingMessage(null as never), {
     method,
@@ -107,7 +113,7 @@ describe("GET /api/categories", () => {
     await handler(event);
 
     expect(prismaMock.mapCategory.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ orderBy: { sortOrder: "asc" } })
+      expect.objectContaining({ orderBy: { sortOrder: "asc" } }),
     );
   });
 });
@@ -241,7 +247,7 @@ describe("PUT /api/categories/:id", () => {
       expect.objectContaining({
         where: { id: VALID_UUID },
         data: { name: "新しいカフェ", color: "#00FF00" },
-      })
+      }),
     );
   });
 

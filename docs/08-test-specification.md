@@ -219,5 +219,14 @@ vi.stubGlobal(
 
 ### CI/CD
 
-- GitHub Actions でプッシュ時に自動テスト実行
-- テスト失敗時はデプロイをブロック
+GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動実行する。いずれかのゲート失敗で PR をブロックする。
+
+**test ジョブ**（品質ゲート）:
+
+1. `nuxt prepare`（型定義・ESLint flat config を生成）
+2. `pnpm type-check`（`nuxt typecheck` = vue-tsc、`tsc --noEmit` 相当）
+3. `pnpm lint`（ESLint。JSDoc/TSDoc ルールを含む）
+4. `pnpm format:check`（Prettier 整形チェック）
+5. `pnpm test`（Vitest ユニット・結合）
+
+**e2e ジョブ**: `pnpm build` → 本番サーバー起動 → `pnpm test:e2e`（Playwright）。失敗時は `playwright-report` を artifact 保存。

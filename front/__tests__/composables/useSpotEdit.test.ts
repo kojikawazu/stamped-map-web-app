@@ -40,7 +40,7 @@ describe("useSpotEdit", () => {
     expect(result).toEqual(spot);
     expect(mockApiFetch).toHaveBeenCalledWith(
       "/api/spots/spot-1",
-      expect.objectContaining({ method: "PUT" })
+      expect.objectContaining({ method: "PUT" }),
     );
     expect(mockToastSuccess).toHaveBeenCalledWith("スポットを更新しました");
     expect(loading.value).toBe(false);

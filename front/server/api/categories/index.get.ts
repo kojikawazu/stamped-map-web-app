@@ -8,8 +8,8 @@ export default defineEventHandler(async (event) => {
     include: { _count: { select: { mapSpots: true } } },
   });
 
-  const data = categories.map((cat: typeof categories[number]) =>
-    formatCategoryResponse(cat, cat._count.mapSpots)
+  const data = categories.map((cat: (typeof categories)[number]) =>
+    formatCategoryResponse(cat, cat._count.mapSpots),
   );
 
   return { data };

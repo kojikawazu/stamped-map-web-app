@@ -159,7 +159,10 @@ pnpm dev          # 開発サーバー起動
 pnpm build        # ビルド
 pnpm test         # ユニット/結合テスト（Vitest）
 pnpm test:e2e     # E2E テスト（Playwright）
-pnpm lint         # Lint（ESLint）
+pnpm type-check   # 型チェック（nuxt typecheck = vue-tsc）
+pnpm lint         # Lint（ESLint。JSDoc ルール含む）
+pnpm format       # フォーマット適用（Prettier）
+pnpm format:check # フォーマットチェック（Prettier）
 pnpm db:seed      # シードデータ投入
 ```
 
