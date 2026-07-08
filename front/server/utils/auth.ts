@@ -1,6 +1,31 @@
 import { createClient } from "@supabase/supabase-js";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { H3Event } from "h3";
+
+// --- E2E 認証バイパス（実 DB E2E 専用） ---
+// サーバー API は Bearer JWT を Supabase で検証するため、実 DB E2E では Supabase 依存になる。
+// これを避けるため、明示的な環境変数が立っているときだけ Supabase 検証をスキップし、
+// 固定のオーナーとして扱う「テスト用シーム」を設ける。
+//
+// ⚠️ 本番では絶対に有効化しないこと。二重ガード:
+//   1) E2E_AUTH_BYPASS === "1"（本番の Vercel には設定しない）
+//   2) VERCEL_ENV !== "production"（万一設定されても本番ランタイムでは無効）
+const E2E_TEST_USER = { id: "e2e-owner", email: "e2e@example.com" } as const;
+
+let _e2eBypassWarned = false;
+
+function isE2EAuthBypass(): boolean {
+  const on =
+    process.env.E2E_AUTH_BYPASS === "1" &&
+    process.env.VERCEL_ENV !== "production";
+  if (on && !_e2eBypassWarned) {
+    _e2eBypassWarned = true;
+    console.warn(
+      "[auth] E2E_AUTH_BYPASS is ON — Supabase 認証をスキップしています。本番では絶対に有効化しないでください。",
+    );
+  }
+  return on;
+}
 
 // フロントエンドは Authorization: Bearer <token> ヘッダーで認証する設計のため、
 // @nuxtjs/supabase の serverSupabaseClient（Cookie セッション前提）ではなく
@@ -23,6 +48,10 @@ function getSupabaseAuth(): SupabaseClient {
 }
 
 export async function verifyAuth(event: H3Event) {
+  if (isE2EAuthBypass()) {
+    return E2E_TEST_USER as unknown as User;
+  }
+
   const token = getHeader(event, "authorization")?.replace("Bearer ", "");
   if (!token) {
     throw createError({ statusCode: 401, message: "認証が必要です" });
@@ -51,6 +80,11 @@ export function getAllowedEmails(): string[] {
 
 export async function verifyOwner(event: H3Event) {
   const user = await verifyAuth(event);
+
+  // バイパス時は verifyAuth が固定オーナーを返すため、ALLOWED_EMAILS チェックもスキップする。
+  if (isE2EAuthBypass()) {
+    return user;
+  }
 
   const allowedEmails = getAllowedEmails();
 

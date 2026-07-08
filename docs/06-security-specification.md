@@ -90,6 +90,20 @@ API が 401 を返した場合のクライアント側対応：
 | メール/パスワード | 対応済み | 事前作成アカウントのみ |
 | Google OAuth | 対応済み | `ALLOWED_EMAILS` でWrite操作を制限 |
 
+### E2E 認証バイパス（テスト専用）
+
+実 DB E2E では、サーバー API の Supabase JWT 検証を回避するため `server/utils/auth.ts` に
+環境変数ゲートのバイパスシームを設けている。
+
+| 項目 | 内容 |
+|------|------|
+| 有効化条件 | `E2E_AUTH_BYPASS=1` **かつ** `VERCEL_ENV !== "production"`（二重ガード） |
+| 挙動 | `verifyAuth` / `verifyOwner` が Supabase 検証を行わず固定オーナーを返す |
+| 設定範囲 | E2E（CI の e2e ジョブ / ローカル）のみ。**本番 Vercel には設定しない** |
+| 可視性 | 有効時はサーバーログに警告を出力 |
+
+> 本番ランタイム（`VERCEL_ENV=production`）では、仮に `E2E_AUTH_BYPASS` が設定されても無効化される。
+
 ## 認可
 
 ### 方針

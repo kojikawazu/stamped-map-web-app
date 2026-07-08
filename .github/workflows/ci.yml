@@ -45,6 +45,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 型チェックは @prisma/client の型に依存する（IT ファイルが PrismaClient を import）。
+      # install の build script 依存は非決定的なため、明示的に生成する。
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+
       - name: Prepare Nuxt
         run: pnpm exec nuxt prepare
         env:
@@ -119,6 +124,30 @@ jobs:
       run:
         working-directory: front
 
+    # 実 DB シナリオ E2E 用の PostGIS サービス（schema が postgis 拡張を要求するため）。
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stamped_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # サーバー・ビルド・DB 準備で共有する環境変数。
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stamped_e2e
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/stamped_e2e
+      SUPABASE_URL: https://dummy.supabase.co
+      SUPABASE_KEY: dummy-anon-key
+      NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -143,19 +172,20 @@ jobs:
 
       - name: Build Nuxt
         run: pnpm build
-        env:
-          SUPABASE_URL: https://dummy.supabase.co
-          SUPABASE_KEY: dummy-anon-key
-          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
-          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
+      # schema を実 DB に同期し、決定的なシード（デフォルト5カテゴリ + ダミー5スポット）を投入する。
+      - name: Prepare test database
+        run: |
+          pnpm exec prisma db push --skip-generate --accept-data-loss
+          pnpm db:seed
+
+      # 本番ビルド済みサーバーを実 DB + E2E 認証バイパスで起動する。
+      # E2E_AUTH_BYPASS は本番では絶対に設定しない（VERCEL_ENV=production でも無効化される二重ガード）。
       - name: Start production server
         run: |
           PORT=3000 HOST=0.0.0.0 \
-          SUPABASE_URL=https://dummy.supabase.co \
-          SUPABASE_KEY=dummy-anon-key \
-          NUXT_PUBLIC_MAPTILER_KEY=dummy-maptiler-key \
-          DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy \
+          E2E_AUTH_BYPASS=1 \
+          ALLOWED_EMAILS=e2e@example.com \
           node .output/server/index.mjs > /tmp/nitro.log 2>&1 &
 
       - name: Wait for production server
@@ -168,10 +198,6 @@ jobs:
         env:
           CI: "true"
           PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
-          SUPABASE_URL: https://dummy.supabase.co
-          SUPABASE_KEY: dummy-anon-key
-          NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
-          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
 
       - name: Upload Playwright report
         if: failure()

@@ -236,4 +236,4 @@ GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動�
 
 **it ジョブ**（統合テスト）: `prisma generate` → `pnpm test:it`。Testcontainers が PostGIS コンテナを起動し実 Prisma を検証する（ubuntu-latest の Docker を利用、services 定義不要）。
 
-**e2e ジョブ**: `pnpm build` → 本番サーバー起動 → `pnpm test:e2e`（Playwright）。失敗時は `playwright-report` を artifact 保存。
+**e2e ジョブ**（実 DB シナリオ）: `services: postgis` を起動 → `pnpm build` → `prisma db push` + `pnpm db:seed` → 本番サーバーを `E2E_AUTH_BYPASS=1` で起動 → `pnpm test:e2e`（Playwright）。API はモックせず実データを検証する。失敗時は `playwright-report` を artifact 保存。

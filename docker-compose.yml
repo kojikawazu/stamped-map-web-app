@@ -1,0 +1,19 @@
+# ローカルの統合(IT)/E2E 用 PostGIS。
+#   docker compose up -d
+# 接続: postgresql://stamped:stamped@localhost:5433/stamped
+# ※ IT（Testcontainers）はこの compose とは独立に自前でコンテナを起動するため不要。
+#    これは主に E2E（別プロセスのアプリサーバーから実 DB を参照する）用途。
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: stamped
+      POSTGRES_PASSWORD: stamped
+      POSTGRES_DB: stamped
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stamped -d stamped"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
