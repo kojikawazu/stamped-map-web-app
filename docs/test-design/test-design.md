@@ -436,7 +436,7 @@ export async function clearSupabaseSession(page)
 ジョブ: lint-and-test
   1. Checkout
   2. pnpm セットアップ（バージョン固定）
-  3. Node.js 20 セットアップ（pnpm キャッシュ）
+  3. Node.js 22 セットアップ（pnpm キャッシュ）
   4. pnpm install --frozen-lockfile
   5. pnpm test（ユニット + 結合テスト）
   6. Playwright ブラウザインストール

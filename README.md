@@ -76,7 +76,7 @@ flowchart TD
 
 ### 前提条件
 
-- Node.js 20+（CI は Node 20 で検証）
+- Node.js 22+（CI は Node 22 で検証。ESLint 10 / @nuxt/eslint が Node 22 以上を要求）
 - pnpm 10+
 - Supabase プロジェクト（PostgreSQL + PostGIS 有効化済み）
 - MapTiler Cloud アカウント（API Key 発行済み）
