@@ -1,6 +1,18 @@
 export type SortField = "visited_at" | "created_at";
 export type SortOrder = "asc" | "desc";
 
+/**
+ * スポット一覧の 1 ページあたり取得件数。
+ *
+ * サーバー側（`GET /api/spots`）は `limit` を 1〜100 にクランプするため、
+ * この値は 100 を超えてはならない。20 は既定値と同値で、
+ * 一覧パネルの縦スクロール量が過大にならない件数として選んでいる。
+ *
+ * 参照箇所がこのファイルに閉じているため、`typescript.md`（定数の配置）に従い
+ * `constants/` へは昇格させずコロケーションのままとする。
+ */
+const SPOT_PAGE_SIZE = 20;
+
 export const useSpotFilter = () => {
   const searchQuery = useState<string>("spotFilter:search", () => "");
   const selectedCategories = useState<string[]>(
@@ -17,7 +29,7 @@ export const useSpotFilter = () => {
   const spotsQuery = computed(() => {
     const params: Record<string, string | number> = {
       page: page.value,
-      limit: 20,
+      limit: SPOT_PAGE_SIZE,
       sort: sortField.value,
       order: sortOrder.value,
     };
