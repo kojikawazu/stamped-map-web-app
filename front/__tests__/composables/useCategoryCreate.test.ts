@@ -13,7 +13,7 @@ describe("useCategoryCreate", () => {
     vi.clearAllMocks();
   });
 
-  it("正常系: カテゴリを作成して返す", async () => {
+  it("N-1: カテゴリを作成して返す", async () => {
     const created = {
       id: "cat-1",
       name: "グルメ",
@@ -32,7 +32,7 @@ describe("useCategoryCreate", () => {
     expect(error.value).toBeNull();
   });
 
-  it("バリデーションエラー: 名前が空の場合は null を返し error をセット", async () => {
+  it("S-1: 名前が空の場合は null を返し error をセット", async () => {
     const { createCategory, error } = useCategoryCreate();
     const result = await createCategory({ name: "", color: "#EF4444" });
 
@@ -41,7 +41,7 @@ describe("useCategoryCreate", () => {
     expect(mockApiFetch).not.toHaveBeenCalled();
   });
 
-  it("バリデーションエラー: カラーコード形式が不正の場合は null を返す", async () => {
+  it("S-2: カラーコード形式が不正の場合は null を返す", async () => {
     const { createCategory, error } = useCategoryCreate();
     const result = await createCategory({ name: "グルメ", color: "red" });
 
@@ -50,7 +50,7 @@ describe("useCategoryCreate", () => {
     expect(mockApiFetch).not.toHaveBeenCalled();
   });
 
-  it("APIエラー: 失敗時は null を返し error をセット", async () => {
+  it("A-1: API 失敗時は null を返し error をセット", async () => {
     mockApiFetch.mockRejectedValue(new Error("Network error"));
 
     const { createCategory, error } = useCategoryCreate();
@@ -60,7 +60,7 @@ describe("useCategoryCreate", () => {
     expect(error.value).toBe("カテゴリの追加に失敗しました");
   });
 
-  it("API 呼び出し中は loading が true になる", async () => {
+  it("N-2: API 呼び出し中は loading が true になる", async () => {
     let resolveFn!: (v: unknown) => void;
     mockApiFetch.mockReturnValue(new Promise((r) => (resolveFn = r)));
 
@@ -81,7 +81,7 @@ describe("useCategoryCreate", () => {
     expect(loading.value).toBe(false);
   });
 
-  it("clearError: エラーをリセットできる", async () => {
+  it("N-3: clearError でエラーをリセットできる", async () => {
     const { createCategory, error, clearError } = useCategoryCreate();
     await createCategory({ name: "", color: "#EF4444" });
     expect(error.value).toBeTruthy();

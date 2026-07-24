@@ -22,7 +22,7 @@ describe("useSpotDelete", () => {
     vi.clearAllMocks();
   });
 
-  it("削除成功時: true を返し、成功トーストを表示する", async () => {
+  it("N-1: 削除成功時に true を返し、成功トーストを表示する", async () => {
     mockApiFetch.mockResolvedValue(undefined);
 
     const { deleteSpot, loading } = useSpotDelete();
@@ -36,7 +36,7 @@ describe("useSpotDelete", () => {
     expect(loading.value).toBe(false);
   });
 
-  it("削除失敗時: false を返し、エラートーストを表示する", async () => {
+  it("A-1: 削除失敗時に false を返し、エラートーストを表示する", async () => {
     mockApiFetch.mockRejectedValue(new Error("Network error"));
 
     const { deleteSpot, loading } = useSpotDelete();
@@ -47,7 +47,7 @@ describe("useSpotDelete", () => {
     expect(loading.value).toBe(false);
   });
 
-  it("API 呼び出し中は loading が true になる", async () => {
+  it("N-2: API 呼び出し中は loading が true になる", async () => {
     let resolveFn!: (v: unknown) => void;
     mockApiFetch.mockReturnValue(new Promise((r) => (resolveFn = r)));
 
