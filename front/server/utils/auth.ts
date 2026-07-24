@@ -40,7 +40,7 @@ function getSupabaseAuth(): SupabaseClient {
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_KEY;
     if (!url || !key) {
-      throw createError({ statusCode: 500, message: "サーバー設定エラー" });
+      throw apiError(500, "INTERNAL_ERROR", "サーバー設定エラー");
     }
     _supabaseAuth = createClient(url, key);
   }
@@ -49,12 +49,17 @@ function getSupabaseAuth(): SupabaseClient {
 
 export async function verifyAuth(event: H3Event) {
   if (isE2EAuthBypass()) {
+    // E2E_TEST_USER は id / email だけを持つ部分実装で、Supabase の User 型は
+    // 構造的にこれより遥かに大きいため直接代入できず、二段キャストで隙間を埋める。
+    // バイパス経路で実際に読まれるのは email のみ（is-owner.get.ts のオーナー判定）で、
+    // verifyOwner はバイパス時に ALLOWED_EMAILS 検証ごとスキップする。
+    // 他フィールドは実行時に触られないため部分実装で足りる。
     return E2E_TEST_USER as unknown as User;
   }
 
   const token = getHeader(event, "authorization")?.replace("Bearer ", "");
   if (!token) {
-    throw createError({ statusCode: 401, message: "認証が必要です" });
+    throw apiError(401, "UNAUTHORIZED", "認証が必要です");
   }
 
   const supabase = getSupabaseAuth();
@@ -65,7 +70,7 @@ export async function verifyAuth(event: H3Event) {
   } = await supabase.auth.getUser(token);
 
   if (error || !user) {
-    throw createError({ statusCode: 401, message: "認証が無効です" });
+    throw apiError(401, "UNAUTHORIZED", "認証が無効です");
   }
 
   return user;
@@ -89,7 +94,7 @@ export async function verifyOwner(event: H3Event) {
   const allowedEmails = getAllowedEmails();
 
   if (!allowedEmails.includes((user.email ?? "").toLowerCase())) {
-    throw createError({ statusCode: 403, message: "操作が許可されていません" });
+    throw apiError(403, "FORBIDDEN", "操作が許可されていません");
   }
 
   return user;
