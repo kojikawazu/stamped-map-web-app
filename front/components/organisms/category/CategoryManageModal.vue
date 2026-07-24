@@ -124,7 +124,9 @@
 import type { Category } from "~/types/category";
 
 defineProps<{
+  /** モーダルの開閉状態。`v-model` で双方向バインドする */
   modelValue: boolean;
+  /** 管理対象のカテゴリ一覧。`spotCount` により削除可否が変わる */
   categories: Category[];
 }>();
 

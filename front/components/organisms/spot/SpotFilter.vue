@@ -89,10 +89,15 @@ import type { Category } from "~/types/category";
 import type { SortField, SortOrder } from "~/composables/useSpotFilter";
 
 const props = defineProps<{
+  /** 現在の検索文字列。スポット名の部分一致に使う */
   searchQuery: string;
+  /** 選択中のカテゴリ ID。空配列は「絞り込みなし」を意味する */
   selectedCategories: string[];
+  /** 現在の並び替え対象 */
   sortField: SortField;
+  /** 現在の並び順 */
   sortOrder: SortOrder;
+  /** 選択肢として表示するカテゴリ一覧 */
   categories: Category[];
 }>();
 

@@ -39,11 +39,17 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
+    /** ダイアログの開閉状態。`v-model` で双方向バインドする */
     modelValue: boolean;
+    /** ダイアログ見出し */
     title: string;
+    /** 確認を促す本文 */
     message: string;
+    /** 実行ボタンのラベル。未指定時は既定値を使う */
     confirmLabel?: string;
+    /** 実行中に表示するラベル。未指定時は既定値を使う */
     loadingLabel?: string;
+    /** 実行中かどうか。true の間はボタンを無効化し二重実行を防ぐ */
     loading?: boolean;
   }>(),
   {

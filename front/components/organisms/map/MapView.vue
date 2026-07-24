@@ -30,7 +30,9 @@ import {
 } from "~/lib/map-utils";
 
 const props = defineProps<{
+  /** 地図に描画するマーカー。絞り込み後の全件（ページングなし） */
   markers: Marker[];
+  /** カテゴリ一覧。ポップアップにカテゴリ名を出すための参照元 */
   categories: Category[];
 }>();
 

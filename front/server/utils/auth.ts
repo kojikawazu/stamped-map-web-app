@@ -47,6 +47,17 @@ function getSupabaseAuth(): SupabaseClient {
   return _supabaseAuth;
 }
 
+/**
+ * リクエストの Bearer トークンを Supabase で検証し、認証済みユーザーを返す。
+ *
+ * すべての API エンドポイントの入口で呼ぶ。`E2E_AUTH_BYPASS` が有効な場合のみ
+ * Supabase 検証をスキップして固定のテストユーザーを返す（本番では無効）。
+ *
+ * @param event - 検証対象のリクエストイベント。`Authorization` ヘッダーを読む
+ * @returns 認証済みの Supabase ユーザー
+ * @throws 401 `UNAUTHORIZED` — トークンが未送信・無効・期限切れの場合
+ * @throws 500 `INTERNAL_ERROR` — SUPABASE_URL / SUPABASE_KEY が未設定の場合
+ */
 export async function verifyAuth(event: H3Event) {
   if (isE2EAuthBypass()) {
     // E2E_TEST_USER は id / email だけを持つ部分実装で、Supabase の User 型は
@@ -76,6 +87,15 @@ export async function verifyAuth(event: H3Event) {
   return user;
 }
 
+/**
+ * 環境変数 `ALLOWED_EMAILS` からオーナーのメールアドレス一覧を取得する。
+ *
+ * カンマ区切りの値を分割し、前後空白の除去と小文字化を行う
+ * （比較時の表記ゆれを防ぐため）。未設定なら空配列を返し、
+ * 結果としてすべてのユーザーが非オーナー扱いになる。
+ *
+ * @returns 小文字に正規化されたメールアドレスの配列
+ */
 export function getAllowedEmails(): string[] {
   return (process.env.ALLOWED_EMAILS ?? "")
     .split(",")
@@ -83,6 +103,17 @@ export function getAllowedEmails(): string[] {
     .filter(Boolean);
 }
 
+/**
+ * 認証に加えて、ユーザーが書き込み権限を持つオーナーかを検証する。
+ *
+ * すべての書き込み系エンドポイント（POST / PUT / DELETE）の入口で呼ぶ。
+ * DB へ到達する前に弾くことで、非オーナーによる更新を防ぐ。
+ *
+ * @param event - 検証対象のリクエストイベント
+ * @returns オーナーとして検証済みの Supabase ユーザー
+ * @throws 403 `FORBIDDEN` — `ALLOWED_EMAILS` に含まれないユーザーの場合
+ * @throws 401 `UNAUTHORIZED` / 500 `INTERNAL_ERROR` — `verifyAuth` から伝播
+ */
 export async function verifyOwner(event: H3Event) {
   const user = await verifyAuth(event);
 

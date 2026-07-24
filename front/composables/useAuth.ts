@@ -1,3 +1,10 @@
+/**
+ * 認証状態の参照とログイン・ログアウト操作を提供する。
+ *
+ * @returns 認証ユーザー・セッション・ローディング状態と、
+ *   メール/パスワードログイン（`login`）・Google OAuth ログイン（`loginWithGoogle`）・
+ *   ログアウト（`logout`）の各操作
+ */
 export const useAuth = () => {
   const supabase = useSupabaseClient();
   const user = useSupabaseUser();

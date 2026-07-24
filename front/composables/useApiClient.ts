@@ -1,5 +1,14 @@
 import type { FetchError } from "ofetch";
 
+/**
+ * 認証付き API 呼び出しのラッパーを提供する。
+ *
+ * Supabase のアクセストークンを `Authorization: Bearer` ヘッダーへ自動付与し、
+ * 401 が返った場合はセッションをリフレッシュして**1 回だけ**リトライする。
+ * リフレッシュに失敗した場合は `/login` へ遷移させる。
+ *
+ * @returns `apiFetch` — 認証ヘッダー付与とリトライを内包した `$fetch` 相当の関数
+ */
 export const useApiClient = () => {
   const supabase = useSupabaseClient();
 

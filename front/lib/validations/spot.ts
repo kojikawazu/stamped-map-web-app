@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+/**
+ * スポット登録リクエストの検証スキーマ。
+ *
+ * Server API（`POST /api/spots`）とフォームの双方で使い、
+ * 同じルールが両側に適用されることを保証する。
+ */
 export const createSpotSchema = z.object({
   name: z
     .string()
@@ -46,7 +52,15 @@ export const createSpotSchema = z.object({
     .or(z.literal("")),
 });
 
+/**
+ * スポット更新リクエストの検証スキーマ。
+ *
+ * 更新は全項目を送る仕様のため、登録と同一ルールを再利用する。
+ * 部分更新（PATCH）を導入する際は `.partial()` を検討すること。
+ */
 export const updateSpotSchema = createSpotSchema;
 
+/** スポット登録リクエストの入力値。スキーマから導出する */
 export type CreateSpotInput = z.infer<typeof createSpotSchema>;
+/** スポット更新リクエストの入力値。スキーマから導出する */
 export type UpdateSpotInput = z.infer<typeof updateSpotSchema>;

@@ -2,6 +2,16 @@ import { toast } from "vue-sonner";
 import { updateCategorySchema } from "~/lib/validations/category";
 import type { Category } from "~/types/category";
 
+/**
+ * カテゴリの更新・削除を提供する。
+ *
+ * 更新と削除でローディング状態を分けて持つ（同一画面で片方だけ無効化するため）。
+ * 結果はトースト通知で利用者に伝える。
+ *
+ * @returns 更新/削除それぞれのローディング状態・更新エラーと、
+ *   更新処理 `updateCategory`・削除処理 `deleteCategory`・
+ *   エラーリセット `clearEditError`
+ */
 export const useCategoryManage = () => {
   const { apiFetch } = useApiClient();
 

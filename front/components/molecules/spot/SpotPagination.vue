@@ -30,7 +30,9 @@
 import type { Pagination } from "~/types/spot";
 
 defineProps<{
+  /** ページング情報。未取得の間は `null` でコントロールを描画しない */
   pagination: Pagination | null;
+  /** 現在のページ番号。1 始まり */
   currentPage: number;
 }>();
 

@@ -36,9 +36,13 @@
 import type { Spot } from "~/types/spot";
 
 defineProps<{
+  /** 表示するスポット。現在ページ分のみ */
   spots: Spot[];
+  /** 取得中かどうか。true の間はスケルトンを表示する */
   loading: boolean;
+  /** 取得エラーのメッセージ。エラーが無ければ `null` */
   error: string | null;
+  /** 選択中スポットの ID。ハイライト表示に使う。未選択なら `null` */
   selectedSpotId?: string | null;
 }>();
 

@@ -1,3 +1,11 @@
+/**
+ * ログインユーザーが書き込み権限を持つオーナーかを判定する。
+ *
+ * 非オーナーに Write 操作ボタンを表示しないために使う。
+ * これは表示制御のみで、権限の実強制はサーバー側の `verifyOwner` が行う。
+ *
+ * @returns オーナー判定の共有状態 `isOwner` と、取得処理 `fetchIsOwner`
+ */
 export const useIsOwner = () => {
   const isOwner = useState<boolean>("isOwner", () => false);
   const { apiFetch } = useApiClient();

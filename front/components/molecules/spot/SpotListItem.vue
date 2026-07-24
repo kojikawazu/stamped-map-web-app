@@ -55,7 +55,12 @@
 <script setup lang="ts">
 import type { Spot } from "~/types/spot";
 
-defineProps<{ spot: Spot; selected?: boolean }>();
+defineProps<{
+  /** 表示するスポット */
+  spot: Spot;
+  /** 選択中かどうか。ハイライト表示に使う */
+  selected?: boolean;
+}>();
 
 const emit = defineEmits<{ select: [spot: Spot] }>();
 

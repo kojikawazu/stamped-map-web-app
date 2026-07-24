@@ -1,5 +1,12 @@
 import { toast } from "vue-sonner";
 
+/**
+ * スポットの削除を提供する。
+ *
+ * 結果はトースト通知で利用者に伝え、成功可否を真偽値で返す。
+ *
+ * @returns ローディング状態と、削除処理 `deleteSpot`
+ */
 export const useSpotDelete = () => {
   const { apiFetch } = useApiClient();
 

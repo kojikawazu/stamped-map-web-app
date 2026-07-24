@@ -1,6 +1,16 @@
 import type { Category } from "~/types/category";
 import { createCategorySchema } from "~/lib/validations/category";
 
+/**
+ * カテゴリの新規作成を提供する。
+ *
+ * 送信前に `createCategorySchema` で検証し、失敗時は API を呼ばずに
+ * `error` へメッセージを設定する。スポット登録モーダルからの
+ * インラインカテゴリ追加でも使う。
+ *
+ * @returns ローディング状態・エラーと、作成処理 `createCategory`・
+ *   エラーリセット `clearError`
+ */
 export const useCategoryCreate = () => {
   const { apiFetch } = useApiClient();
   const loading = ref(false);

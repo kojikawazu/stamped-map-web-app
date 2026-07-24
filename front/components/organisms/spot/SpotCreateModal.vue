@@ -218,7 +218,9 @@ import { createSpotSchema } from "~/lib/validations/spot";
 import type { Category } from "~/types/category";
 
 const props = defineProps<{
+  /** モーダルの開閉状態。`v-model` で双方向バインドする */
   modelValue: boolean;
+  /** カテゴリ選択肢。インラインで追加された分もここへ反映される */
   categories: Category[];
 }>();
 
