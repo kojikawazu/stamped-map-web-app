@@ -70,8 +70,10 @@ jobs:
       - name: Format check (Prettier)
         run: pnpm format:check
 
-      - name: Unit tests (mocked)
-        run: pnpm test
+      # カバレッジ付きで実行する。vitest.config.ts の thresholds を下回ると
+      # このステップが失敗し、testing.md のカバレッジ目安が CI ゲートとして機能する。
+      - name: Unit tests (mocked) + coverage
+        run: pnpm test:coverage
         env:
           SUPABASE_URL: https://dummy.supabase.co
           SUPABASE_KEY: dummy-anon-key
