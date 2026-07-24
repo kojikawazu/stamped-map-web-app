@@ -30,7 +30,7 @@ describe("useSpotCreate", () => {
     longitude: 139.7671,
   };
 
-  it("登録成功時: Spot を返し、成功トーストを表示する", async () => {
+  it("N-1: 登録成功時に Spot を返し、成功トーストを表示する", async () => {
     const spot = { id: "spot-1", ...validPayload };
     mockApiFetch.mockResolvedValue(spot);
 
@@ -43,7 +43,7 @@ describe("useSpotCreate", () => {
     expect(error.value).toBeNull();
   });
 
-  it("登録失敗時: null を返し、エラートーストとエラー状態を設定する", async () => {
+  it("A-1: 登録失敗時に null を返し、エラートーストとエラー状態を設定する", async () => {
     mockApiFetch.mockRejectedValue(new Error("Network error"));
 
     const { createSpot, loading, error } = useSpotCreate();
@@ -55,7 +55,7 @@ describe("useSpotCreate", () => {
     expect(loading.value).toBe(false);
   });
 
-  it("API 呼び出し中は loading が true になる", async () => {
+  it("N-2: API 呼び出し中は loading が true になる", async () => {
     let resolveFn!: (v: unknown) => void;
     mockApiFetch.mockReturnValue(new Promise((r) => (resolveFn = r)));
 

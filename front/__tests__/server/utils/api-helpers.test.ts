@@ -9,19 +9,19 @@ import {
 } from "../../../server/utils/api-helpers";
 
 describe("buildSpotWhereClause", () => {
-  it("空クエリのとき WHERE 句が空オブジェクトになる", () => {
+  it("S-1: 空クエリのとき WHERE 句が空オブジェクトになる（境界値）", () => {
     const result = buildSpotWhereClause({});
     expect(result).toEqual({});
   });
 
-  it("category パラメーターを categoryId の IN 句に変換する", () => {
+  it("N-1: category パラメーターを categoryId の IN 句に変換する", () => {
     const result = buildSpotWhereClause({ category: "cat-1,cat-2" });
     expect(result).toEqual({
       AND: [{ categoryId: { in: ["cat-1", "cat-2"] } }],
     });
   });
 
-  it("category が配列のとき最初の要素を使用する", () => {
+  it("S-2: category が配列のとき最初の要素を使用する（フォールバック）", () => {
     const result = buildSpotWhereClause({
       category: ["cat-1,cat-2", "ignored"],
     });
@@ -30,14 +30,14 @@ describe("buildSpotWhereClause", () => {
     });
   });
 
-  it("q パラメーターを name contains 検索に変換する", () => {
+  it("N-2: q パラメーターを name contains 検索に変換する", () => {
     const result = buildSpotWhereClause({ q: "東京" });
     expect(result).toEqual({
       AND: [{ name: { contains: "東京", mode: "insensitive" } }],
     });
   });
 
-  it("category と q を同時に指定したとき AND 条件になる", () => {
+  it("N-3: category と q を同時に指定したとき AND 条件になる", () => {
     const result = buildSpotWhereClause({ category: "cat-1", q: "東京" });
     expect(result).toEqual({
       AND: [
@@ -47,18 +47,18 @@ describe("buildSpotWhereClause", () => {
     });
   });
 
-  it("category が空文字のとき条件に含まれない", () => {
+  it("S-3: category が空文字のとき条件に含まれない（境界値）", () => {
     const result = buildSpotWhereClause({ category: "" });
     expect(result).toEqual({});
   });
 });
 
 describe("isValidUuid", () => {
-  it("有効な UUID を true と判定する", () => {
+  it("N-1: 有効な UUID を true と判定する", () => {
     expect(isValidUuid("550e8400-e29b-41d4-a716-446655440000")).toBe(true);
   });
 
-  it("無効な文字列を false と判定する", () => {
+  it("S-1: 無効な文字列を false と判定する", () => {
     expect(isValidUuid("not-a-uuid")).toBe(false);
     expect(isValidUuid("")).toBe(false);
     expect(isValidUuid("12345678-1234-1234-1234-12345678901g")).toBe(false);
@@ -66,7 +66,7 @@ describe("isValidUuid", () => {
 });
 
 describe("getValidationErrorDetails", () => {
-  it("Zod エラーをフィールド名→メッセージのマップに変換する", async () => {
+  it("N-1: Zod エラーをフィールド名→メッセージのマップに変換する", async () => {
     const { z } = await import("zod");
     const schema = z.object({
       name: z.string().min(1, "必須"),
@@ -83,7 +83,7 @@ describe("getValidationErrorDetails", () => {
 });
 
 describe("formatCategoryResponse", () => {
-  it("カテゴリオブジェクトを API レスポンス形式にフォーマットする", () => {
+  it("N-1: カテゴリオブジェクトを API レスポンス形式にフォーマットする", () => {
     const category = {
       id: "cat-1",
       name: "カフェ",
@@ -102,7 +102,7 @@ describe("formatCategoryResponse", () => {
     });
   });
 
-  it("spotCount が 0 のときも正しくフォーマットされる", () => {
+  it("S-1: spotCount が 0 のときも正しくフォーマットされる（境界値）", () => {
     const category = {
       id: "cat-2",
       name: "レストラン",
@@ -130,7 +130,7 @@ describe("formatSpotResponse", () => {
     updatedAt: new Date("2026-01-15T12:00:00.000Z"),
   };
 
-  it("スポットオブジェクトを API レスポンス形式にフォーマットする", () => {
+  it("N-1: スポットオブジェクトを API レスポンス形式にフォーマットする", () => {
     const result = formatSpotResponse(baseSpot);
     expect(result).toEqual({
       id: "spot-1",
@@ -146,12 +146,12 @@ describe("formatSpotResponse", () => {
     });
   });
 
-  it("visitedAt を YYYY-MM-DD 形式に変換する", () => {
+  it("N-2: visitedAt を YYYY-MM-DD 形式に変換する", () => {
     const result = formatSpotResponse(baseSpot);
     expect(result.visitedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it("memo が null のとき null のまま返す", () => {
+  it("S-1: memo が null のとき null のまま返す", () => {
     const result = formatSpotResponse({ ...baseSpot, memo: null });
     expect(result.memo).toBeNull();
   });
@@ -167,7 +167,7 @@ describe("formatMarkerResponse", () => {
     category: { color: "#FF5733" },
   };
 
-  it("マーカーオブジェクトを API レスポンス形式にフォーマットする", () => {
+  it("N-1: マーカーオブジェクトを API レスポンス形式にフォーマットする", () => {
     const result = formatMarkerResponse(baseMarker);
     expect(result).toEqual({
       id: "spot-1",
@@ -179,7 +179,7 @@ describe("formatMarkerResponse", () => {
     });
   });
 
-  it("category.color が categoryColor としてフラット化される", () => {
+  it("N-2: category.color が categoryColor としてフラット化される", () => {
     const result = formatMarkerResponse(baseMarker);
     expect(result).not.toHaveProperty("category");
     expect(result.categoryColor).toBe("#FF5733");

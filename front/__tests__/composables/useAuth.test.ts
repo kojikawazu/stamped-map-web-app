@@ -25,7 +25,7 @@ describe("useAuth - loginWithGoogle", () => {
     }
   });
 
-  it("正常系: signInWithOAuth を google プロバイダーで呼び出す", async () => {
+  it("N-1: signInWithOAuth を google プロバイダーで呼び出す", async () => {
     mockSignInWithOAuth.mockResolvedValue({ data: {}, error: null });
 
     const { loginWithGoogle } = useAuth();
@@ -36,7 +36,7 @@ describe("useAuth - loginWithGoogle", () => {
     );
   });
 
-  it("異常系: error が返った場合は Error を throw する", async () => {
+  it("A-1: error が返った場合は Error を throw する", async () => {
     mockSignInWithOAuth.mockResolvedValue({
       data: null,
       error: { message: "OAuth error" },

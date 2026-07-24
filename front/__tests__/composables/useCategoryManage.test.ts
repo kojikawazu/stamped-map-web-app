@@ -23,7 +23,7 @@ describe("useCategoryManage", () => {
   });
 
   describe("updateCategory", () => {
-    it("更新成功時: Category を返し、成功トーストを表示する", async () => {
+    it("N-1: 更新成功時に Category を返し、成功トーストを表示する", async () => {
       const cat = {
         id: "cat-1",
         name: "カフェ",
@@ -46,7 +46,7 @@ describe("useCategoryManage", () => {
       expect(editError.value).toBeNull();
     });
 
-    it("バリデーション失敗時: null を返し、editError を設定する", async () => {
+    it("S-1: バリデーション失敗時に null を返し、editError を設定する", async () => {
       const { updateCategory, editError } = useCategoryManage();
       const result = await updateCategory("cat-1", {
         name: "",
@@ -58,7 +58,7 @@ describe("useCategoryManage", () => {
       expect(editError.value).toBeTruthy();
     });
 
-    it("更新失敗時: null を返し、エラートーストを表示する", async () => {
+    it("A-1: 更新失敗時に null を返し、エラートーストを表示する", async () => {
       mockApiFetch.mockRejectedValue(new Error("Network error"));
 
       const { updateCategory, editError } = useCategoryManage();
@@ -74,7 +74,7 @@ describe("useCategoryManage", () => {
   });
 
   describe("deleteCategory", () => {
-    it("削除成功時: true を返し、成功トーストを表示する", async () => {
+    it("N-1: 削除成功時に true を返し、成功トーストを表示する", async () => {
       mockApiFetch.mockResolvedValue(undefined);
 
       const { deleteCategory } = useCategoryManage();
@@ -87,7 +87,7 @@ describe("useCategoryManage", () => {
       expect(mockToastSuccess).toHaveBeenCalledWith("カテゴリを削除しました");
     });
 
-    it("削除失敗時: false を返し、エラートーストを表示する", async () => {
+    it("A-1: 削除失敗時に false を返し、エラートーストを表示する", async () => {
       mockApiFetch.mockRejectedValue(new Error("Network error"));
 
       const { deleteCategory } = useCategoryManage();
@@ -99,7 +99,7 @@ describe("useCategoryManage", () => {
   });
 
   describe("clearEditError", () => {
-    it("editError をリセットする", async () => {
+    it("N-1: editError をリセットする", async () => {
       mockApiFetch.mockRejectedValue(new Error("fail"));
       const { updateCategory, editError, clearEditError } = useCategoryManage();
       await updateCategory("cat-1", { name: "カフェ", color: "#FF5733" });
