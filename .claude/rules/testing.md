@@ -9,6 +9,35 @@ globs: "front/__tests__/**,front/tests/**"
 - **テストファースト推奨**: 実装前にテストケースを考慮する。
 - **モック最小化**: 必要最小限のモックに留め、実際の動作に近いテストを書く（外部境界＝DB / Supabase / `$fetch` のみモックし、ハンドラの実ロジックは本物を通す）。
 
+## テストファイルの配置（コロケーションではなく集約）
+
+テストは**ソースの隣に置かず（コロケーションしない）、専用ディレクトリに集約する**。ソースのディレクトリ構造をミラーして配置し、対応関係を保つ。
+
+```
+front/
+├── __tests__/              # ユニット/結合・IT を集約
+│   ├── composables/        # composables/ をミラー
+│   ├── lib/                # lib/ をミラー（validations/ も同様）
+│   ├── server/             # server/ をミラー（api/ / utils/）
+│   └── it/                 # 統合テスト（実 DB）
+│       └── harness.ts      # IT 用の共通足場
+└── tests/e2e/              # E2E（Playwright）
+```
+
+| レイヤー | 置き場所 | ファイル名 |
+|---|---|---|
+| ユニット/結合 | `front/__tests__/<ソースと同じ相対パス>/` | `*.test.ts` |
+| 統合（IT） | `front/__tests__/it/` | `*.it.test.ts` |
+| E2E | `front/tests/e2e/` | `*.spec.ts` |
+
+**集約を選ぶ理由**:
+
+- 実行設定の `include` / `exclude` が単純になる。ユニット実行から IT を外す（`**/*.it.test.ts`）、E2E を外す（`tests/e2e/**`）といった除外が**パスと拡張子だけ**で書け、ソースツリーを走査せずに済む。
+- カバレッジの計測対象（`server/**` / `composables/**` / `lib/**` / `middleware/**`）にテストが混入しない。コロケーションだと `exclude` の記述が増え、漏れるとカバレッジが実態より高く出る。
+- 本番バンドルにテストが紛れ込む事故を、ディレクトリ単位で防げる。
+
+**新規テストを追加するときは、対応するソースと同じ相対パスに置く**（例: `composables/useSpots.ts` → `__tests__/composables/useSpots.test.ts`）。ミラー構造が崩れると、テストの有無を目視で確認できなくなる。
+
 ## テストケースの分類（正常系 / 準正常系 / 異常系）
 
 各テストは 3 分類を意識し、テスト名に接頭辞を付ける（`describe` 単位で該当分類を網羅する）。
@@ -48,7 +77,8 @@ globs: "front/__tests__/**,front/tests/**"
 ## カバレッジ
 
 - 計測: `pnpm test:coverage`（Vitest + `@vitest/coverage-v8`）。対象はロジック層（`server/**` / `composables/**` / `lib/**` / `middleware/**`）。`.vue` の描画は E2E で担保するため計測対象外。
-- 目安: ロジック層で Statements / Branches ともに 80% 以上を維持する。
+- 基準: ロジック層で Statements / Branches ともに **80% 以上**を維持する。
+- 強制: `vitest.config.ts` の `coverage.thresholds` に設定済みで、下回るとコマンドが失敗する。CI は `pnpm test:coverage` を実行するため、閾値割れは**マージ前に検出される**（人手のレビュー任せにしない）。
 
 ## テストツール
 

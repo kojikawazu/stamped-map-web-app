@@ -191,6 +191,10 @@
 | ユーティリティ | 80%+ | 純粋関数は高カバレッジ |
 | composables | - | 主要ロジックを優先的にカバー |
 
+**全体閾値（CI で強制）**: ロジック層（`server/**` / `composables/**` / `lib/**` / `middleware/**`）で Statements / Branches ともに **80% 以上**。`vitest.config.ts` の `coverage.thresholds` に設定しており、下回ると `pnpm test:coverage` が失敗する。CI はこのコマンドを実行するため、閾値割れはマージ前に検出される。
+
+> 上表は対象ごとの**目標**（努力目標）、閾値は**全体の下限**（機械的な強制）という役割分担。
+
 ## テスト環境
 
 ### 認証のテスト方針
@@ -213,8 +217,11 @@ vi.stubGlobal(
 
 | 種別 | ツール | 対象ディレクトリ | 備考 |
 |------|--------|-----------------|------|
-| ユニット/結合 | Vitest | `front/__tests__/**` | `tests/e2e/**` は exclude（`vitest.config.ts`） |
+| ユニット/結合 | Vitest | `front/__tests__/**` | `tests/e2e/**` / `**/*.it.test.ts` は exclude（`vitest.config.ts`） |
+| 統合（IT） | Vitest + Testcontainers | `front/__tests__/it/**` | `*.it.test.ts`。専用の `vitest.config.it.ts` で実行 |
 | E2E | Playwright | `front/tests/e2e/**` | `testDir: ./tests/e2e`、Base URL `http://localhost:3000`（`playwright.config.ts`） |
+
+**配置方針**: テストはソースの隣に置かず（コロケーションしない）、上記ディレクトリに**集約**する。ソースのディレクトリ構造をミラーして配置すること（例: `composables/useSpots.ts` → `__tests__/composables/useSpots.test.ts`）。詳細と理由は `.claude/rules/testing.md`「テストファイルの配置」を参照。
 
 ### テスト用DB
 

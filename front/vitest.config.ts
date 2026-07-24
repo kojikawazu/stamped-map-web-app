@@ -32,6 +32,13 @@ export default defineVitestConfig({
       // .vue コンポーネントの描画は E2E（Playwright）で担保するため対象外。
       include: ["server/**", "composables/**", "lib/**", "middleware/**"],
       exclude: ["**/*.test.ts", "**/*.config.*", "generated/**"],
+      // testing.md の「ロジック層で Statements / Branches ともに 80% 以上を維持する」を
+      // 機械的に担保する。計測時点の実績は Stmts 86.17% / Branch 85.64% で、
+      // 余裕を持たせつつ下回ったら CI が落ちる値として 80 を設定している。
+      thresholds: {
+        statements: 80,
+        branches: 80,
+      },
     },
   },
 });
