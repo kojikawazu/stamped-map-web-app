@@ -16,6 +16,7 @@ import {
   formatSpotResponse,
   formatMarkerResponse,
 } from "./server/utils/api-helpers";
+import { apiError } from "./server/utils/errors";
 
 // Nitro サーバーグローバル（H3 ユーティリティ）
 // Server Routes は defineEventHandler 等を import なしで使うため、
@@ -35,6 +36,11 @@ vi.stubGlobal("getValidationErrorDetails", getValidationErrorDetails);
 vi.stubGlobal("formatCategoryResponse", formatCategoryResponse);
 vi.stubGlobal("formatSpotResponse", formatSpotResponse);
 vi.stubGlobal("formatMarkerResponse", formatMarkerResponse);
+
+// Server Utils のオートインポート（errors）
+// apiError は内部でグローバルの createError を呼ぶため、
+// createError を差し替えるテストではその差し替えが反映される。
+vi.stubGlobal("apiError", apiError);
 
 // verifyAuth・prisma のデフォルトスタブ（各テストファイルで vi.stubGlobal で上書き可能）
 vi.stubGlobal("verifyAuth", vi.fn().mockResolvedValue({ id: "user-1" }));

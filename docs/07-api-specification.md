@@ -349,14 +349,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ### 認証エラー
 
-JWT が無効・期限切れ・未送信の場合（`verifyAuth` / `verifyOwner` が送出）。認証・認可エラーは `createError` に `message` のみを渡すため、本体に `code` フィールドは含まれない:
+JWT が無効・期限切れ・未送信の場合（`verifyAuth` / `verifyOwner` が送出）。認証・認可エラーも他の業務エラーと同じ `data: { code, message }` 形式で返す:
 
 ```json
 // 401 Unauthorized
 {
   "statusCode": 401,
   "statusMessage": "...",
-  "message": "認証が必要です"
+  "data": {
+    "code": "UNAUTHORIZED",
+    "message": "認証が必要です"
+  }
 }
 ```
 
@@ -365,7 +368,10 @@ JWT が無効・期限切れ・未送信の場合（`verifyAuth` / `verifyOwner`
 {
   "statusCode": 403,
   "statusMessage": "...",
-  "message": "操作が許可されていません"
+  "data": {
+    "code": "FORBIDDEN",
+    "message": "操作が許可されていません"
+  }
 }
 ```
 
@@ -374,6 +380,8 @@ JWT が無効・期限切れ・未送信の場合（`verifyAuth` / `verifyOwner`
 ### エラーレスポンス形式
 
 本プロジェクトは Nuxt（Nitro）の `createError` を使用する。各ハンドラーは業務エラーを `createError({ statusCode, data: { code, message, details } })` で送出し、Nitro が以下の形でシリアライズする（トップレベルキーは `error` ではなく `data`）:
+
+サーバー側のエラー生成は原則 `server/utils/errors.ts` の `apiError(statusCode, code, message)` を経由する（`data` の付け忘れによる形状崩れを防ぐため）。使用可能な `code` は同ファイルの `API_ERROR_CODES` が唯一の真実。
 
 ```json
 {
@@ -388,7 +396,7 @@ JWT が無効・期限切れ・未送信の場合（`verifyAuth` / `verifyOwner`
 ```
 
 > フロントは `useApiClient` 経由で受け取ったエラーを `err.data.message` / `err.data.code` で参照する。
-> 認証・認可エラー（401/403）のみ `data` を持たず、`message` だけを返す（上記「認証エラー」参照）。
+> 認証・認可エラー（401/403）を含め、**すべてのエラーが同じ `data` 形式**で返る。
 
 ### HTTPステータスコード
 
