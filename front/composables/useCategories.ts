@@ -1,5 +1,13 @@
 import type { Category, CategoriesResponse } from "~/types/category";
 
+/**
+ * カテゴリ一覧の取得と共有状態を提供する。
+ *
+ * 一覧は `useState` でアプリ全体に共有し、フィルター UI と管理モーダルが
+ * 同じデータを参照できるようにする。
+ *
+ * @returns カテゴリ一覧・ローディング状態・エラーと、取得処理 `fetchCategories`
+ */
 export const useCategories = () => {
   const { apiFetch } = useApiClient();
 

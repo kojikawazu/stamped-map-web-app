@@ -105,7 +105,10 @@
 <script setup lang="ts">
 import type { Spot } from "~/types/spot";
 
-defineProps<{ spot: Spot | null }>();
+defineProps<{
+  /** 表示するスポット。`null` のときドロワーは閉じた状態 */
+  spot: Spot | null;
+}>();
 
 const { isOwner } = useIsOwner();
 

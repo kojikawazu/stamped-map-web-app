@@ -1,4 +1,6 @@
+/** 一覧の並び替え対象。API の `sort` パラメータにそのまま渡す */
 export type SortField = "visited_at" | "created_at";
+/** 並び順。API の `order` パラメータにそのまま渡す */
 export type SortOrder = "asc" | "desc";
 
 /**
@@ -13,6 +15,16 @@ export type SortOrder = "asc" | "desc";
  */
 const SPOT_PAGE_SIZE = 20;
 
+/**
+ * スポットの絞り込み・並び替え・ページングの状態を一元管理する。
+ *
+ * 状態は `useState` で共有し、一覧パネル（`spotsQuery`）と地図マーカー
+ * （`markersQuery`）が同じ条件を参照できるようにする。
+ * 絞り込み条件を変える操作はページ番号を 1 に戻す。
+ *
+ * @returns 各絞り込み状態（読み取り専用）・API へ渡すクエリ 2 種と、
+ *   検索・カテゴリ切替・並び替え・ページ移動・リセットの各操作
+ */
 export const useSpotFilter = () => {
   const searchQuery = useState<string>("spotFilter:search", () => "");
   const selectedCategories = useState<string[]>(

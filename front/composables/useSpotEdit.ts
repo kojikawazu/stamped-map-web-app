@@ -2,6 +2,13 @@ import { toast } from "vue-sonner";
 import type { UpdateSpotInput } from "~/lib/validations/spot";
 import type { Spot } from "~/types/spot";
 
+/**
+ * スポットの更新を提供する。
+ *
+ * 更新は全項目を送る仕様のため、登録と同じ検証ルールが適用される。
+ *
+ * @returns ローディング状態・エラーと、更新処理 `updateSpot`
+ */
 export const useSpotEdit = () => {
   const { apiFetch } = useApiClient();
 

@@ -1,5 +1,13 @@
 import type { Marker, MarkersResponse } from "~/types/marker";
 
+/**
+ * 地図マーカーの取得と共有状態を提供する。
+ *
+ * 一覧と条件を揃えるため、絞り込みは `useSpotFilter` の `markersQuery` を使う。
+ * ページングはせず該当する全マーカーを取得する。
+ *
+ * @returns マーカー一覧・ローディング状態と、取得処理 `fetchMarkers`
+ */
 export const useMarkers = () => {
   const { apiFetch } = useApiClient();
   const { markersQuery } = useSpotFilter();

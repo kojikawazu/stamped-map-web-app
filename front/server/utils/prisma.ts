@@ -15,8 +15,14 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-// 遅延初期化: 最初のアクセス時にのみ PrismaClient を生成する。
-// サーバー起動時に DATABASE_URL が存在しない環境（E2E CI 等）でもクラッシュしない。
+/**
+ * アプリ全体で共有する PrismaClient。
+ *
+ * 遅延初期化する Proxy として公開しており、実クライアントは最初のプロパティ
+ * アクセス時にのみ生成される。サーバー起動時点で `DATABASE_URL` が無い環境
+ * （E2E CI のビルド時等）でもクラッシュさせないための構造。
+ * 生成済みインスタンスは `globalThis` に保持し、HMR による接続の増殖を防ぐ。
+ */
 export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
   get(_target, prop) {
     if (!globalForPrisma.prisma) {

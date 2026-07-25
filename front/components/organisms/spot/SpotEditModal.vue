@@ -160,8 +160,11 @@ import type { Category } from "~/types/category";
 import type { Spot } from "~/types/spot";
 
 const props = defineProps<{
+  /** モーダルの開閉状態。`v-model` で双方向バインドする */
   modelValue: boolean;
+  /** 編集対象のスポット。未選択の間は `null` でフォームを初期化しない */
   spot: Spot | null;
+  /** カテゴリ選択肢 */
   categories: Category[];
 }>();
 

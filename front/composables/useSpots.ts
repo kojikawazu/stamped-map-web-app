@@ -1,5 +1,14 @@
 import type { Spot, Pagination, SpotsResponse } from "~/types/spot";
 
+/**
+ * スポット一覧の取得と共有状態を提供する。
+ *
+ * 絞り込み・並び替え・ページ番号は `useSpotFilter` の `spotsQuery` から受け取り、
+ * 一覧パネルと地図が同じ条件を参照できるようにする。
+ *
+ * @returns スポット一覧・ページング情報・ローディング状態・エラーと、
+ *   取得処理 `fetchSpots`
+ */
 export const useSpots = () => {
   const { apiFetch } = useApiClient();
   const { spotsQuery } = useSpotFilter();
