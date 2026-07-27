@@ -21,6 +21,19 @@ globs: "front/prisma/**,front/server/utils/**"
 | createdAt | DateTime @default(now()) | 作成日時 |
 | updatedAt | DateTime @updatedAt | 更新日時 |
 
+操作ユーザー（`createdBy` / `updatedBy`）・論理削除（`deletedAt`）は現状のモデルでは持たない。監査要件が発生した時点で追加する（下記「監査列」の自動注入方針に従う）。
+
+## 監査列
+
+監査列（`createdAt` / `updatedAt` / 将来の `createdBy` / `updatedBy` / `deletedAt`）は **Prisma の機構で自動設定する**。アプリケーションコードで値を組み立てない。
+
+- **手動代入を禁止**する。`data: { updatedAt: new Date() }` のようにハンドラー・`server/utils/` で監査列へ値を書かない（`updatedAt` の手動指定は `@updatedAt` の自動更新を上書きしてしまう）。
+- 日時は **スキーマ側で宣言**する: `createdAt DateTime @default(now())` / `updatedAt DateTime @updatedAt`。
+- `createdAt` は**更新しない**。`update` の `data` に `createdAt` を含めない。
+- 操作ユーザー（`createdBy` / `updatedBy`）を導入する場合は、**Prisma Client Extension（`$extends` の query フック）でリクエストコンテキストから自動注入**する。各ハンドラーで個別に詰めない。
+- 論理削除の `deletedAt` も同様に、削除ヘルパー（extension）経由で設定する。呼び出し側で `deletedAt: new Date()` を書かない。
+- **例外**: シードデータ（`prisma/seed.ts`）・テストで日時を固定したい場合のみ明示指定を許容する。この場合も本番コードパスには持ち込まない。
+
 ## マイグレーション
 
 - `prisma migrate dev` で開発環境のマイグレーションを管理する。
