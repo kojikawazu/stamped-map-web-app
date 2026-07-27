@@ -1,3 +1,9 @@
 {
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- front/ vercel.json"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "**": false,
+      "main": true
+    }
+  }
 }

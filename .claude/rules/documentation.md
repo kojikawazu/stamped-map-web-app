@@ -26,6 +26,7 @@ globs:
 | 画面・コンポーネント・UI（`front/components/**`, `front/pages/**`） | `docs/03-functional-specification.md`、`docs/design/ui-redesign.md`（UI 方針に関わる場合） |
 | 機能要件・業務要件の変更 | `docs/01-business-requirements.md`、`docs/02-requirements-specification.md`、`docs/03-functional-specification.md` |
 | 非機能要件（性能・可用性・運用）の変更 | `docs/04-non-functional-specification.md` |
+| デプロイ発火制御（`vercel.json`）の変更 | `docs/04-non-functional-specification.md`（デプロイ発火制御）、`.claude/rules/vercel.md` |
 | アーキテクチャ・技術スタック・ディレクトリ構成の変更 | `docs/09-architecture-specification.md`、`README.md`、`CLAUDE.md`（Rules テーブルに影響する場合） |
 | テスト方針・テスト構成（Vitest / Playwright）の変更 | `docs/08-test-specification.md`、`docs/test-design/test-design.md`、`.claude/rules/testing.md` |
 | 設計判断・新機能の設計（マイルストーン単位） | `docs/design/` 配下に設計書を追加・更新 |

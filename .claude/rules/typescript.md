@@ -38,6 +38,18 @@ type SpotPanelProps = { spotId: string; status: SpotStatus };
 type OnSelect = (id: string) => void;
 ```
 
+## スキーマの配置（`schemas/` 集約）
+
+Zod スキーマ（実行時に `parse` するもの）の置き場所。
+
+- スキーマは**ソースルート直下の `schemas/` ディレクトリ** ＝ **`front/schemas/`** に集約する。
+- **`lib/validations/` のような「関数の置き場」配下に置かない。** ディレクトリを切り、ドメイン単位でファイルを分ける（`schemas/spot.ts` / `schemas/category.ts`）。
+- **スキーマから導出した型は `types/` に再定義しない。** `z.infer<typeof spotSchema>` を `schemas/spot.ts` から `export` し、それを参照する（手書きの二重定義を作らない）。
+- **検証を伴わない純粋な型は `schemas/` に置かない**（`types/` へ）。`schemas/` に置くのは「実行時に `parse` するもの」だけ。
+- barrel（`schemas/index.ts`）は作らない（理由は型・定数と同じ）。
+
+> **移行中**: 現状の Zod スキーマは `front/lib/validations/` にある。`front/schemas/` への移動は別 issue で対応する（issue #80）。
+
 ## 型定義の配置（コロケーション / `types/` 集約）
 
 型を各ファイルに散在させず、**参照範囲**で置き場所を決める。判断軸は「**その型を参照するファイルが 1 つに閉じるか**」。
@@ -46,6 +58,24 @@ type OnSelect = (id: string) => void;
 |---|---|
 | **1 ファイルに閉じる** | その定義ファイル内にコロケーション（`export` しない） |
 | **2 ファイル以上** / レイヤ・機能をまたぐ | `front/types/` に集約して `export` |
+
+### 置き場所（ディレクトリを切る）
+
+- 集約先は**ソースルート直下の `types/` ディレクトリ**とする。本プロジェクトはソースルートが `front/` の Nuxt 3 構成なので **`front/types/`**（`src/` は使わない）。
+- **単一ファイルにまとめない。** `lib/type.ts` のように 1 ファイルへ全型を詰め込む形は禁止。必ず**ディレクトリを切り、ドメイン単位でファイルを分ける**。
+- **`lib/` `utils/` の下に型ファイルを置かない。** `lib/` は「関数の置き場」、`types/` は「型の置き場」で分離する（定数も同様。「定数の配置」参照）。
+- 命名は**ディレクトリが複数形の `types`、ファイルはドメイン名の単数形**（`types/spot.ts` / `types/category.ts`）。`type.ts` / `Types.ts` のような単数形・PascalCase のディレクトリ名は使わない。
+
+```
+front/
+├── lib/            # 関数（ユーティリティ）
+├── constants/      # 値
+└── types/          # 型
+    ├── spot.ts
+    └── category.ts
+```
+
+❌ `front/lib/type.ts` に全型を詰め込む / ✅ `front/types/spot.ts` にドメイン単位で分ける
 
 ### 運用ルール
 
@@ -89,6 +119,16 @@ export type Spot = { id: string; name: string; status: SpotStatus };
 |---|---|
 | **1 ファイルに閉じる** | その定義ファイルの先頭で `const` 宣言（`export` しない） |
 | **2 ファイル以上** / レイヤ・機能をまたぐ | `front/constants/` に集約して `export` |
+
+### 置き場所（ディレクトリを切る）
+
+型と同じ方針で置き場所を決める（詳細は「型定義の配置」の同名節）。
+
+- 集約先は**ソースルート直下の `constants/` ディレクトリ** ＝ **`front/constants/`**。
+- **単一ファイルにまとめない。** `lib/constants.ts` のように 1 ファイルへ全定数を詰め込む形は禁止。**ディレクトリを切り、ドメイン単位でファイルを分ける**。
+- 命名は**ディレクトリが複数形の `constants`**（`constant.ts` のような単数形の単一ファイルにしない）。
+
+❌ `front/lib/constants.ts` に全定数を詰め込む / ✅ `front/constants/spot.ts` にドメイン単位で分ける
 
 ### 運用ルール
 

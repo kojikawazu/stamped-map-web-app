@@ -19,6 +19,7 @@
   - [認証ガードのUXフロー](#認証ガードのuxフロー)
   - [対応ブラウザ](#対応ブラウザ)
 - [環境変数管理](#環境変数管理)
+- [デプロイ発火制御](#デプロイ発火制御)
 - [ログ・監視](#ログ監視)
 
 ## パフォーマンス
@@ -149,6 +150,17 @@
 > `DATABASE_URL` / `DIRECT_URL` はサーバー側のみ。クライアントバンドルに含めない。
 > `SUPABASE_URL` / `SUPABASE_KEY` は `@nuxtjs/supabase` モジュールが直接読む変数名のため `NUXT_PUBLIC_` プレフィックスは付けない。
 > Google OAuth の `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` はアプリが直接使用しない（Supabase ダッシュボード側で設定）。アプリの環境変数には不要。
+
+## デプロイ発火制御
+
+Vercel の Git 連携は GitHub Actions を経由せず push を直接拾うため、デプロイの発火制御は `vercel.json`（リポジトリ直下 = Vercel の Root Directory）で行う。
+
+| 設定 | 方針 | 理由 |
+|------|------|------|
+| `git.deploymentEnabled` | `{"**": false, "main": true}` — `main` のみデプロイ | `deploymentEnabled` は**拒否リスト**（未列挙のブランチは既定で発火する）。`"**": false` で全ブランチを止めてから `main` を許可する。`feat/*` 等のスラッシュ付きブランチ名を使うため `*` ではなく `**` を用いる |
+| `ignoreCommand` | **設定しない** | 判定を誤ると本番が静かに古くなる（デプロイは成功扱いのまま）。パスによる実行制御は CI 側（`paths-ignore`）に寄せる |
+
+詳細な根拠・導入時の最低条件は `.claude/rules/vercel.md` を参照。
 
 ## ログ・監視
 
