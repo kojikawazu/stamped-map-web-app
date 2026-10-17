@@ -65,10 +65,12 @@
 ### M2 追加: Google OAuth認証（完了）
 
 手動作業:
+
 - [x] Google Cloud Console で OAuth 2.0 クライアントID 作成（承認済みリダイレクト URI に `https://[project-ref].supabase.co/auth/v1/callback` を追加）
 - [x] Supabase ダッシュボード → Authentication → Providers → Google 有効化
 
 コード実装:
+
 - [x] `nuxt.config.ts` に `siteUrl` runtimeConfig 追加
 - [x] `composables/useAuth.ts` に `loginWithGoogle()` 追加
 - [x] `pages/login.vue` に Google ログインボタン・区切り線追加
@@ -77,6 +79,7 @@
 ## M4: CRUD実装（進行中）
 
 ### Server API（完了）
+
 - [x] 共通ヘルパー（`server/utils/api-helpers.ts` — レスポンス整形、バリデーションエラー変換、WHERE句ビルダー）
 - [x] `GET /api/categories` — カテゴリ一覧（spotCount付き）
 - [x] `POST /api/categories` — カテゴリ追加（重複チェック付き）
@@ -90,6 +93,7 @@
 - [x] `DELETE /api/spots/:id` — スポット削除
 
 ### フロントエンドUI（進行中）
+
 - [x] スポット一覧（左パネル）— SpotPanel / SpotList / SpotListItem / SpotFilter / SpotPagination
 - [x] スポット登録モーダル（SpotCreateModal）
 - [x] コンポーザブル実装

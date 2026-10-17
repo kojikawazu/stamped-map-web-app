@@ -13,7 +13,7 @@ globs: "front/__tests__/**,front/tests/**"
 
 テストは**ソースの隣に置かず（コロケーションしない）、専用ディレクトリに集約する**。ソースのディレクトリ構造をミラーして配置し、対応関係を保つ。
 
-```
+```text
 front/
 ├── __tests__/              # ユニット/結合・IT を集約
 │   ├── components/         # components/ をミラー（VTU。atoms / molecules / organisms）

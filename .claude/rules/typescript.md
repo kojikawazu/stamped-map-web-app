@@ -64,7 +64,7 @@ Zod スキーマ（実行時に `parse` するもの）の置き場所。
 - **`lib/` `utils/` の下に型ファイルを置かない。** `lib/` は「関数の置き場」、`types/` は「型の置き場」で分離する（定数も同様。「定数の配置」参照）。
 - 命名は**ディレクトリが複数形の `types`、ファイルはドメイン名の単数形**（`types/spot.ts` / `types/category.ts`）。`type.ts` / `Types.ts` のような単数形・PascalCase のディレクトリ名は使わない。
 
-```
+```text
 front/
 ├── lib/            # 関数（ユーティリティ）
 ├── constants/      # 値

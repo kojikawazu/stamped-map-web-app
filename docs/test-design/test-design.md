@@ -63,7 +63,7 @@
 
 ## テスト構成の全体像
 
-```
+```text
 テストピラミッド
 
          ┌──────────────┐
@@ -89,7 +89,7 @@
 
 ### ファイル配置
 
-```
+```text
 front/
 ├── __tests__/
 │   ├── server/utils/
@@ -228,6 +228,7 @@ front/
 - 認証エラーテスト（401）は `verifyAuth` が例外をスローするようモック
 
 **モック方針**:
+
 - モック許可: `verifyAuth`（外部I/O）、`prisma`（外部I/O）
 - モック禁止: バリデーションロジック、レスポンス整形関数
 
@@ -439,9 +440,11 @@ export async function clearSupabaseSession(page)
 
 ### ワークフロー設計
 
+> **本節は初期設計時の記述であり、現行の構成とは異なる。** 現行のワークフロー（`test` / `it` / `e2e` の 3 ジョブ・`push` は `main` のみ・E2E は実 DB）は [`../08-test-specification.md`](../08-test-specification.md) の CI/CD 節と [`../../.claude/rules/github-actions.md`](../../.claude/rules/github-actions.md) を正とする。
+
 **ファイル**: `.github/workflows/ci.yml`
 
-```
+```text
 トリガー:
   push: main, feature/**, fix/**, chore/**
   pull_request: 上記ブランチへのPR
@@ -458,6 +461,7 @@ export async function clearSupabaseSession(page)
 ```
 
 **環境変数（CI時のダミー値）**:
+
 - `NUXT_PUBLIC_SUPABASE_URL`: ダミーURL
 - `NUXT_PUBLIC_SUPABASE_ANON_KEY`: ダミーキー
 - `NUXT_PUBLIC_MAPTILER_KEY`: ダミーキー
@@ -483,6 +487,7 @@ export async function clearSupabaseSession(page)
 ```
 
 **vitest.config.ts の変更点**:
+
 - `exclude` に `tests/e2e/**` を追加（E2Eテストをユニットテスト実行から除外）
 
 ---

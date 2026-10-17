@@ -70,7 +70,7 @@ flowchart TD
 
 ### 方式：クライアント側認証（Bearer トークン）
 
-```
+```text
 クライアント側：
   - @nuxtjs/supabase の useSupabaseClient() でログイン（signInWithPassword）
   - useApiClient（repositories/api-client.ts）が Authorization: Bearer <token> を自動付与
@@ -103,7 +103,7 @@ export default defineNuxtRouteMiddleware(() => {
 
 ## ディレクトリ構成（`front/`）
 
-```
+```text
 front/
 ├── app.vue                    # ルートレイアウト（NuxtLayout + Toaster）
 ├── nuxt.config.ts             # Nuxt設定
@@ -192,7 +192,7 @@ front/
 
 ### Spot の永続化方式
 
-```
+```text
 latitude (Float) ──┐
                    ├── location (geography) ← 生成カラム（自動算出）
 longitude (Float) ─┘
@@ -255,7 +255,7 @@ export async function verifyAuth(event: H3Event) {
 
 ### バックエンド分離（必要になった場合）
 
-```
+```text
 Frontend : Vercel（そのまま）
 Backend  : Go + Echo on Cloud Run
 DB       : Supabase（そのまま）

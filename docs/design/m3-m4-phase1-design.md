@@ -47,7 +47,7 @@
 
 ### フィルター状態（`useSpotFilter`）
 
-```
+```ts
 searchQuery: string       // 名前検索
 selectedCategories: string[] // カテゴリIDの配列（空=全件）
 sortField: 'visited_at' | 'created_at'
@@ -69,6 +69,7 @@ page: number              // 現在のページ（一覧用）
 ## Composables 設計
 
 ### `composables/useSpotFilter.ts`
+
 フィルター状態の一元管理。
 
 ```typescript
@@ -92,6 +93,7 @@ function resetFilters()
 ```
 
 ### `composables/useSpots.ts`
+
 スポット一覧取得（ページネーション付き）。
 
 ```typescript
@@ -108,6 +110,7 @@ async function fetchSpots()  // フィルター変化を watch して自動発�
 ```
 
 ### `composables/useMarkers.ts`
+
 マーカー用軽量データ取得（全件）。
 
 ```typescript
@@ -122,6 +125,7 @@ async function fetchMarkers() // フィルター変化を watch して自動発�
 ```
 
 ### `composables/useCategories.ts`
+
 カテゴリ一覧取得（フィルターUI用）。
 
 ```typescript
@@ -138,6 +142,7 @@ async function fetchCategories() // onMounted で一度だけ呼ぶ
 `types/` ディレクトリを新設してAPIレスポンス型を定義する。
 
 ### `types/spot.ts`
+
 ```typescript
 export interface SpotCategory {
   id: string
@@ -172,6 +177,7 @@ export interface SpotsResponse {
 ```
 
 ### `types/marker.ts`
+
 ```typescript
 export interface Marker {
   id: string
@@ -188,6 +194,7 @@ export interface MarkersResponse {
 ```
 
 ### `types/category.ts`
+
 ```typescript
 export interface Category {
   id: string
@@ -207,7 +214,7 @@ export interface CategoriesResponse {
 
 ## コンポーネント設計
 
-```
+```text
 pages/index.vue
 ├── components/spot/SpotPanel.vue       # 左パネル全体（aside）
 │   ├── components/spot/SpotFilter.vue  # 検索・ソート・カテゴリフィルター
@@ -218,27 +225,30 @@ pages/index.vue
 ```
 
 ### `components/spot/SpotPanel.vue`
+
 左パネルのコンテナ。`useSpotFilter`, `useSpots`, `useCategories` を呼び出し、子コンポーネントに props で渡す。
 
 ### `components/spot/SpotFilter.vue`
 
-```
+```text
 Props: categories, searchQuery, selectedCategories, sortField, sortOrder
 Emits: update:searchQuery, update:selectedCategories, update:sort
 ```
 
 UI要素:
+
 - テキスト入力（スポット名検索）
 - セレクトボックス（ソート選択）
 - カテゴリチェックボックス一覧（色バッジ付き）
 
 ### `components/spot/SpotList.vue`
 
-```
+```text
 Props: spots, loading, error
 ```
 
 UI要素:
+
 - ローディングスケルトン（loading=true 時）
 - エラーメッセージ（error 時）
 - 件数ゼロ時の空状態メッセージ
@@ -246,11 +256,12 @@ UI要素:
 
 ### `components/spot/SpotListItem.vue`
 
-```
+```text
 Props: spot (Spot 型)
 ```
 
 表示内容:
+
 - カテゴリ色のバッジ
 - スポット名
 - カテゴリ名
@@ -258,12 +269,13 @@ Props: spot (Spot 型)
 
 ### `components/spot/SpotPagination.vue`
 
-```
+```text
 Props: pagination (Pagination 型), currentPage
 Emits: update:page
 ```
 
 UI要素:
+
 - 「前へ」「次へ」ボタン
 - 現在ページ / 総ページ数表示
 - 総件数表示
@@ -274,11 +286,12 @@ UI要素:
 代わりに `pages/index.vue` または `SpotPanel.vue` と同じ `useSpotFilter` を共有し、
 `markers` を props で受け取る形とする。
 
-```
+```text
 Props: markers (Marker[] 型)
 ```
 
 マーカー実装方針:
+
 - MapLibre の `GeoJSON Source` + `Circle Layer` でマーカーを描画
 - `categoryColor` を円の色に使用
 - マーカークリック → ポップアップ（名前・カテゴリ名・訪問日）を表示
@@ -309,7 +322,7 @@ Props: markers (Marker[] 型)
 
 ## データフロー図
 
-```
+```text
 pages/index.vue
   │
   ├── useSpotFilter（フィルター状態）
@@ -320,7 +333,8 @@ pages/index.vue
 ```
 
 フィルター変更時のフロー:
-```
+
+```text
 SpotFilter（ユーザー操作）
   → emit → SpotPanel → useSpotFilter を更新
   → watch → useSpots.fetchSpots() 自動発火

@@ -65,6 +65,13 @@ format-check: ## Prettier 整形チェック（変更なし確認）
 actionlint: ## GitHub Actions ワークフロー検査（actionlint + shellcheck）※Docker 必須
 	docker run --rm -v "$(CURDIR)":/repo -w /repo $(ACTIONLINT_IMAGE) -color
 
+# コマンドとバージョンは scripts/ が唯一の定義（CI の markdownlint.yml / shellcheck.yml も同じスクリプトを実行する）
+.PHONY: lint-docs lint-shell
+lint-docs: ## Markdown 検査（markdownlint-cli2。設定は .markdownlint-cli2.jsonc）
+	./scripts/lint-docs.sh
+lint-shell: ## シェルスクリプト検査（shellcheck。固定版が無ければ Docker）
+	./scripts/lint-shell.sh
+
 ##@ テスト
 .PHONY: test test-coverage test-it
 test: ## ユニット/結合テスト（Vitest, prisma モック）

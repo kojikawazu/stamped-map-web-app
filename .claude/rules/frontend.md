@@ -39,7 +39,7 @@ globs: "front/components/**,front/pages/**,front/composables/**,front/layouts/**
 
 **依存は上位から下位への一方向のみ**。下位レイヤが上位レイヤを import してはならない。**auto-import があるため import 文に現れず、逆流が起きても気づきにくい**。参照の向きを意識的に守る。
 
-```
+```text
 pages  →  components  →  composables  →  repositories  →  lib / schemas  →  types / constants
 （画面合成）  （表示）     （ロジック）    （API アクセス） （純粋関数・検証）    （最下層）
 ```

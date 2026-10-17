@@ -112,7 +112,7 @@
 
 ### 認証ガードのUXフロー
 
-```
+```text
 1. メイン画面（/）にアクセス
 2. Nuxt ルートミドルウェア（middleware/auth.ts）が発動
 3. useSupabaseUser() で認証状態を判定

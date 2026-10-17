@@ -1,0 +1,38 @@
+name: shellcheck
+
+# リポジトリ内のシェルスクリプト（scripts/*.sh 等）を shellcheck で検査する。
+# actionlint が shellcheck に渡すのはワークフローの run: の中身だけで、独立した .sh は対象外になるため、
+# 本ワークフローがそれを埋める。運用方針の正本は .claude/rules/static-analysis.md。
+# 数秒で終わるため paths で絞らず常に実行する
+# （ワークフローレベルで止めると、必須チェックに含めた際に pending のまま PR がマージできなくなる）。
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # 検査対象を git ls-files から引くため、checkout を先に置く
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # コマンドとバージョンは scripts/lint-shell.sh が唯一の定義（ローカルの make lint-shell と同一の検査）。
+      # ランナーにプリインストールされた shellcheck はバージョンが固定できないため、スクリプト側が
+      # 固定タグの Docker イメージへ倒す
+      - name: Lint shell scripts
+        run: ./scripts/lint-shell.sh
