@@ -34,4 +34,4 @@
 | `api.md` | `front/server/**` | Nuxt.js Server API 設計・ディレクトリ構成・バリデーション方針 |
 | `database.md` | `front/prisma/**`, `front/server/utils/**` | Prisma 命名規約・監査列の自動設定・マイグレーション・クエリ規約 |
 | `vercel.md` | `vercel.json` | Vercel デプロイ制御（ブランチ単位の発火制御・ビルドスキップの是非） |
-| `github-actions.md` | `.github/workflows/**` | GitHub Actions 規約（push トリガ・concurrency・パスフィルタ・actionlint） |
+| `github-actions.md` | `.github/workflows/**` | GitHub Actions 規約（push トリガ・concurrency・パスフィルタ・actionlint・Dependabot） |
