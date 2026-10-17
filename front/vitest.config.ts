@@ -40,8 +40,10 @@ export default defineVitestConfig({
       ],
       exclude: ["**/*.test.ts", "**/*.config.*", "generated/**"],
       // testing.md の「ロジック層で Statements / Branches ともに 80% 以上を維持する」を
-      // 機械的に担保する。計測時点の実績は Stmts 86.17% / Branch 85.64% で、
-      // 余裕を持たせつつ下回ったら CI が落ちる値として 80 を設定している。
+      // 機械的に担保する。下回ったら CI が落ちる値として 80 を設定している。
+      // vitest 4 で v8 カバレッジの集計が AST ベースに変わり、同じテストでも数値が変わる
+      // （vitest 3: Stmts 91.72% / Branch 90.03% → vitest 4: Stmts 89.92% / Branch 81.73%）。
+      // Branch の余裕が小さいため、分岐を足すときはテストも同時に足す。
       thresholds: {
         statements: 80,
         branches: 80,

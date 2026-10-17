@@ -2,7 +2,7 @@ import { execSync } from "node:child_process";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
-import type { GlobalSetupContext } from "vitest/node";
+import type { TestProject } from "vitest/node";
 import { assertLocalDatabaseUrl } from "./lib/test-database-url";
 
 declare module "vitest" {
@@ -18,9 +18,10 @@ declare module "vitest" {
  * `prisma db push` が失敗する。PostGIS 入りイメージを使用する。
  * 接続 URL は `provide("databaseUrl")` で各テストワーカーへ渡す。
  *
+ * @param project - vitest が渡すプロジェクト。`provide` でワーカーへ値を渡すために使う
  * @returns コンテナを停止する teardown 関数
  */
-export default async function ({ provide }: GlobalSetupContext) {
+export default async function (project: TestProject) {
   const container = await new PostgreSqlContainer("postgis/postgis:16-3.4")
     .withDatabase("stamped_test")
     .withUsername("test")
@@ -38,7 +39,7 @@ export default async function ({ provide }: GlobalSetupContext) {
     env: { ...process.env, DATABASE_URL: url, DIRECT_URL: url },
   });
 
-  provide("databaseUrl", url);
+  project.provide("databaseUrl", url);
 
   return async () => {
     await container.stop();
