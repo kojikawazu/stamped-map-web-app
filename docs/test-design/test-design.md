@@ -85,7 +85,7 @@
 
 - 各ケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。
 - **異常系（`A-`）**: 書き込み系エンドポイント（POST/PUT/DELETE spots・categories）は、オーナー限定違反（`verifyOwner` 失敗 → 403、かつ DB 書き込み未到達）と、DB 例外の伝播を検証する。認証失敗（401）も GET で検証する。
-- カバレッジは `pnpm test:coverage`（`@vitest/coverage-v8`）で計測。対象はロジック層（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）。現状 Statements 約 90% / Branches 約 82%（vitest 4 の AST ベース集計。閾値は 80%）。分類規約は [`.claude/rules/testing.md`](../../.claude/rules/testing.md)。
+- カバレッジは `pnpm test:coverage`（`@vitest/coverage-v8`）で計測。対象はロジック層（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）。現状 Statements 約 93% / Branches 約 89%（vitest 4 の AST ベース集計。閾値は 80%）。分類規約は [`.claude/rules/testing.md`](../../.claude/rules/testing.md)。
 
 ### ファイル配置
 

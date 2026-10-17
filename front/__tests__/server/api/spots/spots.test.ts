@@ -120,6 +120,55 @@ describe("GET /api/spots", () => {
     expect(result.pagination.page).toBe(1);
   });
 
+  it("N-3: sort=created_at&order=asc で作成日時の昇順に並べる", async () => {
+    prismaMock.mapSpot.findMany.mockResolvedValue([]);
+    prismaMock.mapSpot.count.mockResolvedValue(0);
+
+    const handler = (await import("../../../../server/api/spots/index.get"))
+      .default;
+    await handler(makeEvent("GET", "/api/spots?sort=created_at&order=asc"));
+
+    expect(prismaMock.mapSpot.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ orderBy: { createdAt: "asc" } }),
+    );
+  });
+
+  it("S-2: 未知の sort と order は訪問日の降順にフォールバックする", async () => {
+    prismaMock.mapSpot.findMany.mockResolvedValue([]);
+    prismaMock.mapSpot.count.mockResolvedValue(0);
+
+    const handler = (await import("../../../../server/api/spots/index.get"))
+      .default;
+    await handler(makeEvent("GET", "/api/spots?sort=name&order=random"));
+
+    expect(prismaMock.mapSpot.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ orderBy: { visitedAt: "desc" } }),
+    );
+  });
+
+  it.each([
+    ["abc", 20],
+    ["0", 20],
+    ["500", 100],
+  ])(
+    "S-3: limit=%s は %i に丸められる（不正値・0 は既定値、上限は 100）",
+    async (limit, expected) => {
+      prismaMock.mapSpot.findMany.mockResolvedValue([]);
+      prismaMock.mapSpot.count.mockResolvedValue(0);
+
+      const handler = (await import("../../../../server/api/spots/index.get"))
+        .default;
+      const result = await handler(
+        makeEvent("GET", `/api/spots?limit=${limit}`),
+      );
+
+      expect(result.pagination.limit).toBe(expected);
+      expect(prismaMock.mapSpot.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ take: expected }),
+      );
+    },
+  );
+
   it("A-1: verifyAuth が 401 をスローするとハンドラが伝播する", async () => {
     verifyAuthMock.mockRejectedValueOnce(
       Object.assign(new Error("認証が無効です"), { statusCode: 401 }),
