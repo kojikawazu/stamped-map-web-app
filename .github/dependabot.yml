@@ -1,0 +1,23 @@
+# GitHub Actions のバージョン更新を Dependabot に任せる（#86）。
+# 手で一括置換すると、次の非推奨化（Node 20 → 24 のようなランタイム移行）でまた手作業になる。
+#
+# 対象は workflows の `uses:` だけ。以下は Dependabot では更新されないため手で上げる:
+# - actionlint の Docker タグ（Makefile の ACTIONLINT_IMAGE）
+# - pnpm のバージョン（ci.yml の pnpm/action-setup の `version:`）・Node.js のバージョン（`node-version:`）
+# - e2e の PostGIS サービスイメージ（ci.yml の services.postgres.image）
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Tokyo
+    # アクションごとに PR が分かれると、マージのたびに重量級の CI（it / e2e）が走るため 1 本にまとめる
+    groups:
+      github-actions:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: chore(ci)

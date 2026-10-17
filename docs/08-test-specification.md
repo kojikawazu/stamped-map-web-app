@@ -254,3 +254,5 @@ GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動�
 **Secret scan**（別ワークフロー `.github/workflows/secret-scan.yml`）: 鍵・`.env` 系の秘匿ファイルが Git 管理下にないかを検査する。`front/**` に限らずどの変更でも混入しうるため、`paths` で絞らず `main` への push / PR で常に実行する。検出パターンの自己テスト（`scripts/test-check-tracked-secrets.sh`）→ 本検査（`scripts/check-tracked-secrets.sh`）の順。詳細は `docs/06-security-specification.md`「シークレット管理」。
 
 **actionlint**（別ワークフロー `.github/workflows/actionlint.yml`）: 全ワークフローを actionlint + shellcheck（`run:` 内のシェル）で検査する。Secret scan と同じく `paths` で絞らず常に実行する。コマンドは `Makefile` の `actionlint` ターゲットに一元化しており（公式 Docker イメージをタグ固定）、ローカルでも `make actionlint` で同じ検査を実行できる。
+
+**アクションの更新**: `.github/dependabot.yml`（`github-actions`、毎週月曜 09:00 JST、全アクションを 1 PR にグループ化）が `uses:` のバージョン更新 PR を作成する。更新 PR も上記の CI / actionlint を通してからマージする。

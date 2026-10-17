@@ -15,6 +15,8 @@ globs: ".github/workflows/**"
 | `secret-scan.yml` | 鍵・`.env` 系の追跡混入の検出（`security.md`） | **なし**（常時実行） |
 | `actionlint.yml` | ワークフロー自体の検査（actionlint + shellcheck） | **なし**（常時実行） |
 
+アクションの更新 PR は `.github/dependabot.yml` が週次で作成する（「5. アクションのバージョン更新」）。
+
 ## 1. 発火トリガ（二重実行を作らない）
 
 - **`push` は `main` のみ**にする。作業ブランチ（`feat/**` / `fix/**` / `chore/**` 等）を `push` に並べない。
@@ -50,7 +52,13 @@ concurrency:
 - ワークフローを変更したら、push 前に `make actionlint`（Docker 必須）を実行する。
 - actionlint のバージョンを上げる場合は `ACTIONLINT_IMAGE` のタグを更新し、全ワークフローが通ることを確認する。
 
-## 5. 共通の書き方
+## 5. アクションのバージョン更新（Dependabot）
+
+- `uses:` のアクションのバージョンは **Dependabot（`.github/dependabot.yml`、週次・1 PR にグループ化）に任せる**。手で一括置換しない。
+- Dependabot の更新 PR は、CI（actionlint を含む）が通ることを確認してマージする。メジャー更新はリリースノートで入力名・既定値の変更を確認する。
+- `run:` や設定値で固定しているバージョン（`Makefile` の `ACTIONLINT_IMAGE`、`ci.yml` の pnpm `version:` / `node-version:` / PostGIS イメージ）は **Dependabot の対象外**。手で更新する。
+
+## 6. 共通の書き方
 
 - ワークフロー（またはジョブ）に **`permissions: contents: read`** を明示し、必要な権限だけを足す。
 - 各ジョブに **`timeout-minutes`** を付ける（ハングしたジョブで実行枠を使い切らない）。
