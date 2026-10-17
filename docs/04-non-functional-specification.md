@@ -133,7 +133,7 @@
 | モバイルブラウザ | Phase 2 |
 | IE | × 非対応 |
 
-> WebGL 必須のため、WebGL 非対応ブラウザでは地図が表示されない。
+> **WebGL2 必須**（MapLibre GL JS v6 で WebGL1 が廃止された）。WebGL2 を初期化できないブラウザでは地図の代わりに案内を表示し、スポット一覧などの他の機能は通常どおり使える（`MapView.vue` が `GPUInitializationError` のみを捕捉する）。
 
 ## 環境変数管理
 

@@ -10,6 +10,15 @@
       </p>
     </div>
     <div
+      v-else-if="webglUnavailable"
+      class="flex h-full w-full items-center justify-center bg-zinc-100"
+    >
+      <p class="text-sm text-zinc-400">
+        このブラウザでは地図を表示できません（WebGL2
+        に対応したブラウザで開いてください）。
+      </p>
+    </div>
+    <div
       v-else
       ref="mapContainerRef"
       class="h-full w-full"
@@ -19,8 +28,12 @@
 </template>
 
 <script setup lang="ts">
-import maplibregl from "maplibre-gl";
+// v6 は ESM のみで default export が無いため、名前空間 import で受ける
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+// v6 はバンドラ利用時にワーカーの URL を明示する必要がある（import.meta.url から解決できないため）。
+// Vite の ?worker&url で、ワーカーを依存込みの 1 ファイルにバンドルした URL を得る
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import type { Point } from "geojson";
 import type { Marker } from "~/types/marker";
 import type { Category } from "~/types/category";
@@ -71,6 +84,8 @@ function saveMapState(center: [number, number], zoom: number) {
 
 const mapContainerRef = ref<HTMLDivElement | null>(null);
 const mapRef = ref<maplibregl.Map | null>(null);
+/** WebGL2 が使えず地図を生成できなかったか。v6 は WebGL1 を廃止し、生成時に例外を投げる */
+const webglUnavailable = ref(false);
 
 function addSpotLayers(map: maplibregl.Map) {
   // クラスター円
@@ -195,12 +210,28 @@ onMounted(() => {
 
   const { center, zoom } = getSavedMapState();
 
-  const map = new maplibregl.Map({
-    container: mapContainerRef.value,
-    style: `https://api.maptiler.com/maps/streets/style.json?key=${maptilerKey}`,
-    center,
-    zoom,
-  });
+  maplibregl.setWorkerUrl(workerUrl);
+
+  let map: maplibregl.Map;
+  try {
+    map = new maplibregl.Map({
+      container: mapContainerRef.value,
+      style: `https://api.maptiler.com/maps/streets/style.json?key=${maptilerKey}`,
+      center,
+      zoom,
+    });
+  } catch (error) {
+    // WebGL2 非対応だけは利用者に案内して止める。それ以外の例外は握り潰さず投げ直す
+    if (error instanceof maplibregl.GPUInitializationError) {
+      console.error(
+        "[MapView] WebGL2 を初期化できないため地図を表示しない",
+        error,
+      );
+      webglUnavailable.value = true;
+      return;
+    }
+    throw error;
+  }
 
   map.addControl(new maplibregl.NavigationControl(), "top-right");
 

@@ -54,7 +54,7 @@ flowchart TD
 | フロントエンド | Nuxt.js 3 + TypeScript | Vue.js エコシステム、地図SPA開発に適した CSR/SSR ハイブリッド構成 |
 | スタイリング | Tailwind CSS v4（`@tailwindcss/vite`） | ユーティリティファースト、Vite ネイティブ統合 |
 | トースト通知 | vue-sonner | API 失敗・操作完了の通知 |
-| 地図ライブラリ | MapLibre GL JS | MapTiler推奨、TS製、WebGL描画、ベクタータイルネイティブ対応 |
+| 地図ライブラリ | MapLibre GL JS（v6） | MapTiler推奨、TS製、WebGL2描画、ベクタータイルネイティブ対応。v6 は ESM のみのため名前空間 import（`import * as maplibregl`）で使い、ワーカーの URL を `setWorkerUrl()` で明示する（Vite の `?worker&url`） |
 | 地図タイル | MapTiler Cloud | 無料枠100,000タイル/月、日本語地名対応、MapLibre相性◎ |
 | バックエンドAPI | Nuxt Server Routes (`defineEventHandler`) | Vercel一体デプロイ、追加インフラ不要 |
 | ORM | Prisma + `@prisma/adapter-pg` | 型安全なDB操作、PostgreSQL アダプター経由接続 |
