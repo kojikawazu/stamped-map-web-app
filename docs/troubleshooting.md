@@ -61,7 +61,8 @@
 
 ### `prisma migrate` 系コマンドが想定外の挙動をする
 
-- このプロジェクトは **マイグレーションファイルを持たない**。`prisma migrate dev` ではなく **`prisma db push`** でスキーマを DB に同期する。
+- このプロジェクトは **マイグレーションファイルを持たない**（`prisma migrate` は使わない）。
+- **本番スキーマはこのリポジトリから変更しない**。ローカル / テスト DB へのスキーマ同期は `make e2e-setup`（= `pnpm db:setup:test`、接続先ガード経由の `prisma db push`）で行う。`front/` で引数なしの `prisma db push` は `front/.env`（本番）を向くため実行しない。
 - 詳細: [`05-data-specification.md`](05-data-specification.md#prisma-スキーマ)。
 
 ### PostGIS 関連のエラー

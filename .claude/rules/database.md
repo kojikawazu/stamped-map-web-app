@@ -1,5 +1,5 @@
 ---
-description: Prisma ORM 命名規約・マイグレーション・クエリ規約
+description: Prisma ORM 命名規約・スキーマ同期（本番は変更しない）・クエリ規約
 globs: "front/prisma/**,front/server/utils/**"
 ---
 
@@ -34,11 +34,14 @@ globs: "front/prisma/**,front/server/utils/**"
 - 論理削除の `deletedAt` も同様に、削除ヘルパー（extension）経由で設定する。呼び出し側で `deletedAt: new Date()` を書かない。
 - **例外**: シードデータ（`prisma/seed.ts`）・テストで日時を固定したい場合のみ明示指定を許容する。この場合も本番コードパスには持ち込まない。
 
-## マイグレーション
+## スキーマ同期
 
-- `prisma migrate dev` で開発環境のマイグレーションを管理する。
-- `prisma migrate deploy` で本番環境に適用する。
-- マイグレーションファイルは手動で編集しない。
+- マイグレーションファイルは持たない（`prisma migrate` は使わない）。
+- **本番スキーマはこのリポジトリから変更しない**（本番への `db push` / `migrate deploy` を行わない。`production-data.md`）。
+- ローカル / テスト DB には `prisma db push` で同期する。必ず接続先ガード（`front/lib/test-database-url.ts`）を通す経路を使う:
+  - E2E / ローカル: `pnpm db:setup:test`（= `make e2e-setup`。接続先は `TEST_DATABASE_URL`）
+  - IT: `vitest.it.global-setup.ts`（Testcontainers の払い出し URL）
+- `front/` で引数なしの `prisma db push` を実行しない（`front/.env` の `DATABASE_URL` = 本番を読む）。
 
 ## クエリ
 

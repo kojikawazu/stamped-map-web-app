@@ -77,10 +77,9 @@ test-it: ## 統合テスト（IT, Testcontainers で実 PostGIS）※Docker 必�
 	cd $(FRONT) && pnpm test:it
 
 ##@ データベース
-.PHONY: db-push db-seed
-db-push: ## ⚠ front/.env の DB（本番 Supabase）へスキーマ同期。production-data.md の手順に従う
-	cd $(FRONT) && pnpm exec prisma db push
-
+# 本番スキーマはこのリポジトリから変更しないため、本番（front/.env の DATABASE_URL）への
+# db push ターゲットは置かない。テスト DB への同期は e2e-setup を使う。
+.PHONY: db-seed
 db-seed: ## ローカルのテスト DB にシード投入（本番は接続先ガードで拒否）
 	cd $(FRONT) && TEST_DATABASE_URL=$(TEST_DATABASE_URL) pnpm db:seed
 

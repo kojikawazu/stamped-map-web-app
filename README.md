@@ -122,20 +122,19 @@ Google ログインを使う場合のみ：
 
 ### 4. データベースのセットアップ
 
-このプロジェクトは **マイグレーションファイルを持たず**、Prisma スキーマを DB に直接同期する運用（`db push`）。
+**本番スキーマはこのリポジトリから変更しない**（本番 Supabase への `prisma db push` / `prisma migrate` は行わない）。本番のテーブル・デフォルトカテゴリは作成済みの前提とする。マイグレーションファイルは持たず、`front/prisma/schema.prisma` はローカル / テスト DB への同期と Prisma Client の生成に使う。
 
 ```bash
-cd front
+# ローカルのテスト DB（PostGIS, 5433）を起動 → スキーマ同期 + シード投入
+make db-up && make e2e-setup
 
-# スキーマを Supabase に同期 + Prisma クライアント生成
-pnpm exec prisma db push
+# Prisma Client の生成（pnpm build にも含まれる）
+cd front && pnpm exec prisma generate
 ```
 
-> ⚠ 上記は**本番 Supabase への書き込み**であり、[`.claude/rules/production-data.md`](.claude/rules/production-data.md) の手順に従う（接続先の確認・`--accept-data-loss` を付けない）。`prisma migrate` への移行は issue #87 で対応予定。
+> `front/.env` の `DATABASE_URL` は本番 Supabase を指す。**`front/` で引数なしの `prisma db push` を実行しない**（`.env` を読んで本番に書き込む）。ローカル / テスト DB への同期は `make e2e-setup`（= `pnpm db:setup:test`）を使い、接続先は `TEST_DATABASE_URL` で渡す（[`.claude/rules/production-data.md`](.claude/rules/production-data.md)）。
 >
-> `pnpm db:seed`（デフォルトカテゴリ + 確認用ダミースポット）は**ローカルのテスト DB 専用**で、本番には投入できない（接続先ガード `front/lib/test-database-url.ts` が `localhost` 以外を拒否する）。本番のデフォルトカテゴリは投入済みの前提とし、再投入が必要な場合は `production-data.md` の例外手順に従う。
->
-> ローカルのテスト DB は `make db-up && make e2e-setup`（PostGIS を 5433 で起動 → スキーマ同期 + シード）で用意する。
+> `pnpm db:seed`（デフォルトカテゴリ + 確認用ダミースポット）は**ローカルのテスト DB 専用**で、本番には投入できない（接続先ガード `front/lib/test-database-url.ts` が `localhost` 以外を拒否する）。
 
 > PostGIS の空間インデックス（`location` 生成カラム）は現状未使用。導入する場合は [`docs/05-data-specification.md`](docs/05-data-specification.md) のマイグレーション SQL を参照。
 
