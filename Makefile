@@ -7,12 +7,14 @@
 # --- 設定 ---------------------------------------------------------------
 FRONT := front
 
-# ローカル E2E 用 PostGIS（docker-compose.yml の db サービス, 5433 公開）
-E2E_DATABASE_URL ?= postgresql://stamped:stamped@localhost:5433/stamped
-E2E_BASE_URL     ?= http://localhost:3000
+# ローカル E2E 用 PostGIS（docker-compose.yml の db サービス, 5433 公開）。
+# テスト専用の変数で渡す（DATABASE_URL は front/.env の本番と衝突するため使わない）。
+# 接続先は front/lib/test-database-url.ts が localhost 系のみ許可する。
+TEST_DATABASE_URL ?= postgresql://stamped:stamped@localhost:5433/stamped
+E2E_BASE_URL      ?= http://localhost:3000
 # E2E は Supabase 検証をバイパスし固定オーナーで動かす（本番では絶対に有効化しない）
 E2E_ENV := E2E_AUTH_BYPASS=1 ALLOWED_EMAILS=e2e@example.com \
-	DATABASE_URL=$(E2E_DATABASE_URL) PLAYWRIGHT_BASE_URL=$(E2E_BASE_URL)
+	TEST_DATABASE_URL=$(TEST_DATABASE_URL) PLAYWRIGHT_BASE_URL=$(E2E_BASE_URL)
 
 .DEFAULT_GOAL := help
 
@@ -65,13 +67,13 @@ test-coverage: ## カバレッジ計測（@vitest/coverage-v8）
 test-it: ## 統合テスト（IT, Testcontainers で実 PostGIS）※Docker 必須
 	cd $(FRONT) && pnpm test:it
 
-##@ データベース（開発用 / front/.env.local を使用）
+##@ データベース
 .PHONY: db-push db-seed
-db-push: ## Prisma スキーマを DB に同期（db push）
+db-push: ## ⚠ front/.env の DB（本番 Supabase）へスキーマ同期。production-data.md の手順に従う
 	cd $(FRONT) && pnpm exec prisma db push
 
-db-seed: ## シードデータ投入
-	cd $(FRONT) && pnpm db:seed
+db-seed: ## ローカルのテスト DB にシード投入（本番は接続先ガードで拒否）
+	cd $(FRONT) && TEST_DATABASE_URL=$(TEST_DATABASE_URL) pnpm db:seed
 
 ##@ E2E（実 DB シナリオ / ローカル PostGIS 5433）
 .PHONY: e2e e2e-full e2e-setup db-up db-down db-logs
@@ -84,9 +86,8 @@ db-down: ## ローカル PostGIS を停止・破棄
 db-logs: ## ローカル PostGIS のログを表示
 	docker compose logs -f db
 
-e2e-setup: ## E2E 用 DB へスキーマ同期 + シード投入（5433 に対して）
-	cd $(FRONT) && DATABASE_URL=$(E2E_DATABASE_URL) pnpm exec prisma db push \
-		&& DATABASE_URL=$(E2E_DATABASE_URL) pnpm db:seed
+e2e-setup: ## E2E 用 DB へスキーマ同期 + シード投入（接続先ガード経由, 5433 に対して）
+	cd $(FRONT) && TEST_DATABASE_URL=$(TEST_DATABASE_URL) pnpm db:setup:test
 
 e2e: ## E2E テスト実行（Playwright が pnpm dev を自動起動）
 	cd $(FRONT) && $(E2E_ENV) pnpm test:e2e

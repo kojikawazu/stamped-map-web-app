@@ -64,6 +64,8 @@
 | Playwright | E2Eテスト（実装済み） |
 
 > **テストレイヤー**: ユニット（`pnpm test`、prisma モック・高速）/ **統合(IT)**（`pnpm test:it`、実 PostGIS を Testcontainers で起動し実 Prisma を検証。Supabase 認証のみモック）/ E2E（`pnpm test:e2e`）。IT は `front/__tests__/it/**/*.it.test.ts`、実行に Docker が必要。
+>
+> **テスト DB の接続先ガード**: IT / E2E / seed の接続先は `front/lib/test-database-url.ts` に集約する。E2E / seed は `TEST_DATABASE_URL`（既定 `localhost:5433`）から解決し、`DATABASE_URL` は参照しない。IT は Testcontainers の払い出し URL を検証する。いずれも `localhost` / `127.0.0.1` / `::1` 以外なら `db push` / seed / `TRUNCATE` の前に throw する（UT: `__tests__/lib/test-database-url.test.ts`）。
 
 > テストケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。書き込み系エンドポイントは認可の異常系（オーナー限定=403）と DB 例外伝播を必須とする。分類規約の詳細は [`.claude/rules/testing.md`](../.claude/rules/testing.md)。
 
@@ -243,4 +245,4 @@ GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動�
 
 **it ジョブ**（統合テスト）: `prisma generate` → `pnpm test:it`。Testcontainers が PostGIS コンテナを起動し実 Prisma を検証する（ubuntu-latest の Docker を利用、services 定義不要）。
 
-**e2e ジョブ**（実 DB シナリオ）: `services: postgis` を起動 → `pnpm build` → `prisma db push` + `pnpm db:seed` → 本番サーバーを `E2E_AUTH_BYPASS=1` で起動 → `pnpm test:e2e`（Playwright）。API はモックせず実データを検証する。失敗時は `playwright-report` を artifact 保存。
+**e2e ジョブ**（実 DB シナリオ）: `services: postgis` を起動 → `pnpm build` → `pnpm db:setup:test`（接続先ガード経由で `prisma db push` + seed。ジョブ env は `TEST_DATABASE_URL` のみ） → 本番サーバーを `DATABASE_URL="$TEST_DATABASE_URL"` + `E2E_AUTH_BYPASS=1` で起動 → `pnpm test:e2e`（Playwright）。API はモックせず実データを検証する。失敗時は `playwright-report` を artifact 保存。

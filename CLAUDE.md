@@ -28,6 +28,7 @@
 | `jsdoc.md` | `front/components/**`, `front/composables/**`, `front/server/**`, `front/lib/**`, `front/middleware/**` | TypeScript 公開シンボルへの JSDoc（TSDoc）必須・型ブレース禁止 |
 | `error-handling.md` | 全体 | バリデーション・HTTP ステータスコード・ログ方針 |
 | `security.md` | 全体 | Supabase Auth / ALLOWED_EMAILS / Prisma インジェクション対策 |
+| `production-data.md` | 全体 | 本番データ保護（本番 DB への破壊的操作の禁止・環境分離・例外手順・AI エージェントへの制約） |
 | `testing.md` | `front/__tests__/**`, `front/tests/**` | Vitest + Playwright テスト方針 |
 | `frontend.md` | `front/components/**`, `front/pages/**`, `front/composables/**`, `front/repositories/**`, `front/schemas/**` | Nuxt.js 3 コンポーネント・composables 設計規約・関心別ディレクトリ・レイヤ一方向依存 |
 | `api.md` | `front/server/**` | Nuxt.js Server API 設計・ディレクトリ構成・バリデーション方針 |

@@ -143,9 +143,10 @@ jobs:
           --health-retries 10
 
     # サーバー・ビルド・DB 準備で共有する環境変数。
+    # DB はテスト専用の TEST_DATABASE_URL で渡す（DATABASE_URL をジョブ全体に置かない。testing.md）。
+    # DB 準備スクリプトは front/lib/test-database-url.ts の接続先ガード（localhost 系のみ許可）を通る。
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stamped_e2e
-      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/stamped_e2e
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stamped_e2e
       SUPABASE_URL: https://dummy.supabase.co
       SUPABASE_KEY: dummy-anon-key
       NUXT_PUBLIC_MAPTILER_KEY: dummy-maptiler-key
@@ -177,15 +178,15 @@ jobs:
 
       # schema を実 DB に同期し、決定的なシード（デフォルト5カテゴリ + ダミー5スポット）を投入する。
       - name: Prepare test database
-        run: |
-          pnpm exec prisma db push --skip-generate --accept-data-loss
-          pnpm db:seed
+        run: pnpm db:setup:test
 
       # 本番ビルド済みサーバーを実 DB + E2E 認証バイパスで起動する。
       # E2E_AUTH_BYPASS は本番では絶対に設定しない（VERCEL_ENV=production でも無効化される二重ガード）。
       - name: Start production server
         run: |
           PORT=3000 HOST=0.0.0.0 \
+          DATABASE_URL="$TEST_DATABASE_URL" \
+          DIRECT_URL="$TEST_DATABASE_URL" \
           E2E_AUTH_BYPASS=1 \
           ALLOWED_EMAILS=e2e@example.com \
           node .output/server/index.mjs > /tmp/nitro.log 2>&1 &

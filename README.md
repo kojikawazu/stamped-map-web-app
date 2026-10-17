@@ -109,6 +109,7 @@ cp .env.example .env.local
 | `NUXT_PUBLIC_SITE_URL` | - | サイト URL（OAuth リダイレクト先）。ローカルは省略可（`window.location.origin` にフォールバック） |
 | `GOOGLE_CLIENT_ID` | OAuth時 | Google OAuth クライアント ID（Supabase の Provider 設定に登録） |
 | `GOOGLE_CLIENT_SECRET` | OAuth時 | Google OAuth クライアントシークレット（同上） |
+| `TEST_DATABASE_URL` | - | テスト DB（E2E / seed）の接続先。既定 `postgresql://stamped:stamped@localhost:5433/stamped`。`localhost` / `127.0.0.1` / `::1` 以外は拒否される。**`.env` には書かない**（シェル / Makefile / CI で渡す） |
 
 ### 3. Google OAuth の設定（任意）
 
@@ -128,10 +129,13 @@ cd front
 
 # スキーマを Supabase に同期 + Prisma クライアント生成
 pnpm exec prisma db push
-
-# シードデータ投入（デフォルトカテゴリ + 確認用ダミースポット）
-pnpm db:seed
 ```
+
+> ⚠ 上記は**本番 Supabase への書き込み**であり、[`.claude/rules/production-data.md`](.claude/rules/production-data.md) の手順に従う（接続先の確認・`--accept-data-loss` を付けない）。`prisma migrate` への移行は issue #87 で対応予定。
+>
+> `pnpm db:seed`（デフォルトカテゴリ + 確認用ダミースポット）は**ローカルのテスト DB 専用**で、本番には投入できない（接続先ガード `front/lib/test-database-url.ts` が `localhost` 以外を拒否する）。本番のデフォルトカテゴリは投入済みの前提とし、再投入が必要な場合は `production-data.md` の例外手順に従う。
+>
+> ローカルのテスト DB は `make db-up && make e2e-setup`（PostGIS を 5433 で起動 → スキーマ同期 + シード）で用意する。
 
 > PostGIS の空間インデックス（`location` 生成カラム）は現状未使用。導入する場合は [`docs/05-data-specification.md`](docs/05-data-specification.md) のマイグレーション SQL を参照。
 
@@ -163,7 +167,8 @@ pnpm type-check   # 型チェック（nuxt typecheck = vue-tsc）
 pnpm lint         # Lint（ESLint。JSDoc ルール含む）
 pnpm format       # フォーマット適用（Prettier）
 pnpm format:check # フォーマットチェック（Prettier）
-pnpm db:seed      # シードデータ投入
+pnpm db:seed      # シード投入（ローカルのテスト DB 専用。本番は拒否）
+pnpm db:setup:test # テスト DB へスキーマ同期 + シード（接続先は TEST_DATABASE_URL、既定 localhost:5433）
 ```
 
 ## ドキュメント
