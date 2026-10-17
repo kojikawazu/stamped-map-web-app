@@ -31,7 +31,7 @@
 
 ### テストピラミッド
 
-```
+```text
          ┌─────┐
          │ E2E │        少数（重要フローのみ）
         ┌┴─────┴┐
@@ -66,7 +66,7 @@
 > **テストレイヤー**: ユニット（`pnpm test`、prisma モック・高速）/ **統合(IT)**（`pnpm test:it`、実 PostGIS を Testcontainers で起動し実 Prisma を検証。Supabase 認証のみモック）/ E2E（`pnpm test:e2e`）。IT は `front/__tests__/it/**/*.it.test.ts`、実行に Docker が必要。
 >
 > **テスト DB の接続先ガード**: IT / E2E / seed の接続先は `front/lib/test-database-url.ts` に集約する。E2E / seed は `TEST_DATABASE_URL`（既定 `localhost:5433`）から解決し、`DATABASE_URL` は参照しない。IT は Testcontainers の払い出し URL を検証する。いずれも `localhost` / `127.0.0.1` / `::1` 以外なら `db push` / seed / `TRUNCATE` の前に throw する（UT: `__tests__/lib/test-database-url.test.ts`）。
-
+>
 > テストケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。書き込み系エンドポイントは認可の異常系（オーナー限定=403）と DB 例外伝播を必須とする。分類規約の詳細は [`.claude/rules/testing.md`](../.claude/rules/testing.md)。
 
 ## テストケース
@@ -255,5 +255,11 @@ GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動�
 **Secret scan**（別ワークフロー `.github/workflows/secret-scan.yml`）: 鍵・`.env` 系の秘匿ファイルが Git 管理下にないかを検査する。`front/**` に限らずどの変更でも混入しうるため、`paths` で絞らず `main` への push / PR で常に実行する。検出パターンの自己テスト（`scripts/test-check-tracked-secrets.sh`）→ 本検査（`scripts/check-tracked-secrets.sh`）の順。詳細は `docs/06-security-specification.md`「シークレット管理」。
 
 **actionlint**（別ワークフロー `.github/workflows/actionlint.yml`）: 全ワークフローを actionlint + shellcheck（`run:` 内のシェル）で検査する。Secret scan と同じく `paths` で絞らず常に実行する。コマンドは `Makefile` の `actionlint` ターゲットに一元化しており（公式 Docker イメージをタグ固定）、ローカルでも `make actionlint` で同じ検査を実行できる。
+
+**markdownlint**（別ワークフロー `.github/workflows/markdownlint.yml`）: リポジトリ内の Markdown（`docs/` / `README.md` / `.claude/rules/` 等）を markdownlint-cli2 で検査する。設定は `.markdownlint-cli2.jsonc`（見た目は検査せず、壊れているものだけを検出する）、コマンドとバージョンは `scripts/lint-docs.sh` に一元化（ローカルは `make lint-docs`）。`paths` で絞らず常に実行する。
+
+**shellcheck**（別ワークフロー `.github/workflows/shellcheck.yml`）: 追跡中の `*.sh`（`scripts/` 配下等）を shellcheck で検査する。actionlint は `run:` 内しか見ないため、独立したスクリプトはこちらで検査する。コマンドとバージョンは `scripts/lint-shell.sh` に一元化（ローカルは `make lint-shell`。固定バージョンの shellcheck が無ければ Docker を使う）。`paths` で絞らず常に実行する。
+
+運用方針（警告ゼロ・抑制コメントの作法・`--fix` の扱い）は `.claude/rules/static-analysis.md`。
 
 **アクションの更新**: `.github/dependabot.yml`（`github-actions`、毎週月曜 09:00 JST、全アクションを 1 PR にグループ化）が `uses:` のバージョン更新 PR を作成する。更新 PR も上記の CI / actionlint を通してからマージする。

@@ -14,7 +14,7 @@ globs: "front/server/**"
 
 ## ディレクトリ構成
 
-```
+```text
 server/
 ├── api/               # API エンドポイント
 │   ├── categories/    # GET, POST, PUT/:id, DELETE/:id

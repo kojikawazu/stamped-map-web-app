@@ -113,7 +113,7 @@ APIが 403 を返した場合は、既存の `useApiClient.ts` のエラーハ�
 
 ## `.env.example` への追記
 
-```
+```dotenv
 # オーナー制限（CRUD操作を許可するメールアドレス、カンマ区切り）
 ALLOWED_EMAILS=owner@example.com
 ```

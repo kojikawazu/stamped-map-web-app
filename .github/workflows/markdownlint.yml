@@ -1,0 +1,34 @@
+name: markdownlint
+
+# リポジトリ内の Markdown（docs/ / README.md / .claude/rules/ 等）を markdownlint-cli2 で検査する。
+# 設定の正本は .markdownlint-cli2.jsonc、運用方針の正本は .claude/rules/static-analysis.md。
+# 数秒で終わるため paths で絞らず常に実行する
+# （ワークフローレベルで止めると、必須チェックに含めた際に pending のまま PR がマージできなくなる）。
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # コマンドとバージョンは scripts/lint-docs.sh が唯一の定義（ローカルの make lint-docs と同一の検査）
+      - name: Lint Markdown
+        run: ./scripts/lint-docs.sh

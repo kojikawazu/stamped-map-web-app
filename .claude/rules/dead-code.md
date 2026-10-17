@@ -38,7 +38,7 @@ globs:
 
 ## 検出
 
-- Linter の未使用検出を有効にする（未使用変数・未使用 import・到達不能コード）。本プロジェクトでは ESLint（`@nuxt/eslint`、`coding-standards.md`）が担い、CI の `lint` で必須実行される。
+- Linter の未使用検出を有効にする（未使用変数・未使用 import・到達不能コード）。本プロジェクトでは ESLint（`@nuxt/eslint`、`coding-standards.md`）が担い、CI の `lint` で必須実行される。詳細な運用は `static-analysis.md` に従う。
 - **未使用の `export` は通常の Linter では検出できない**。プロジェクト全体を横断して調べる専用ツール（TypeScript の `knip` / `ts-prune`、Go の `deadcode`、Python の `vulture` 等）の導入を検討する。
 - **カバレッジ 0% の行はデッドコードの候補**。テストカバレッジレポート（`pnpm test:coverage`）を、未使用コードの発見にも使う。
 

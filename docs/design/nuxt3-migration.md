@@ -63,7 +63,7 @@
 
 ## ディレクトリ構成（移行後）
 
-```
+```text
 front/
 ├── server/
 │   ├── api/
@@ -153,11 +153,13 @@ export default defineNuxtConfig({
 **採用する。**
 
 理由：
+
 - `useSupabaseClient()`・`useSupabaseUser()`・`useSupabaseSession()` が自動インポートで使えるため、`lib/supabase.ts` が不要になる
 - 設定が `nuxt.config.ts` の `supabase` セクションに集約され、クライアント管理コードが減る
 - Nuxt エコシステムとの統合度が高く、学習目的にも適している
 
 影響範囲：
+
 - `lib/supabase.ts` は**作成しない**
 - `composables/useAuth.ts` は `useSupabaseClient()` を利用して実装する
 - `server/utils/auth.ts` の `verifyAuth()` はサーバー側で直接 `createClient` を使う（`@supabase/supabase-js`）

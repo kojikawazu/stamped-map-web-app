@@ -135,7 +135,7 @@ cd front && pnpm exec prisma generate
 > `front/.env` の `DATABASE_URL` は本番 Supabase を指す。**`front/` で引数なしの `prisma db push` を実行しない**（`.env` を読んで本番に書き込む）。ローカル / テスト DB への同期は `make e2e-setup`（= `pnpm db:setup:test`）を使い、接続先は `TEST_DATABASE_URL` で渡す（[`.claude/rules/production-data.md`](.claude/rules/production-data.md)）。
 >
 > `pnpm db:seed`（デフォルトカテゴリ + 確認用ダミースポット）は**ローカルのテスト DB 専用**で、本番には投入できない（接続先ガード `front/lib/test-database-url.ts` が `localhost` 以外を拒否する）。
-
+>
 > PostGIS の空間インデックス（`location` 生成カラム）は現状未使用。導入する場合は [`docs/05-data-specification.md`](docs/05-data-specification.md) のマイグレーション SQL を参照。
 
 ### 5. ユーザーアカウントの作成

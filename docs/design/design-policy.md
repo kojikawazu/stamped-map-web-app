@@ -98,7 +98,7 @@
 
 - **モノレポ（ルート管理）** を基本とする。
 
-```
+```text
 /
 ├── docs/           # ドキュメント（設計書・仕様書など）
 ├── front/          # フロントエンド（Nuxt.js 3）※ Server Routes含む
@@ -165,7 +165,7 @@
 
 ### ドキュメント配置
 
-```
+```text
 docs/
 ├── tasks/          # タスク管理ファイル
 ├── specs/          # 仕様書
@@ -210,7 +210,7 @@ docs/
 
 ### ディレクトリ構成（Nuxt.js 3 / アトミックデザイン）
 
-```
+```text
 front/
 ├── pages/              # ルーティング（index.vue / login.vue）
 ├── layouts/            # レイアウト（default.vue / empty.vue）
@@ -318,11 +318,13 @@ front/
 - Vercel のデフォルトビルド・デプロイを利用する（`nuxt build` → Vercel Serverless）。
 - GitHub Actions で CI を実行する。
 
-**CI（Push / PR 時）**
+#### CI（Push / PR 時）
+
 - ユニットテスト（Vitest）
 - E2E テスト（Playwright）
 
-**CD（main マージ時）**
+#### CD（main マージ時）
+
 - Vercel が自動デプロイ
 
 ---

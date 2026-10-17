@@ -36,7 +36,7 @@
 
 ## 認証フロー
 
-```
+```text
 1. ログイン画面で「Google でログイン」ボタンをクリック
 2. supabase.auth.signInWithOAuth({ provider: "google" }) を呼び出し
 3. Google の OAuth 同意画面にリダイレクト
@@ -89,7 +89,7 @@ const loginWithGoogle = async (): Promise<void> => {
 
 ### ログイン画面レイアウト
 
-```
+```text
 ┌─────────────────────────────┐
 │       Stamped Map           │
 │  アカウントにログインして...  │
@@ -168,7 +168,7 @@ runtimeConfig: {
 
 ## .env / .env.example 追加内容
 
-```
+```dotenv
 # Site URL（OAuth リダイレクト先ベースURL）
 # 本番: https://your-domain.vercel.app
 # ローカル: 省略可（window.location.origin にフォールバック）

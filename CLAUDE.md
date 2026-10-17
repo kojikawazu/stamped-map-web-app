@@ -35,6 +35,7 @@
 | `database.md` | `front/prisma/**`, `front/server/utils/**` | Prisma 命名規約・監査列の自動設定・スキーマ同期（本番は変更しない）・クエリ規約 |
 | `vercel.md` | `vercel.json` | Vercel デプロイ制御（ブランチ単位の発火制御・ビルドスキップの是非） |
 | `github-actions.md` | `.github/workflows/**` | GitHub Actions 規約（push トリガ・concurrency・パスフィルタ・actionlint・Dependabot） |
+| `static-analysis.md` | 全体 | 静的解析の運用（Formatter / Linter の役割分担・CI 必須・警告ゼロ・抑制コメント・markdownlint / shellcheck / 秘匿ファイル検出） |
 | `duplication.md` | 全体 | 重複と共通化の判断基準（同じ知識だけ共通化・3 回目で共通化・初期化手順の一元化） |
 | `dead-code.md` | 全体 | デッドコード禁止（コメントアウト・未使用・スキップ放置テストを残さない） |
 | `lessons-learned.md` | 全体 | 誤り・ハマりの教訓を `docs/lessons-learned.md` に蓄積する運用・ルールへの昇格基準 |

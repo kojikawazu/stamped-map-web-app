@@ -226,7 +226,7 @@ const nearby = await prisma.$queryRaw`
 
 ## データフロー
 
-```
+```text
 【登録フロー】
 ユーザー（地図クリック → モーダル入力）
   ↓ POST /api/spots + JWT
