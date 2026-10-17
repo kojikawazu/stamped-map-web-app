@@ -24,7 +24,6 @@
     "db:setup:test": "pnpm db:push:test && pnpm db:seed"
   },
   "dependencies": {
-    "@nuxt/fonts": "^0.14.0",
     "@nuxtjs/supabase": "^1.6.2",
     "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.19.3",

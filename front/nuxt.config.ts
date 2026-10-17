@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     dirs: [{ path: "~/components", pathPrefix: false }],
   },
 
-  modules: ["@nuxtjs/supabase", "@nuxt/fonts", "@nuxt/eslint"],
+  modules: ["@nuxtjs/supabase", "@nuxt/eslint"],
 
   vite: {
     plugins: [tailwindcss()],
