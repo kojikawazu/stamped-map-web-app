@@ -60,7 +60,7 @@
 | Vitest | ユニットテスト・結合テスト（prisma モック） |
 | Testcontainers（`@testcontainers/postgresql` + PostGIS） | 統合テスト（IT）で実 DB を起動（`pnpm test:it`） |
 | @vitest/coverage-v8 | カバレッジ計測（`pnpm test:coverage`） |
-| @vue/test-utils + @nuxt/test-utils | composables・Nuxt 環境テスト |
+| @vue/test-utils + @nuxt/test-utils | composables・Nuxt 環境テスト、コンポーネント（VTU。`mountSuspended`） |
 | Playwright | E2Eテスト（実装済み） |
 
 > **テストレイヤー**: ユニット（`pnpm test`、prisma モック・高速）/ **統合(IT)**（`pnpm test:it`、実 PostGIS を Testcontainers で起動し実 Prisma を検証。Supabase 認証のみモック）/ E2E（`pnpm test:e2e`）。IT は `front/__tests__/it/**/*.it.test.ts`、実行に Docker が必要。
@@ -220,6 +220,7 @@ vi.stubGlobal(
 | 種別 | ツール | 対象ディレクトリ | 備考 |
 |------|--------|-----------------|------|
 | ユニット/結合 | Vitest | `front/__tests__/**` | `tests/e2e/**` / `**/*.it.test.ts` は exclude（`vitest.config.ts`） |
+| コンポーネント（VTU） | Vitest + `@nuxt/test-utils`（`mountSuspended`） | `front/__tests__/components/**` | ユニットと同じ実行（`pnpm test`）。props / emit・表示分岐を検証。`.vue` はカバレッジ計測対象外 |
 | 統合（IT） | Vitest + Testcontainers | `front/__tests__/it/**` | `*.it.test.ts`。専用の `vitest.config.it.ts` で実行 |
 | E2E | Playwright | `front/tests/e2e/**` | `testDir: ./tests/e2e`、Base URL `http://localhost:3000`（`playwright.config.ts`） |
 
