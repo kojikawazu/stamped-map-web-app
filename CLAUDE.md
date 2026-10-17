@@ -26,7 +26,7 @@
 | `coding-standards.md` | 全体 | TypeScript strict / pnpm / ESLint + Prettier 規約 |
 | `typescript.md` | `front/**/*.ts`, `front/**/*.vue` | type/interface の使い分け・型/定数の配置・any 禁止・`import type` |
 | `jsdoc.md` | `front/components/**`, `front/composables/**`, `front/repositories/**`, `front/schemas/**`, `front/server/**`, `front/lib/**`, `front/middleware/**` | TypeScript 公開シンボルへの JSDoc（TSDoc）必須・型ブレース禁止 |
-| `error-handling.md` | 全体 | バリデーション・HTTP ステータスコード・ログ方針 |
+| `error-handling.md` | 全体 | バリデーション・HTTP ステータスコード・ログ方針・判定不能を正常値に丸めない |
 | `security.md` | 全体 | Supabase Auth / ALLOWED_EMAILS / Prisma インジェクション対策 |
 | `production-data.md` | 全体 | 本番データ保護（本番 DB への破壊的操作の禁止・環境分離・例外手順・AI エージェントへの制約） |
 | `testing.md` | `front/__tests__/**`, `front/tests/**` | Vitest + Playwright テスト方針 |
@@ -35,3 +35,6 @@
 | `database.md` | `front/prisma/**`, `front/server/utils/**` | Prisma 命名規約・監査列の自動設定・スキーマ同期（本番は変更しない）・クエリ規約 |
 | `vercel.md` | `vercel.json` | Vercel デプロイ制御（ブランチ単位の発火制御・ビルドスキップの是非） |
 | `github-actions.md` | `.github/workflows/**` | GitHub Actions 規約（push トリガ・concurrency・パスフィルタ・actionlint・Dependabot） |
+| `duplication.md` | 全体 | 重複と共通化の判断基準（同じ知識だけ共通化・3 回目で共通化・初期化手順の一元化） |
+| `dead-code.md` | 全体 | デッドコード禁止（コメントアウト・未使用・スキップ放置テストを残さない） |
+| `lessons-learned.md` | 全体 | 誤り・ハマりの教訓を `docs/lessons-learned.md` に蓄積する運用・ルールへの昇格基準 |

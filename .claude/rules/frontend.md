@@ -73,6 +73,18 @@ pages  →  components  →  composables  →  repositories  →  lib / schemas 
 - `pages/` ディレクトリによるファイルベースルーティングを使用する。
 - ルートファイルを手動で定義しない。
 
+## ページ（pages/）は薄く保つ
+
+- `pages/` のルートコンポーネントは**薄く**保つ。責務は「データ取得の起点・composable 呼び出し・レイアウト/メタ指定」に限定する。
+- ビジネスロジック・複雑な状態管理・副作用を page に直接書かない → **composable へ切り出す**。
+
+## セキュリティ（機密をクライアントに置かない）
+
+本プロジェクトは Nuxt の Server API（`server/`）を BFF として使う構成。**機密（DB 接続情報など）を扱うのは Server API だけ**で、クライアントは自分の Server API のみを呼ぶ。
+
+- `runtimeConfig`（サーバ専用。`databaseUrl` / `directUrl`）と `runtimeConfig.public`（クライアント公開。`maptilerKey` / `siteUrl`）を使い分ける。**クライアントに渡すのは公開してよい値のみ**。機密を `runtimeConfig.public` に置いて回避しない（クライアントのバンドルとページの HTML に埋め込まれる）。
+- 外部 API に機密を伴う呼び出しが必要になったら、クライアントから直接呼ばず Server API に寄せる（`api.md`）。
+
 ## バリデーション
 
 - フォームバリデーションには Zod スキーマバリデーションを使用する。
