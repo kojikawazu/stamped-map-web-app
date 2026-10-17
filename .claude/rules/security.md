@@ -36,3 +36,7 @@ globs:
 
 - ローカル環境: `.env.local`（`.gitignore` に追加必須）
 - 本番環境: Vercel Environment Variables を使用
+- **混入検出**: `.gitignore` は未追跡ファイルにしか効かず、push 済みの秘匿ファイルは履歴から消えない。CI の Secret scan（`.github/workflows/secret-scan.yml` → `scripts/check-tracked-secrets.sh`）で鍵・`.env` 系が追跡対象に入っていないかを常時検査する。
+  - ワークフローを `paths` / `paths-ignore` で絞らない（どの変更でも混入しうる。必須チェック化した際に pending で PR がマージ不能になる）。
+  - 検出パターンを変更したら `scripts/test-check-tracked-secrets.sh` に代表パスを追加する。
+  - 検出された場合は追跡除外だけで済ませず、**鍵・トークンをローテーション**する。

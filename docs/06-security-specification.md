@@ -18,6 +18,8 @@
 - [データアクセス制御](#データアクセス制御)
 - [暗号化](#暗号化)
 - [脆弱性対策](#脆弱性対策)
+- [シークレット管理](#シークレット管理)
+  - [Secret scan（CI）](#secret-scanci)
 
 ## 認証
 
@@ -222,3 +224,25 @@ export default defineEventHandler(async (event) => {
 | 不正アクセス | JWT 検証を全 Server API で実施（共通ヘルパー `verifyAuth` / `verifyOwner`） |
 | 不正サインアップ | Supabase 側で公開サインアップを無効化 |
 | 非オーナーによるWrite操作 | `verifyOwner()` で 403 を返却（`ALLOWED_EMAILS` による制限） |
+| 秘匿ファイルのリポジトリ混入 | `.gitignore` での除外に加え、CI の Secret scan で追跡対象を検査（下記「シークレット管理」） |
+
+## シークレット管理
+
+| 環境 | 保管場所 |
+|------|---------|
+| ローカル | `front/.env` / `.env.local`（`.gitignore` 済み・Git 管理外） |
+| 本番 | Vercel Environment Variables |
+
+### Secret scan（CI）
+
+`.gitignore` は**未追跡ファイルにしか効かない**（`git add -f` や追跡済みファイルは止められない）。また Git の履歴は追記型のため、一度 push した秘匿ファイルは追跡除外しても履歴に残り、対処は**鍵・トークンのローテーション**しかない。そこで「混入させない」`.gitignore` に加え、「**追跡された時点で落とす**」検出を CI に持たせる。
+
+| 項目 | 内容 |
+|------|------|
+| ワークフロー | `.github/workflows/secret-scan.yml`（`main` への push / PR で**常に実行**。`paths` で絞らない） |
+| 検査スクリプト | `scripts/check-tracked-secrets.sh`（`git ls-files` を検査。ローカルでも `bash scripts/check-tracked-secrets.sh` で実行可） |
+| 検出対象 | 鍵・証明書（`*.key` / `*.pem` / `*.p12` / `*.pfx` / `*.jks` / `*.keystore` / `id_rsa` / `id_ed25519` / `id_dsa`）、認証情報（`credentials.json` / `serviceAccountKey.json`）、`.env` 系（`.env` / `.env.local` / `.env.production` 等） |
+| 除外 | `*.example` / `*.sample` / `*.template` / `*.dist` / `*.env.d.ts`（値を持たないテンプレート・型定義） |
+| パターンの自己テスト | `scripts/test-check-tracked-secrets.sh`（代表パスの検出/素通りを固定し、正規表現の退行による検出漏れを防ぐ） |
+
+> 検出された場合は、ファイルを追跡除外するだけでなく、**含まれていた鍵・トークンを必ずローテーション**する。
