@@ -1,0 +1,33 @@
+name: actionlint
+
+# GitHub Actions ワークフロー（run: 内のシェルを含む）を actionlint + shellcheck で検査する。
+# 数秒で終わるため paths で絞らず常に実行する
+# （ワークフローレベルで止めると、必須チェックに含めた際に pending のまま PR がマージできなくなる）。
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # コマンドとイメージのタグは Makefile が唯一の定義（ローカルの make actionlint と同一の検査）
+      - name: Lint workflows
+        run: make actionlint
