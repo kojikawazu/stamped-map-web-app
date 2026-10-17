@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import type { GlobalSetupContext } from "vitest/node";
+import { assertLocalDatabaseUrl } from "./lib/test-database-url";
 
 declare module "vitest" {
   export interface ProvidedContext {
@@ -26,7 +27,9 @@ export default async function ({ provide }: GlobalSetupContext) {
     .withPassword("test")
     .start();
 
-  const url = container.getConnectionUri();
+  // Testcontainers の払い出し先も、db push（--accept-data-loss）の前に接続先ガードを通す。
+  // DOCKER_HOST がリモートを指す等でループバック以外になった場合はここで止める。
+  const url = assertLocalDatabaseUrl(container.getConnectionUri());
 
   // マイグレーションファイルを持たない db push 運用に合わせ、スキーマを直接同期する。
   execSync("pnpm exec prisma db push --skip-generate --accept-data-loss", {

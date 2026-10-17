@@ -18,9 +18,11 @@ import {
   isValidUuid,
 } from "./server/utils/api-helpers";
 import { readBodyMock } from "./__tests__/it/harness";
+import { assertLocalDatabaseUrl } from "./lib/test-database-url";
 
 // globalSetup が provide した接続 URL から実 PrismaClient を生成する。
-const url = inject("databaseUrl");
+// 各テスト前に TRUNCATE するため、接続前に接続先ガードを再度通す（入口を 1 箇所に集約）。
+const url = assertLocalDatabaseUrl(inject("databaseUrl"));
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: url }),
 });

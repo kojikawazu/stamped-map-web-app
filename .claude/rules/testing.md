@@ -68,11 +68,11 @@ front/
 
 - **境界**: ブラウザ → Nuxt server → 実 Prisma → 実 Postgres。API はモックしない。認証は `E2E_AUTH_BYPASS`（後述）でサーバー側の Supabase 検証をスキップし、クライアントは `injectSupabaseSession` でログイン状態を注入する。
 - **flaky 対策**: web-first assertion（自動待機）を使い `waitForTimeout` を避ける。CI では `retries: 2` / `workers: 1` / `trace: on-first-retry`。決定的なシード（`prisma/seed.ts`）に対してアサートする。
-- **ローカル実行**:
-  1. `docker compose up -d`（リポジトリ直下、PostGIS を 5433 で起動）
-  2. `cd front && DATABASE_URL=postgresql://stamped:stamped@localhost:5433/stamped pnpm exec prisma db push && DATABASE_URL=... pnpm db:seed`
-  3. `E2E_AUTH_BYPASS=1 ALLOWED_EMAILS=e2e@example.com DATABASE_URL=... pnpm dev`（別ターミナル）
-  4. `CI=true PLAYWRIGHT_BASE_URL=http://localhost:3000 pnpm test:e2e`
+- **ローカル実行**（`make e2e-full` で 1〜3 を一括実行できる）:
+  1. `make db-up`（= `docker compose up -d --wait`。リポジトリ直下、PostGIS を 5433 で起動）
+  2. `cd front && pnpm db:setup:test`（接続先ガードを通してスキーマ同期 + シード。接続先は `TEST_DATABASE_URL`、既定はローカル 5433）
+  3. `E2E_AUTH_BYPASS=1 ALLOWED_EMAILS=e2e@example.com pnpm test:e2e`（Playwright が `pnpm dev` を自動起動し、その `DATABASE_URL` をテスト DB に固定する）
+  - `pnpm dev` を別ターミナルで先に起動しておく場合は、**`DATABASE_URL` をテスト DB に明示**して起動する（`reuseExistingServer` により既存サーバーがそのまま使われ、`.env` の本番を読んだサーバーでも再利用されてしまうため）。
 
 ## カバレッジ
 
@@ -89,3 +89,23 @@ front/
 | カバレッジ | `@vitest/coverage-v8`（`pnpm test:coverage`） |
 | E2E テスト | Playwright |
 | スモークテスト | Playwright（起動確認・主要ページ表示） |
+
+## テスト用 DB の接続先（破壊防止）
+
+**テストは本番と同じ接続先環境変数（`DATABASE_URL`）を参照してはならない。** IT / E2E の seed は既存データを全削除することが多く、接続先を誤ると本番データが消える。本プロジェクトの `front/.env` は本番 Supabase を指しているため、`DATABASE_URL` を読む時点で本番に届き得る。
+
+- 接続先の解決は **1 箇所に集約**する（`front/lib/test-database-url.ts`）。IT・E2E の双方がこの入口を通す。
+  - E2E / seed: `resolveTestDatabaseUrl()` で解決する（`prisma/seed.ts` / `prisma/push-test-db.ts` / `playwright.config.ts` の `webServer.env`）。
+  - IT: Testcontainers が払い出した URL を `assertLocalDatabaseUrl()` に通してから `db push` / `TRUNCATE` する（`vitest.it.global-setup.ts` / `vitest.it.setup.ts`）。
+- 上書きは**テスト専用の環境変数**（`TEST_DATABASE_URL`）でのみ行う。既定値は `postgresql://stamped:stamped@localhost:5433/stamped`（`docker-compose.yml` の db サービス）。
+- **ホストの allowlist で検証し、`localhost` / `127.0.0.1` / `::1` 以外なら接続前に throw する。** テストランナー起動時ではなく、**seed や migrate が走る前**に落とす。接続先を上書きできるクエリパラメータ（`host` / `hostaddr`）を含む URL も拒否する。
+- 失敗メッセージには**解決されたホスト名**と**復旧手順**（テスト DB の起動コマンド `make db-up`、既定 URL）を含める。原因の特定に時間をかけさせない。
+- **`process.env.X ?? ローカル既定` というフォールバックを書かない。** 「未設定なら安全側」に見えて、実際は「**値が入っていれば危険側**」に倒れる。安全な既定は allowlist（通すものを列挙し、他は落とす）である。
+- ガード自体をテストする（既定値・localhost 許可・本番用変数が汚染されていても無視すること・リモート拒否・メッセージ内容）。`__tests__/lib/test-database-url.test.ts`。
+- **シェルや CI の `env` で `DATABASE_URL` をジョブ全体に設定しない。** CI の e2e ジョブは `TEST_DATABASE_URL` だけをジョブ env に置き、アプリサーバーの起動ステップでのみ `DATABASE_URL="$TEST_DATABASE_URL"` を明示して渡す。
+
+**なぜフォールバックが危険か**: ORM クライアント（Prisma 等）を import した時点で `.env` が `process.env` に読み込まれる実装がある。この場合 `process.env.DATABASE_URL ?? ローカル既定` は **`.env` の本番 URL を拾う**。しかもアプリ側と seed 側で評価タイミングが違うと、**アプリはローカルを読み、seed だけが本番を壊す**という非対称が起き、症状は「seed 依存テストが全滅」という形でしか現れない。
+
+> **テストが不可解に全滅したら、まず接続先を疑う。** 原因を推測で決めつけて環境変数を手で固定し、先に進めてはならない。
+
+同じ原則は DB 以外の破壊的操作にも適用する。テストやスクリプトが外部リソース（ストレージ、キュー、メール送信、決済 API 等）を消去・送信し得る場合は、接続先・宛先を allowlist で検証し、本番を指したら実行前に失敗させる。

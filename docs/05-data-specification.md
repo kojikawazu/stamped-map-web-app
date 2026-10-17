@@ -111,6 +111,7 @@ CREATE INDEX map_spots_location_gist ON map_spots USING GIST (location);
 
 > 上記5件はいずれも `is_default = true` で投入される（`prisma/seed.ts`）。
 > seed では加えて、スポットが0件の場合のみ確認用のダミースポット5件（渋谷スクランブル交差点・新宿御苑・築地場外市場・浅草寺・吉祥寺ハモニカ横丁）を投入する。
+> seed は**ローカルのテスト DB 専用**（接続先ガード `front/lib/test-database-url.ts` が `localhost` 以外を拒否する）。本番のデフォルトカテゴリは投入済みの前提で、再投入は `.claude/rules/production-data.md` の例外手順に従う。
 
 ### map_spots テーブル
 

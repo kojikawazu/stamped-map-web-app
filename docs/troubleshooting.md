@@ -69,9 +69,11 @@
 - Supabase プロジェクトで PostGIS 拡張を有効化しておく（`CREATE EXTENSION IF NOT EXISTS postgis;`）。
 - なお `location` 生成カラム・GIST インデックスは現状未実装。空間検索は未使用。
 
-### シードが流れない
+### シードが流れない / `[test-db guard]` エラーで止まる
 
-- `pnpm db:seed` は `DATABASE_URL`（PgBouncer 経由）を使用する。未設定だとエラー。
+- `pnpm db:seed` / `pnpm db:setup:test` は **ローカルのテスト DB 専用**。`DATABASE_URL` は参照せず、`TEST_DATABASE_URL`（既定 `postgresql://stamped:stamped@localhost:5433/stamped`）に接続する。
+- 接続先が `localhost` / `127.0.0.1` / `::1` 以外、または `?host=` / `?hostaddr=` を含む URL だと、書き込み前に `[test-db guard]` で停止する（`front/lib/test-database-url.ts`）。**ガードを外したり `DATABASE_URL` に向け直したりしない。** テスト DB を `make db-up` で起動して再実行する。
+- 接続エラー（`ECONNREFUSED ...:5433`）はテスト DB が起動していない。`make db-up`。
 - デフォルトカテゴリは upsert。ダミースポットはスポットが 0 件のときのみ投入される。
 
 ## CI / E2E
@@ -80,7 +82,12 @@
 
 - E2E ジョブは `pnpm build` 後に本番サーバー（`node .output/server/index.mjs`）をダミー環境変数で起動し、`http://127.0.0.1:3000` の応答を待ってから Playwright を実行する。
 - 起動ログは `/tmp/nitro.log` に出力され、待機失敗時に CI ログへダンプされる。サーバーが起動しない場合はまずこのログを確認。
-- ローカルで E2E を回す場合は `pnpm dev`（または `pnpm build && pnpm preview`）でサーバーを起動した状態で `pnpm test:e2e`。
+- ローカルで E2E を回す手順は [`.claude/rules/testing.md`](../.claude/rules/testing.md)「E2E（実 DB シナリオ）」を参照（`make e2e-full`）。
+
+### ローカル E2E がほぼ全滅する
+
+- **ポート 3000 を別アプリが使っていないか確認する**（`lsof -nP -iTCP:3000 -sTCP:LISTEN`）。`playwright.config.ts` は `reuseExistingServer: true` のため、別プロジェクトの dev サーバーが 3000 にいるとそれに対してテストが走る（画面が Next.js の 404 になる等）。また既存サーバーを再利用した場合、その **DB 接続先は Playwright 側から制御できない**（`.env` の本番を読んだサーバーでも再利用される）。空きポートで起動し `CI=true PLAYWRIGHT_BASE_URL=http://localhost:<port> pnpm test:e2e` で回す。
+- **認証系・spots 系だけ落ちて `/login` に戻される**場合は、dev サーバーが `.env` の実 `SUPABASE_URL` を読んでいる。テストの `injectSupabaseSession` は `SUPABASE_URL` 未設定時に `sb-dummy-auth-token` を注入するため cookie 名が一致しない。CI と同様に、サーバー・テストの双方へダミー値（`SUPABASE_URL=https://dummy.supabase.co` / `SUPABASE_KEY=dummy-anon-key`）を渡す。
 
 ### ユニットテストが環境変数で落ちる
 

@@ -145,9 +145,11 @@
 | `SUPABASE_KEY` | Supabase Anon Key（`@nuxtjs/supabase` が読む） | Vercel env / .env.local |
 | `NUXT_PUBLIC_MAPTILER_KEY` | MapTiler API Key（クライアントに公開） | Vercel env / .env.local |
 | `NUXT_PUBLIC_SITE_URL` | サイトURL（Google OAuth リダイレクト先ベースURL） | Vercel env / .env.local |
+| `TEST_DATABASE_URL` | テスト DB（E2E / seed）の接続先。既定 `localhost:5433`。ループバック以外は接続先ガードが拒否 | シェル / Makefile / CI のみ（`.env` に書かない。Vercel には設定しない） |
 
 > `NUXT_PUBLIC_` プレフィックスの変数はクライアントにも公開される（`nuxt.config.ts` の `runtimeConfig.public` にマップ）。
 > `DATABASE_URL` / `DIRECT_URL` はサーバー側のみ。クライアントバンドルに含めない。
+> テスト・シードは `DATABASE_URL` を参照しない（`.env` の本番に届き得るため）。接続先は `TEST_DATABASE_URL` から解決し、`front/lib/test-database-url.ts` で allowlist 検証する（`.claude/rules/testing.md`「テスト用 DB の接続先（破壊防止）」/ `.claude/rules/production-data.md`）。
 > `SUPABASE_URL` / `SUPABASE_KEY` は `@nuxtjs/supabase` モジュールが直接読む変数名のため `NUXT_PUBLIC_` プレフィックスは付けない。
 > Google OAuth の `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` はアプリが直接使用しない（Supabase ダッシュボード側で設定）。アプリの環境変数には不要。
 

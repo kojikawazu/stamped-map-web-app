@@ -30,7 +30,8 @@ pnpm test:watch   # Vitest ウォッチ
 pnpm test:e2e     # Playwright（E2E）
 pnpm test:e2e:ui  # Playwright UI モード
 pnpm lint         # ESLint
-pnpm db:seed      # シードデータ投入
+pnpm db:seed      # シード投入（ローカルのテスト DB 専用。本番は拒否）
+pnpm db:setup:test # テスト DB へスキーマ同期 + シード（TEST_DATABASE_URL、既定 localhost:5433）
 ```
 
 ## コーディング規約
