@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import type { Point } from "geojson";
 import {
   escapeHtml,
   buildCategoryMap,
@@ -132,7 +133,7 @@ describe("markersToGeoJSON", () => {
 
   it("N-3: 座標が [longitude, latitude] の順で設定される", () => {
     const result = markersToGeoJSON([baseMarker], categoryMap);
-    const coords = result.features[0].geometry as GeoJSON.Point;
+    const coords = result.features[0].geometry as Point;
     expect(coords.coordinates[0]).toBe(baseMarker.longitude);
     expect(coords.coordinates[1]).toBe(baseMarker.latitude);
   });

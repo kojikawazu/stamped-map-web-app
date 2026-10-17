@@ -1,10 +1,13 @@
-# GitHub Actions のバージョン更新を Dependabot に任せる（#86）。
-# 手で一括置換すると、次の非推奨化（Node 20 → 24 のようなランタイム移行）でまた手作業になる。
+# 依存のバージョン更新を Dependabot に任せる。
+# - github-actions（#86）: 手で一括置換すると、次の非推奨化（Node 20 → 24 のようなランタイム移行）でまた手作業になる。
+# - npm（front/、#108）: lockfile を放置した結果、間接依存の脆弱性 alert が 146 件まで溜まった。
+#   定期更新の PR を受け取り、古い lockfile を溜めない。
 #
-# 対象は workflows の `uses:` だけ。以下は Dependabot では更新されないため手で上げる:
+# 以下は Dependabot では更新されないため手で上げる:
 # - actionlint の Docker タグ（Makefile の ACTIONLINT_IMAGE）
 # - pnpm のバージョン（ci.yml の pnpm/action-setup の `version:`）・Node.js のバージョン（`node-version:`）
 # - e2e の PostGIS サービスイメージ（ci.yml の services.postgres.image）
+# - markdownlint-cli2 / shellcheck のバージョン（scripts/lint-docs.sh / scripts/lint-shell.sh）
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -21,3 +24,20 @@ updates:
           - '*'
     commit-message:
       prefix: chore(ci)
+
+  - package-ecosystem: npm
+    directory: /front
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Tokyo
+    # minor / patch は 1 本にまとめる（マージのたびに it / e2e が走るため）。
+    # major は破壊的変更の確認が要るので、パッケージごとの個別 PR のまま受け取る。
+    groups:
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: chore(deps)

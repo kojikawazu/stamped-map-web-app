@@ -183,6 +183,7 @@ type SpotStatus = (typeof SPOT_STATUSES)[number];
 
 - 型だけを import する場合は **`import type`** を使う（値と型を混ぜない）。
 - 理由: バンドラ／トランスパイラが型を確実に消せる、副作用のない循環参照を避けられる。`verbatimModuleSyntax` 有効化を推奨。
+- **グローバルの型名前空間（`GeoJSON.Point` 等）に頼らず、`import type { Point } from "geojson"` のように明示する。** Nuxt の生成する `tsconfig` は `types: []` で `@types/*` を自動で読み込まないため、名前空間が見えるかどうかが依存の入り方次第になる（#108 で依存更新後に型エラーとして顕在化した）。
 
 ```ts
 import type { Spot } from '~/types/spot';

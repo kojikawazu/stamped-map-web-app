@@ -21,6 +21,7 @@
 <script setup lang="ts">
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { Point } from "geojson";
 import type { Marker } from "~/types/marker";
 import type { Category } from "~/types/category";
 import {
@@ -142,7 +143,7 @@ function addSpotLayers(map: maplibregl.Map) {
     if (clusterId == null) return;
 
     const source = map.getSource("spots") as maplibregl.GeoJSONSource;
-    const coords = (features[0].geometry as GeoJSON.Point).coordinates as [
+    const coords = (features[0].geometry as Point).coordinates as [
       number,
       number,
     ];
