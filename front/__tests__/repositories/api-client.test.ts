@@ -1,21 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { mockNuxtImport } from "@nuxt/test-utils/runtime";
 import { useNuxtApp } from "#imports";
 
-// navigateTo は Nuxt のオートインポート（#imports 経由）のため、
-// vi.mock("#imports") で差し替える必要がある。
-// vi.stubGlobal では composable 内部の import binding に届かない。
+// navigateTo は Nuxt の auto-import で、変換後は "#imports" ではなく実体のモジュール
+// （#app/composables/router）を直接 import する。そのため vi.mock("#imports") や
+// vi.stubGlobal では対象コードの import binding に届かない。@nuxt/test-utils の
+// mockNuxtImport は auto-import の解決先ごと差し替えるため、こちらを使う。
 
-const mockGetSession = vi.fn();
-const mockRefreshSession = vi.fn();
-const navigateToMock = vi.fn();
+const { mockGetSession, mockRefreshSession, navigateToMock } = vi.hoisted(
+  () => ({
+    mockGetSession: vi.fn(),
+    mockRefreshSession: vi.fn(),
+    navigateToMock: vi.fn(),
+  }),
+);
 
-vi.mock("#imports", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    navigateTo: navigateToMock,
-  };
-});
+mockNuxtImport("navigateTo", () => navigateToMock);
 
 describe("useApiClient", () => {
   beforeEach(() => {
@@ -112,28 +112,7 @@ describe("useApiClient", () => {
     );
   });
 
-  it("S-2: 401 でリフレッシュに失敗した場合、エラーをスローしてリトライしない", async () => {
-    // navigateTo は Nuxt ランタイムの auto-import のため副作用のテストは困難。
-    // 代わりに「エラーが再スローされる」「fetch は1回のみ（リトライなし）」を検証する。
-    const error401 = Object.assign(new Error("401"), {
-      response: { status: 401 },
-    });
-    const mockFetch = vi.fn().mockRejectedValue(error401);
-    vi.stubGlobal("$fetch", mockFetch);
-
-    mockRefreshSession.mockResolvedValue({
-      error: new Error("refresh failed"),
-    });
-
-    const { useApiClient } = await import("../../repositories/api-client");
-    const { apiFetch } = useApiClient();
-    await expect(apiFetch("/api/spots")).rejects.toThrow();
-
-    // リフレッシュが失敗した場合はリトライしない（fetch は1回のみ）
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-  });
-
-  it("S-3: 401 以外のエラーはリトライせずそのままスローする", async () => {
+  it("S-2: 401 以外のエラーはリトライせずそのままスローする", async () => {
     const error500 = Object.assign(new Error("500"), {
       response: { status: 500 },
     });
@@ -146,5 +125,52 @@ describe("useApiClient", () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockRefreshSession).not.toHaveBeenCalled();
+  });
+
+  // --- 異常系 ---
+
+  it("A-1: 401 でリフレッシュに失敗した場合、/login へ遷移して元のエラーを投げ、リトライしない", async () => {
+    const error401 = Object.assign(new Error("401"), {
+      response: { status: 401 },
+    });
+    const mockFetch = vi.fn().mockRejectedValue(error401);
+    vi.stubGlobal("$fetch", mockFetch);
+
+    mockRefreshSession.mockResolvedValue({
+      error: new Error("refresh failed"),
+    });
+
+    const { useApiClient } = await import("../../repositories/api-client");
+    const { apiFetch } = useApiClient();
+    await expect(apiFetch("/api/spots")).rejects.toBe(error401);
+
+    expect(navigateToMock).toHaveBeenCalledWith("/login");
+    // リフレッシュが失敗した場合はリトライしない（fetch は1回のみ）
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("A-2: 401 でリフレッシュは成功したがトークンを再取得できない場合、/login へ遷移して元のエラーを投げる", async () => {
+    const error401 = Object.assign(new Error("401"), {
+      response: { status: 401 },
+    });
+    const mockFetch = vi.fn().mockRejectedValue(error401);
+    vi.stubGlobal("$fetch", mockFetch);
+
+    // refreshSession はエラーを返さないが、直後の getSession でセッションが消えている
+    // （別タブでのログアウト・リフレッシュトークン失効の競合など）
+    mockRefreshSession.mockResolvedValue({ error: null });
+    mockGetSession
+      .mockResolvedValueOnce({
+        data: { session: { access_token: "old-token" } },
+      })
+      .mockResolvedValueOnce({ data: { session: null } });
+
+    const { useApiClient } = await import("../../repositories/api-client");
+    const { apiFetch } = useApiClient();
+    await expect(apiFetch("/api/spots")).rejects.toBe(error401);
+
+    expect(navigateToMock).toHaveBeenCalledWith("/login");
+    // トークンが無いままリトライしない（fetch は1回のみ）
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 });
