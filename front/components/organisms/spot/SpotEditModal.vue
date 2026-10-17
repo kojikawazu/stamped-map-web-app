@@ -173,17 +173,8 @@ const emit = defineEmits<{
   updated: [spot: Spot];
 }>();
 
-const todayStr = new Date().toISOString().split("T")[0];
-
-const form = reactive({
-  name: "",
-  categoryId: "",
-  visitedAt: "",
-  latitude: 0 as number,
-  longitude: 0 as number,
-  memo: "",
-});
-const errors = reactive<Record<string, string>>({});
+const { form, errors, todayStr, reset, validate } =
+  useSpotForm(updateSpotSchema);
 
 const {
   updateSpot,
@@ -196,26 +187,18 @@ watch(
   () => props.spot,
   (spot) => {
     if (spot) {
-      form.name = spot.name;
-      form.categoryId = spot.category.id;
-      form.visitedAt = spot.visitedAt;
-      form.latitude = spot.latitude;
-      form.longitude = spot.longitude;
-      form.memo = spot.memo ?? "";
-      resetErrors();
+      reset({
+        name: spot.name,
+        categoryId: spot.category.id,
+        visitedAt: spot.visitedAt,
+        latitude: spot.latitude,
+        longitude: spot.longitude,
+        memo: spot.memo ?? "",
+      });
     }
   },
   { immediate: true },
 );
-
-// バリデーションエラーを全消去する。errors は reactive な Record でキーが動的なため、
-// 全クリアには動的 delete が必要（@typescript-eslint/no-dynamic-delete の対象だが意図的）。
-function resetErrors() {
-  for (const key of Object.keys(errors)) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete errors[key];
-  }
-}
 
 function close() {
   emit("update:modelValue", false);
@@ -223,33 +206,10 @@ function close() {
 
 async function submit() {
   if (!props.spot) return;
-  resetErrors();
+  const input = validate();
+  if (!input) return;
 
-  if (form.latitude === undefined || isNaN(form.latitude as number)) {
-    errors.latitude = "緯度を入力してください";
-  }
-  if (form.longitude === undefined || isNaN(form.longitude as number)) {
-    errors.longitude = "経度を入力してください";
-  }
-  if (errors.latitude || errors.longitude) return;
-
-  const result = updateSpotSchema.safeParse({
-    name: form.name,
-    categoryId: form.categoryId,
-    visitedAt: form.visitedAt,
-    latitude: form.latitude,
-    longitude: form.longitude,
-    memo: form.memo || undefined,
-  });
-  if (!result.success) {
-    for (const issue of result.error.issues) {
-      const key = String(issue.path[0]);
-      if (!errors[key]) errors[key] = issue.message;
-    }
-    return;
-  }
-
-  const updated = await updateSpot(props.spot.id, result.data);
+  const updated = await updateSpot(props.spot.id, input);
   if (updated) {
     emit("updated", updated);
     close();

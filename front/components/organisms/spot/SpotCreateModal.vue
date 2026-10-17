@@ -229,19 +229,8 @@ const emit = defineEmits<{
   created: [];
 }>();
 
-const todayStr = new Date().toISOString().split("T")[0];
-
-const initialForm = () => ({
-  name: "",
-  categoryId: "",
-  visitedAt: todayStr,
-  latitude: undefined as number | undefined,
-  longitude: undefined as number | undefined,
-  memo: "",
-});
-
-const form = reactive(initialForm());
-const errors = reactive<Record<string, string>>({});
+const { form, errors, todayStr, reset, validate } =
+  useSpotForm(createSpotSchema);
 
 const {
   createSpot,
@@ -301,55 +290,21 @@ watch(
   () => props.modelValue,
   (val) => {
     if (val) {
-      Object.assign(form, initialForm());
-      resetErrors();
+      reset();
       showNewCategory.value = false;
     }
   },
 );
-
-// バリデーションエラーを全消去する。errors は reactive な Record でキーが動的なため、
-// 全クリアには動的 delete が必要（@typescript-eslint/no-dynamic-delete の対象だが意図的）。
-function resetErrors() {
-  for (const key of Object.keys(errors)) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete errors[key];
-  }
-}
 
 function close() {
   emit("update:modelValue", false);
 }
 
 async function submit() {
-  // クライアントバリデーション
-  resetErrors();
-  // type="number" の空入力は v-model.number が NaN になるため、明示的にチェックする
-  if (form.latitude === undefined || isNaN(form.latitude as number)) {
-    errors.latitude = "緯度を入力してください";
-  }
-  if (form.longitude === undefined || isNaN(form.longitude as number)) {
-    errors.longitude = "経度を入力してください";
-  }
-  if (errors.latitude || errors.longitude) return;
+  const input = validate();
+  if (!input) return;
 
-  const result = createSpotSchema.safeParse({
-    name: form.name,
-    categoryId: form.categoryId,
-    visitedAt: form.visitedAt,
-    latitude: form.latitude,
-    longitude: form.longitude,
-    memo: form.memo || undefined,
-  });
-  if (!result.success) {
-    for (const issue of result.error.issues) {
-      const key = String(issue.path[0]);
-      if (!errors[key]) errors[key] = issue.message;
-    }
-    return;
-  }
-
-  const spot = await createSpot(result.data);
+  const spot = await createSpot(input);
   if (spot) {
     emit("created");
     close();

@@ -85,6 +85,8 @@ front/
 - **`<Teleport>`**: `global: { stubs: { teleport: true } }` でインライン描画させ、`wrapper` 内で検証する（そのままでは `document.body` に出て `wrapper.find` で取れない）。
 - **アサーションは要素を特定して行う**。HTML 全体への正規表現は、別要素の値に一致して壊れを見逃す（例: バッジの `color:` が左ボーダーの `background-color:` に一致する）。
 - 無効化（`disabled`）は属性の有無に加え、**押しても emit されないこと**まで検証する。
+- 送信まで通すテストは、通信の境界（`~/repositories/api-client` の `apiFetch`）だけをモックし、composable / repository は本物を通す。送信内容は `apiFetch` の呼び出し引数で検証する。
+- Zod の `.uuid()` を通すテストデータは **RFC 4122 形式の UUID**（例: `11111111-1111-4111-8111-111111111111`）にする。zod v4 はバージョン桁・バリアント桁まで検証するため、`00000000-0000-0000-0000-000000000001` のような値は不正扱いになる。
 - `useState` を使う composable のテストは、`beforeEach` で `clearNuxtState` して状態を初期化する。内部で `watch` を張る composable は `effectScope` 内で生成し、`afterEach` で `stop` する（コンポーネント外で生成した `watch` は破棄されず、後続テストに残って余計な呼び出しを起こす）。
 
 ## カバレッジ
