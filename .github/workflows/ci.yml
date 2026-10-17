@@ -1,12 +1,11 @@
 name: CI
 
+# 作業ブランチは PR でのみ実行する（push にも作業ブランチを並べると同じ内容が 2 回走る）。
+# push は main（マージ後の検証）だけに絞る。
 on:
   push:
     branches:
       - main
-      - "feature/**"
-      - "fix/**"
-      - "chore/**"
     paths:
       - "front/**"
       - ".github/workflows/ci.yml"
@@ -16,6 +15,12 @@ on:
     paths:
       - "front/**"
       - ".github/workflows/ci.yml"
+
+# 同一 PR への連続 push では古い実行をキャンセルする（it / e2e は重量ジョブのため積み上げない）。
+# main への push はマージごとの検証結果を残すため、キャンセルせず順に完走させる。
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:

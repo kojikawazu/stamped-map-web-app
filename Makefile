@@ -16,6 +16,11 @@ E2E_BASE_URL      ?= http://localhost:3000
 E2E_ENV := E2E_AUTH_BYPASS=1 ALLOWED_EMAILS=e2e@example.com \
 	TEST_DATABASE_URL=$(TEST_DATABASE_URL) PLAYWRIGHT_BASE_URL=$(E2E_BASE_URL)
 
+# actionlint は公式 Docker イメージをタグ固定で使う（shellcheck / pyflakes 同梱）。
+# バイナリ単体だと shellcheck が無い環境で run: の検査が静かにスキップされ、終了コード 0 のまま通る。
+# CI（.github/workflows/actionlint.yml）もこのターゲットを呼び、バージョンを一致させる。
+ACTIONLINT_IMAGE := rhysd/actionlint:1.7.12
+
 .DEFAULT_GOAL := help
 
 # --- ヘルプ -------------------------------------------------------------
@@ -55,6 +60,10 @@ format: ## Prettier で整形を適用
 
 format-check: ## Prettier 整形チェック（変更なし確認）
 	cd $(FRONT) && pnpm format:check
+
+.PHONY: actionlint
+actionlint: ## GitHub Actions ワークフロー検査（actionlint + shellcheck）※Docker 必須
+	docker run --rm -v "$(CURDIR)":/repo -w /repo $(ACTIONLINT_IMAGE) -color
 
 ##@ テスト
 .PHONY: test test-coverage test-it
