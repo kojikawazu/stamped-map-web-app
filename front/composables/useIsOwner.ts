@@ -1,3 +1,5 @@
+import { useMeRepository } from "~/repositories/me";
+
 /**
  * ログインユーザーが書き込み権限を持つオーナーかを判定する。
  *
@@ -8,16 +10,13 @@
  */
 export const useIsOwner = () => {
   const isOwner = useState<boolean>("isOwner", () => false);
-  const { apiFetch } = useApiClient();
+  const meRepository = useMeRepository();
 
   const fetchIsOwner = async () => {
     // 取得前にリセットし、エラー時やログイン切り替え時に前の状態が残らないようにする
     isOwner.value = false;
     try {
-      const res = await apiFetch<{ data: { isOwner: boolean } }>(
-        "/api/me/is-owner",
-      );
-      isOwner.value = res.data.isOwner;
+      isOwner.value = await meRepository.isOwner();
     } catch {
       isOwner.value = false;
     }

@@ -1,4 +1,5 @@
-import type { Spot, Pagination, SpotsResponse } from "~/types/spot";
+import { useSpotRepository } from "~/repositories/spot";
+import type { Spot, Pagination } from "~/types/spot";
 
 /**
  * スポット一覧の取得と共有状態を提供する。
@@ -10,7 +11,7 @@ import type { Spot, Pagination, SpotsResponse } from "~/types/spot";
  *   取得処理 `fetchSpots`
  */
 export const useSpots = () => {
-  const { apiFetch } = useApiClient();
+  const spotRepository = useSpotRepository();
   const { spotsQuery } = useSpotFilter();
 
   const spots = useState<Spot[]>("spots:list", () => []);
@@ -25,13 +26,7 @@ export const useSpots = () => {
     loading.value = true;
     error.value = null;
     try {
-      const params = new URLSearchParams();
-      for (const [key, value] of Object.entries(spotsQuery.value)) {
-        params.set(key, String(value));
-      }
-      const res = await apiFetch<SpotsResponse>(
-        `/api/spots?${params.toString()}`,
-      );
+      const res = await spotRepository.list(spotsQuery.value);
       spots.value = res.data;
       pagination.value = res.pagination;
     } catch {

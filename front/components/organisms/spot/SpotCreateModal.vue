@@ -214,7 +214,7 @@
 </template>
 
 <script setup lang="ts">
-import { createSpotSchema } from "~/lib/validations/spot";
+import { createSpotSchema } from "~/schemas/spot";
 import type { Category } from "~/types/category";
 
 const props = defineProps<{

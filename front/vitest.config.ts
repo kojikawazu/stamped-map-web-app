@@ -30,7 +30,14 @@ export default defineVitestConfig({
       reportsDirectory: "./coverage",
       // ユニットテストが対象とするロジック層のみ計測する。
       // .vue コンポーネントの描画は E2E（Playwright）で担保するため対象外。
-      include: ["server/**", "composables/**", "lib/**", "middleware/**"],
+      include: [
+        "server/**",
+        "composables/**",
+        "repositories/**",
+        "schemas/**",
+        "lib/**",
+        "middleware/**",
+      ],
       exclude: ["**/*.test.ts", "**/*.config.*", "generated/**"],
       // testing.md の「ロジック層で Statements / Branches ともに 80% 以上を維持する」を
       // 機械的に担保する。計測時点の実績は Stmts 86.17% / Branch 85.64% で、

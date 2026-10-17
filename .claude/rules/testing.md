@@ -17,7 +17,9 @@ globs: "front/__tests__/**,front/tests/**"
 front/
 ├── __tests__/              # ユニット/結合・IT を集約
 │   ├── composables/        # composables/ をミラー
-│   ├── lib/                # lib/ をミラー（validations/ も同様）
+│   ├── repositories/       # repositories/ をミラー
+│   ├── schemas/            # schemas/ をミラー
+│   ├── lib/                # lib/ をミラー
 │   ├── server/             # server/ をミラー（api/ / utils/）
 │   └── it/                 # 統合テスト（実 DB）
 │       └── harness.ts      # IT 用の共通足場
@@ -33,7 +35,7 @@ front/
 **集約を選ぶ理由**:
 
 - 実行設定の `include` / `exclude` が単純になる。ユニット実行から IT を外す（`**/*.it.test.ts`）、E2E を外す（`tests/e2e/**`）といった除外が**パスと拡張子だけ**で書け、ソースツリーを走査せずに済む。
-- カバレッジの計測対象（`server/**` / `composables/**` / `lib/**` / `middleware/**`）にテストが混入しない。コロケーションだと `exclude` の記述が増え、漏れるとカバレッジが実態より高く出る。
+- カバレッジの計測対象（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）にテストが混入しない。コロケーションだと `exclude` の記述が増え、漏れるとカバレッジが実態より高く出る。
 - 本番バンドルにテストが紛れ込む事故を、ディレクトリ単位で防げる。
 
 **新規テストを追加するときは、対応するソースと同じ相対パスに置く**（例: `composables/useSpots.ts` → `__tests__/composables/useSpots.test.ts`）。ミラー構造が崩れると、テストの有無を目視で確認できなくなる。
@@ -76,7 +78,7 @@ front/
 
 ## カバレッジ
 
-- 計測: `pnpm test:coverage`（Vitest + `@vitest/coverage-v8`）。対象はロジック層（`server/**` / `composables/**` / `lib/**` / `middleware/**`）。`.vue` の描画は E2E で担保するため計測対象外。
+- 計測: `pnpm test:coverage`（Vitest + `@vitest/coverage-v8`）。対象はロジック層（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）。`.vue` の描画は E2E で担保するため計測対象外。
 - 基準: ロジック層で Statements / Branches ともに **80% 以上**を維持する。
 - 強制: `vitest.config.ts` の `coverage.thresholds` に設定済みで、下回るとコマンドが失敗する。CI は `pnpm test:coverage` を実行するため、閾値割れは**マージ前に検出される**（人手のレビュー任せにしない）。
 

@@ -41,7 +41,7 @@ describe("useApiClient", () => {
     const mockFetch = vi.fn().mockResolvedValue({ data: [] });
     vi.stubGlobal("$fetch", mockFetch);
 
-    const { useApiClient } = await import("../../composables/useApiClient");
+    const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await apiFetch("/api/spots");
 
@@ -57,7 +57,7 @@ describe("useApiClient", () => {
     const mockFetch = vi.fn().mockResolvedValue({ data: [] });
     vi.stubGlobal("$fetch", mockFetch);
 
-    const { useApiClient } = await import("../../composables/useApiClient");
+    const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await apiFetch("/api/spots");
 
@@ -70,7 +70,7 @@ describe("useApiClient", () => {
     const mockFetch = vi.fn().mockResolvedValue({ data: {} });
     vi.stubGlobal("$fetch", mockFetch);
 
-    const { useApiClient } = await import("../../composables/useApiClient");
+    const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await apiFetch("/api/spots", { method: "POST", body: { name: "test" } });
 
@@ -100,7 +100,7 @@ describe("useApiClient", () => {
         data: { session: { access_token: "new-token" } },
       });
 
-    const { useApiClient } = await import("../../composables/useApiClient");
+    const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     const result = await apiFetch("/api/spots");
 
@@ -125,7 +125,7 @@ describe("useApiClient", () => {
       error: new Error("refresh failed"),
     });
 
-    const { useApiClient } = await import("../../composables/useApiClient");
+    const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await expect(apiFetch("/api/spots")).rejects.toThrow();
 
@@ -140,7 +140,7 @@ describe("useApiClient", () => {
     const mockFetch = vi.fn().mockRejectedValue(error500);
     vi.stubGlobal("$fetch", mockFetch);
 
-    const { useApiClient } = await import("../../composables/useApiClient");
+    const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await expect(apiFetch("/api/spots")).rejects.toThrow("500");
 

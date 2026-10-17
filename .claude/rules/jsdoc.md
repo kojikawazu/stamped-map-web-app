@@ -1,6 +1,6 @@
 ---
 description: JSDoc（TSDoc）ドキュメンテーションコメント規約 — TypeScript の公開シンボルに必須
-globs: front/components/**,front/composables/**,front/server/**,front/lib/**,front/middleware/**
+globs: front/components/**,front/composables/**,front/repositories/**,front/schemas/**,front/server/**,front/lib/**,front/middleware/**
 ---
 
 # JSDoc 規約（TypeScript）
@@ -58,7 +58,7 @@ export async function resolveDisplayName(
 
 `eslint-plugin-jsdoc` を `front/eslint.config.mjs`（`@nuxt/eslint` の flat config）に組み込み済み。有効ルールの唯一の真実は同ファイルの JSDoc ブロックとする。
 
-- 対象 glob（この rule の `globs` に対応）: `components/**/*.vue` / `composables/**/*.ts` / `server/**/*.ts` / `lib/**/*.ts` / `middleware/**/*.ts`
+- 対象 glob（この rule の `globs` に対応）: `components/**/*.vue` / `composables/**/*.ts` / `repositories/**/*.ts` / `schemas/**/*.ts` / `server/**/*.ts` / `lib/**/*.ts` / `middleware/**/*.ts`
 - 型は TS シグネチャに委ねる（`settings.jsdoc.mode = "typescript"`、`jsdoc/no-types` で型ブレースを禁止）。
 - `@param` の欠落・名前ズレは `jsdoc/require-param` / `jsdoc/check-param-names` で検出する。
 - `@returns` は `.ts`（composable / lib / server）で必須。テンプレートを描画する `.vue` コンポーネントは除外（`jsdoc/require-returns` を off）。

@@ -4,7 +4,7 @@ const { mockApiFetch } = vi.hoisted(() => ({
   mockApiFetch: vi.fn(),
 }));
 
-vi.mock("~/composables/useApiClient", () => ({
+vi.mock("~/repositories/api-client", () => ({
   useApiClient: () => ({ apiFetch: mockApiFetch }),
 }));
 

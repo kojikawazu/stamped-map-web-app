@@ -13,7 +13,7 @@ vi.mock("vue-sonner", () => ({
   },
 }));
 
-vi.mock("~/composables/useApiClient", () => ({
+vi.mock("~/repositories/api-client", () => ({
   useApiClient: () => ({ apiFetch: mockApiFetch }),
 }));
 

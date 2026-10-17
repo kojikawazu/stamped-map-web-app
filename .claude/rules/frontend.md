@@ -32,8 +32,8 @@ globs: "front/components/**,front/pages/**,front/composables/**,front/layouts/**
 - **`$fetch` を書いてよいのは `repositories/` と `server/` だけ**。SFC・composables・`lib/` から直接叩かない。呼び出し口を 1 箇所に閉じることで、認証ヘッダ・エラー処理・リトライの実装が散らばらない。
 - ディレクトリ名は**複数形で統一**する（`types` / `constants` / `schemas` / `repositories`）。
 - `repositories/` `schemas/` は **Nuxt の auto-import 対象外**（規約ディレクトリではない）。明示的に import する。
-
-> **移行中**: 現状 `$fetch` は `composables/useApiClient.ts` に集約されており（呼び出し口 1 箇所という意図は満たしている）、Zod は `lib/validations/` にある。`repositories/` / `schemas/` への移動は別 issue で対応する（issue #80）。
+- repository は**ドメイン単位のファクトリ**（`repositories/spot.ts` の `useSpotRepository()` 等）として書き、composable の**同期実行部分（`await` より前）で呼ぶ**。認証付きの `apiFetch`（`repositories/api-client.ts`）が setup 時に Supabase クライアントを確保するため、`await` の後で呼ぶと Nuxt コンテキストを失う。
+- repository が持つのは **URL・クエリ文字列の組み立てと `{ data }` envelope の展開まで**。状態（`useState` / `ref`）・トースト・エラーメッセージの文言は composable 側に置く。
 
 ## レイヤ依存の一方向ルール
 

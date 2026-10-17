@@ -73,7 +73,7 @@ flowchart TD
 ```
 クライアント側：
   - @nuxtjs/supabase の useSupabaseClient() でログイン（signInWithPassword）
-  - useApiClient composable が Authorization: Bearer <token> を自動付与
+  - useApiClient（repositories/api-client.ts）が Authorization: Bearer <token> を自動付与
   - 401 時はトークンリフレッシュ → 1回リトライ（try/catch ラッパー）
   - middleware/auth.ts で未認証なら /login へリダイレクト（クライアントサイドのみ）
 
@@ -136,7 +136,6 @@ front/
 │           └── SpotDetailDrawer.vue # スポット詳細サイドパネル（スライドイン）
 ├── composables/
 │   ├── useAuth.ts             # Supabase セッション管理・ログイン・ログアウト・Google OAuth
-│   ├── useApiClient.ts        # $fetch ラッパー（Bearer token + 401 リトライ）
 │   ├── useSpotFilter.ts       # フィルター・ソート・ページ状態の一元管理（useState共有）
 │   ├── useSpots.ts            # スポット一覧取得（ページネーション付き）
 │   ├── useMarkers.ts          # マーカーデータ取得（全件・軽量）
@@ -147,6 +146,14 @@ front/
 │   ├── useCategoryCreate.ts   # カテゴリ追加（インライン）
 │   ├── useCategoryManage.ts   # カテゴリ編集・削除
 │   └── useIsOwner.ts          # オーナー判定（/api/me/is-owner 取得・useState 共有）
+├── repositories/              # API アクセス（$fetch は repositories/ と server/ のみ。auto-import 対象外）
+│   ├── api-client.ts          # useApiClient: $fetch ラッパー（Bearer token + 401 リトライ）
+│   ├── spot.ts                # useSpotRepository: 一覧・マーカー・登録・更新・削除
+│   ├── category.ts            # useCategoryRepository: 一覧・登録・更新・削除
+│   └── me.ts                  # useMeRepository: オーナー判定
+├── schemas/                   # Zod スキーマ（フォーム・Server API の双方で使用。auto-import 対象外）
+│   ├── spot.ts                # スポット
+│   └── category.ts            # カテゴリ
 ├── types/
 │   ├── spot.ts                # Spot / Pagination / SpotsResponse 型
 │   ├── marker.ts              # Marker / MarkersResponse 型
@@ -164,14 +171,14 @@ front/
 │       └── me/                # GET /is-owner（オーナー判定）
 ├── lib/
 │   ├── map-utils.ts           # 地図ユーティリティ（escapeHtml / buildCategoryMap / markersToGeoJSON）
-│   └── validations/
-│       ├── spot.ts            # Zod スキーマ（スポット）
-│       └── category.ts        # Zod スキーマ（カテゴリ）
+│   └── test-database-url.ts   # テスト DB 接続先ガード（localhost 以外を拒否）
 ├── __tests__/                 # Vitest（ユニット・結合）
 │   ├── composables/           # composable ユニットテスト
+│   ├── repositories/          # repository ユニットテスト（api-client の 401 リトライ含む）
+│   ├── schemas/               # Zod スキーマテスト
 │   ├── server/utils/          # auth・api-helpers ユニットテスト
 │   ├── server/api/            # Server Routes ユニットテスト（categories, spots, me/is-owner）
-│   └── lib/                   # Zod バリデーション・map-utils テスト
+│   └── lib/                   # map-utils・test-database-url テスト
 ├── tests/
 │   └── e2e/                   # Playwright E2E（auth, smoke, spots + helpers）
 ├── playwright.config.ts       # Playwright 設定（testDir: ./tests/e2e, Base URL :3000）
@@ -254,7 +261,7 @@ DB       : Supabase（そのまま）
 ```
 
 - API を RESTful に設計しておけば、フロントは base URL を差し替えるだけで移行可能
-- `useApiClient.ts` に API 呼び出しを集約し、移行コストを最小化
+- API 呼び出しを `repositories/`（`$fetch` は `api-client.ts` の 1 箇所）に集約し、移行コストを最小化
 
 ### コンポーネント設計
 

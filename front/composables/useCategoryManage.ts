@@ -1,5 +1,6 @@
 import { toast } from "vue-sonner";
-import { updateCategorySchema } from "~/lib/validations/category";
+import { useCategoryRepository } from "~/repositories/category";
+import { updateCategorySchema } from "~/schemas/category";
 import type { Category } from "~/types/category";
 
 /**
@@ -13,7 +14,7 @@ import type { Category } from "~/types/category";
  *   エラーリセット `clearEditError`
  */
 export const useCategoryManage = () => {
-  const { apiFetch } = useApiClient();
+  const categoryRepository = useCategoryRepository();
 
   const editLoading = ref(false);
   const deleteLoading = ref(false);
@@ -34,12 +35,9 @@ export const useCategoryManage = () => {
 
     editLoading.value = true;
     try {
-      const res = await apiFetch<{ data: Category }>(`/api/categories/${id}`, {
-        method: "PUT",
-        body: result.data,
-      });
+      const category = await categoryRepository.update(id, result.data);
       toast.success("カテゴリを更新しました");
-      return res.data;
+      return category;
     } catch {
       editError.value = "カテゴリの更新に失敗しました";
       toast.error("更新に失敗しました");
@@ -52,7 +50,7 @@ export const useCategoryManage = () => {
   async function deleteCategory(id: string): Promise<boolean> {
     deleteLoading.value = true;
     try {
-      await apiFetch(`/api/categories/${id}`, { method: "DELETE" });
+      await categoryRepository.remove(id);
       toast.success("カテゴリを削除しました");
       return true;
     } catch (err: unknown) {

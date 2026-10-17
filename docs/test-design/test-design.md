@@ -13,7 +13,7 @@
   - [1-1. `useSpotFilter`（composables/useSpotFilter.ts）](#1-1-usespotfiltercomposablesusespotfilterts)
     - [正常系](#正常系)
     - [準正常系](#準正常系)
-  - [1-2. `useApiClient`（composables/useApiClient.ts）](#1-2-useapiclientcomposablesuseapiclientts)
+  - [1-2. `useApiClient`（repositories/api-client.ts）](#1-2-useapiclientrepositoriesapi-clientts)
     - [正常系](#正常系-1)
     - [準正常系](#準正常系-1)
 - [2. 結合テスト（Server Routes）](#2-結合テストserver-routes)
@@ -85,7 +85,7 @@
 
 - 各ケースは **正常系（`N-`）/ 準正常系（`S-`）/ 異常系（`A-`）** で分類する。
 - **異常系（`A-`）**: 書き込み系エンドポイント（POST/PUT/DELETE spots・categories）は、オーナー限定違反（`verifyOwner` 失敗 → 403、かつ DB 書き込み未到達）と、DB 例外の伝播を検証する。認証失敗（401）も GET で検証する。
-- カバレッジは `pnpm test:coverage`（`@vitest/coverage-v8`）で計測。対象はロジック層（`server/**` / `composables/**` / `lib/**` / `middleware/**`）。現状 Statements/Branches ともに約 87%。分類規約は [`.claude/rules/testing.md`](../../.claude/rules/testing.md)。
+- カバレッジは `pnpm test:coverage`（`@vitest/coverage-v8`）で計測。対象はロジック層（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）。現状 Statements/Branches ともに約 87%。分類規約は [`.claude/rules/testing.md`](../../.claude/rules/testing.md)。
 
 ### ファイル配置
 
@@ -98,12 +98,13 @@ front/
 │   │   ├── spots.test.ts             # 新規：Server Routes 結合テスト
 │   │   └── categories.test.ts        # 新規：Server Routes 結合テスト
 │   ├── composables/
-│   │   ├── useSpotFilter.test.ts     # 新規：フィルター状態ロジック
-│   │   └── useApiClient.test.ts      # 新規：401リトライロジック
+│   │   └── useSpotFilter.test.ts     # 新規：フィルター状態ロジック
+│   ├── repositories/
+│   │   └── api-client.test.ts        # 新規：401リトライロジック（旧 composables/useApiClient）
+│   ├── schemas/
+│   │   ├── spot.test.ts              # 既存（14テスト。旧 lib/validations/）
+│   │   └── category.test.ts          # 既存（5テスト。旧 lib/validations/）
 │   └── lib/
-│       ├── validations/
-│       │   ├── spot.test.ts          # 既存（14テスト）
-│       │   └── category.test.ts      # 既存（5テスト）
 │       └── map-utils.test.ts         # 新規：地図ユーティリティ関数（18テスト）
 └── tests/
     └── e2e/
@@ -188,10 +189,10 @@ front/
 
 ---
 
-### 1-2. `useApiClient`（composables/useApiClient.ts）
+### 1-2. `useApiClient`（repositories/api-client.ts）
 
-**対象ファイル**: `front/composables/useApiClient.ts`
-**テストファイル**: `front/__tests__/composables/useApiClient.test.ts`
+**対象ファイル**: `front/repositories/api-client.ts`
+**テストファイル**: `front/__tests__/repositories/api-client.test.ts`
 **モック対象**: `useSupabaseClient`（外部I/O）、`$fetch`（外部I/O）
 
 #### 正常系

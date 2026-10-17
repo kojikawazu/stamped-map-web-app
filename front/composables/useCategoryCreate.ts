@@ -1,5 +1,6 @@
 import type { Category } from "~/types/category";
-import { createCategorySchema } from "~/lib/validations/category";
+import { useCategoryRepository } from "~/repositories/category";
+import { createCategorySchema } from "~/schemas/category";
 
 /**
  * カテゴリの新規作成を提供する。
@@ -12,7 +13,7 @@ import { createCategorySchema } from "~/lib/validations/category";
  *   エラーリセット `clearError`
  */
 export const useCategoryCreate = () => {
-  const { apiFetch } = useApiClient();
+  const categoryRepository = useCategoryRepository();
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -31,11 +32,7 @@ export const useCategoryCreate = () => {
 
     loading.value = true;
     try {
-      const res = await apiFetch<{ data: Category }>("/api/categories", {
-        method: "POST",
-        body: result.data,
-      });
-      return res.data;
+      return await categoryRepository.create(result.data);
     } catch {
       error.value = "カテゴリの追加に失敗しました";
       return null;
