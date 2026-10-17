@@ -76,6 +76,8 @@ pages  →  components  →  composables  →  repositories  →  lib / schemas 
 ## バリデーション
 
 - フォームバリデーションには Zod スキーマバリデーションを使用する。
+- 複数の画面で同じ入力項目を持つフォームは、状態・検証・項目別エラーを composable に集約する（例: スポットの登録 / 編集 → `useSpotForm`）。送信（API 呼び出し）は別の composable に分け、コンポーネントは描画と結線だけを持つ。
+- `type="number"` の入力の未入力判定は **`Number.isFinite`** で行う。`v-model.number` は数値に変換できない入力（空欄など）を `NaN` ではなく**元の文字列 `""` のまま**書き戻し、`isNaN("")` は `false` になるため素通りする。
 
 ## テスト
 

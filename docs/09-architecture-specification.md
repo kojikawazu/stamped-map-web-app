@@ -140,6 +140,7 @@ front/
 │   ├── useSpots.ts            # スポット一覧取得（ページネーション付き）
 │   ├── useMarkers.ts          # マーカーデータ取得（全件・軽量）
 │   ├── useCategories.ts       # カテゴリ一覧取得
+│   ├── useSpotForm.ts         # スポット登録・編集フォームの状態・検証・項目別エラー（両モーダルで共有）
 │   ├── useSpotCreate.ts       # スポット登録
 │   ├── useSpotEdit.ts         # スポット更新
 │   ├── useSpotDelete.ts       # スポット削除
