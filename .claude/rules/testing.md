@@ -16,11 +16,13 @@ globs: "front/__tests__/**,front/tests/**"
 ```
 front/
 ├── __tests__/              # ユニット/結合・IT を集約
+│   ├── components/         # components/ をミラー（VTU。atoms / molecules / organisms）
 │   ├── composables/        # composables/ をミラー
 │   ├── repositories/       # repositories/ をミラー
 │   ├── schemas/            # schemas/ をミラー
 │   ├── lib/                # lib/ をミラー
 │   ├── server/             # server/ をミラー（api/ / utils/）
+│   ├── fixtures/           # 複数のテストで共有するテストデータのビルダー（例: buildSpot）
 │   └── it/                 # 統合テスト（実 DB）
 │       └── harness.ts      # IT 用の共通足場
 └── tests/e2e/              # E2E（Playwright）
@@ -76,9 +78,18 @@ front/
   3. `E2E_AUTH_BYPASS=1 ALLOWED_EMAILS=e2e@example.com pnpm test:e2e`（Playwright が `pnpm dev` を自動起動し、その `DATABASE_URL` をテスト DB に固定する）
   - `pnpm dev` を別ターミナルで先に起動しておく場合は、**`DATABASE_URL` をテスト DB に明示**して起動する（`reuseExistingServer` により既存サーバーがそのまま使われ、`.env` の本番を読んだサーバーでも再利用されてしまうため）。
 
+### コンポーネント（VTU）
+
+- **境界**: 1 コンポーネントの props → 描画、操作 → emit。子コンポーネントはスタブせず本物を描画する（auto-import がそのまま解決される）。通信は持たない（`components/` は `$fetch` を呼ばない。`frontend.md`）ため、モックは原則不要。
+- **マウント**: `@nuxt/test-utils/runtime` の `mountSuspended` を使う（Nuxt 環境・auto-import が効く）。
+- **`<Teleport>`**: `global: { stubs: { teleport: true } }` でインライン描画させ、`wrapper` 内で検証する（そのままでは `document.body` に出て `wrapper.find` で取れない）。
+- **アサーションは要素を特定して行う**。HTML 全体への正規表現は、別要素の値に一致して壊れを見逃す（例: バッジの `color:` が左ボーダーの `background-color:` に一致する）。
+- 無効化（`disabled`）は属性の有無に加え、**押しても emit されないこと**まで検証する。
+- `useState` を使う composable のテストは、`beforeEach` で `clearNuxtState` して状態を初期化する。内部で `watch` を張る composable は `effectScope` 内で生成し、`afterEach` で `stop` する（コンポーネント外で生成した `watch` は破棄されず、後続テストに残って余計な呼び出しを起こす）。
+
 ## カバレッジ
 
-- 計測: `pnpm test:coverage`（Vitest + `@vitest/coverage-v8`）。対象はロジック層（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）。`.vue` の描画は E2E で担保するため計測対象外。
+- 計測: `pnpm test:coverage`（Vitest + `@vitest/coverage-v8`）。対象はロジック層（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）。`.vue` は計測対象外（props / emit・表示分岐は VTU、画面シナリオは E2E で担保する。閾値はロジック層の指標として維持し、`.vue` を混ぜて意味を変えない）。
 - 基準: ロジック層で Statements / Branches ともに **80% 以上**を維持する。
 - 強制: `vitest.config.ts` の `coverage.thresholds` に設定済みで、下回るとコマンドが失敗する。CI は `pnpm test:coverage` を実行するため、閾値割れは**マージ前に検出される**（人手のレビュー任せにしない）。
 
