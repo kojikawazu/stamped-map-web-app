@@ -65,7 +65,7 @@ model MapSpot {
 
 ### マイグレーション追加SQL（PostGIS 空間インデックス用）※未実装（将来予定）
 
-> **ステータス：未実装。** 現状のスキーマ（`front/prisma/schema.prisma`）に `location` 生成カラム・GIST インデックスは存在せず、`prisma/migrations/` ディレクトリも未作成。マイグレーションは用いず、`prisma db push` でスキーマを DB に同期する運用（セットアップ手順は [`../README.md`](../README.md#4-データベースのセットアップ) を参照）。
+> **ステータス：未実装。** 現状のスキーマ（`front/prisma/schema.prisma`）に `location` 生成カラム・GIST インデックスは存在せず、`prisma/migrations/` ディレクトリも未作成。マイグレーションは用いず、本番スキーマはこのリポジトリから変更しない。ローカル / テスト DB には `prisma db push` で同期する（セットアップ手順は [`../README.md`](../README.md#4-データベースのセットアップ) を参照）。
 > 空間検索を導入する段階で、生成カラムと GIST インデックスを以下の SQL で migration に手動追加する。生成カラムと GIST インデックスは Prisma スキーマだけでは定義できないため。
 
 ```sql

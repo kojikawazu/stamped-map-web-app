@@ -140,7 +140,7 @@
 | 変数 | 用途 | 配置場所 |
 |------|------|----------|
 | `DATABASE_URL` | Supabase 接続文字列（プーリング） | Vercel env / .env.local |
-| `DIRECT_URL` | Supabase 直接接続（Prisma Migrate用） | Vercel env / .env.local |
+| `DIRECT_URL` | Supabase 直接接続（`schema.prisma` の `directUrl`。Prisma CLI 用。本番スキーマの同期には使わない） | Vercel env / .env.local |
 | `SUPABASE_URL` | Supabase プロジェクトURL（`@nuxtjs/supabase` が読む） | Vercel env / .env.local |
 | `SUPABASE_KEY` | Supabase Anon Key（`@nuxtjs/supabase` が読む） | Vercel env / .env.local |
 | `NUXT_PUBLIC_MAPTILER_KEY` | MapTiler API Key（クライアントに公開） | Vercel env / .env.local |
