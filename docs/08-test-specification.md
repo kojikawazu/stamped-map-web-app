@@ -246,3 +246,5 @@ GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動�
 **it ジョブ**（統合テスト）: `prisma generate` → `pnpm test:it`。Testcontainers が PostGIS コンテナを起動し実 Prisma を検証する（ubuntu-latest の Docker を利用、services 定義不要）。
 
 **e2e ジョブ**（実 DB シナリオ）: `services: postgis` を起動 → `pnpm build` → `pnpm db:setup:test`（接続先ガード経由で `prisma db push` + seed。ジョブ env は `TEST_DATABASE_URL` のみ） → 本番サーバーを `DATABASE_URL="$TEST_DATABASE_URL"` + `E2E_AUTH_BYPASS=1` で起動 → `pnpm test:e2e`（Playwright）。API はモックせず実データを検証する。失敗時は `playwright-report` を artifact 保存。
+
+**Secret scan**（別ワークフロー `.github/workflows/secret-scan.yml`）: 鍵・`.env` 系の秘匿ファイルが Git 管理下にないかを検査する。`front/**` に限らずどの変更でも混入しうるため、`paths` で絞らず `main` への push / PR で常に実行する。検出パターンの自己テスト（`scripts/test-check-tracked-secrets.sh`）→ 本検査（`scripts/check-tracked-secrets.sh`）の順。詳細は `docs/06-security-specification.md`「シークレット管理」。
