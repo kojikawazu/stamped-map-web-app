@@ -193,22 +193,29 @@ front/
 
 **対象ファイル**: `front/repositories/api-client.ts`
 **テストファイル**: `front/__tests__/repositories/api-client.test.ts`
-**モック対象**: `useSupabaseClient`（外部I/O）、`$fetch`（外部I/O）
+**モック対象**: Supabase の `auth.getSession` / `auth.refreshSession`（外部I/O）、`$fetch`（外部I/O）、`navigateTo`（`mockNuxtImport` で差し替え。`vi.mock("#imports")` は auto-import の解決先に届かない）
 
 #### 正常系
 
 | # | テストケース | 入力 | 期待結果 | 優先度 |
 |---|---|---|---|---|
 | N-1 | 正常なリクエストで Bearer トークンが付与される | `apiFetch("/api/spots")` | `Authorization: Bearer <token>` ヘッダー付きで呼ばれる | High |
-| N-2 | レスポンスデータが返る | 正常なAPIレスポンス | 型安全なレスポンスが返る | High |
+| N-2 | セッションが無い場合はヘッダーなしで呼ぶ | セッション `null` | `Authorization` ヘッダーなしで呼ばれる | High |
+| N-3 | 追加の options が引き渡される | `method` / `body` 指定 | `$fetch` に同じ値が渡る | Medium |
 
 #### 準正常系
 
 | # | テストケース | 入力 | 期待結果 | 優先度 |
 |---|---|---|---|---|
-| S-1 | 401 エラー時にトークンをリフレッシュして1回リトライする | 初回 401 → リフレッシュ成功 → 2回目 200 | 1回のリトライ後に正常レスポンス | High |
-| S-2 | リフレッシュ失敗時に `/login` にリダイレクトする | 401 → リフレッシュ失敗 | `navigateTo("/login")` が呼ばれる | High |
-| S-3 | 401 以外のエラーはリトライせず例外をスローする | 500 エラー | 例外がそのままスローされる | Medium |
+| S-1 | 401 エラー時にトークンをリフレッシュして1回リトライする | 初回 401 → リフレッシュ成功 → 2回目 200 | 新トークンで 1 回リトライし正常レスポンス | High |
+| S-2 | 401 以外のエラーはリトライせず例外をスローする | 500 エラー | 例外がそのままスローされ、リフレッシュしない | Medium |
+
+#### 異常系
+
+| # | テストケース | 入力 | 期待結果 | 優先度 |
+|---|---|---|---|---|
+| A-1 | リフレッシュ失敗時に `/login` へ遷移する | 401 → `refreshSession` がエラー | `navigateTo("/login")`、元の 401 を再 throw、リトライなし | High |
+| A-2 | リフレッシュ成功後にトークンを再取得できない場合も `/login` へ遷移する | 401 → リフレッシュ成功 → `getSession` が `null` | `navigateTo("/login")`、元の 401 を再 throw、リトライなし | High |
 
 ---
 
