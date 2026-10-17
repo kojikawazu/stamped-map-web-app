@@ -1,4 +1,4 @@
-import { createCategorySchema } from "~/lib/validations/category";
+import { createCategorySchema } from "~/schemas/category";
 
 export default defineEventHandler(async (event) => {
   await verifyOwner(event);

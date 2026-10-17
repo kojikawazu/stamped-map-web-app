@@ -4,9 +4,11 @@ import jsdoc from "eslint-plugin-jsdoc";
 import prettier from "eslint-config-prettier/flat";
 
 // 対象は .claude/rules/jsdoc.md の glob に対応（front からの相対パス）。
-// TS ソース（composables / server / lib / middleware）+ Vue コンポーネント（components）。
+// TS ソース（composables / repositories / schemas / server / lib / middleware）+ Vue コンポーネント（components）。
 const JSDOC_TARGETS = [
   "composables/**/*.ts",
+  "repositories/**/*.ts",
+  "schemas/**/*.ts",
   "server/**/*.ts",
   "lib/**/*.ts",
   "middleware/**/*.ts",

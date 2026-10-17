@@ -1,5 +1,6 @@
 import { toast } from "vue-sonner";
-import type { UpdateSpotInput } from "~/lib/validations/spot";
+import { useSpotRepository } from "~/repositories/spot";
+import type { UpdateSpotInput } from "~/schemas/spot";
 import type { Spot } from "~/types/spot";
 
 /**
@@ -10,7 +11,7 @@ import type { Spot } from "~/types/spot";
  * @returns ローディング状態・エラーと、更新処理 `updateSpot`
  */
 export const useSpotEdit = () => {
-  const { apiFetch } = useApiClient();
+  const spotRepository = useSpotRepository();
 
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -22,12 +23,9 @@ export const useSpotEdit = () => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await apiFetch<{ data: Spot }>(`/api/spots/${id}`, {
-        method: "PUT",
-        body: payload,
-      });
+      const spot = await spotRepository.update(id, payload);
       toast.success("スポットを更新しました");
-      return res.data;
+      return spot;
     } catch {
       error.value = "スポットの更新に失敗しました";
       toast.error("更新に失敗しました");

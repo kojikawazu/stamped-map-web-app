@@ -25,7 +25,7 @@
 | `documentation.md` | 全体 | ドキュメント更新の影響マップ・opt-out 完了条件 |
 | `coding-standards.md` | 全体 | TypeScript strict / pnpm / ESLint + Prettier 規約 |
 | `typescript.md` | `front/**/*.ts`, `front/**/*.vue` | type/interface の使い分け・型/定数の配置・any 禁止・`import type` |
-| `jsdoc.md` | `front/components/**`, `front/composables/**`, `front/server/**`, `front/lib/**`, `front/middleware/**` | TypeScript 公開シンボルへの JSDoc（TSDoc）必須・型ブレース禁止 |
+| `jsdoc.md` | `front/components/**`, `front/composables/**`, `front/repositories/**`, `front/schemas/**`, `front/server/**`, `front/lib/**`, `front/middleware/**` | TypeScript 公開シンボルへの JSDoc（TSDoc）必須・型ブレース禁止 |
 | `error-handling.md` | 全体 | バリデーション・HTTP ステータスコード・ログ方針 |
 | `security.md` | 全体 | Supabase Auth / ALLOWED_EMAILS / Prisma インジェクション対策 |
 | `production-data.md` | 全体 | 本番データ保護（本番 DB への破壊的操作の禁止・環境分離・例外手順・AI エージェントへの制約） |

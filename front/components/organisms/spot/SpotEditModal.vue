@@ -155,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-import { updateSpotSchema } from "~/lib/validations/spot";
+import { updateSpotSchema } from "~/schemas/spot";
 import type { Category } from "~/types/category";
 import type { Spot } from "~/types/spot";
 

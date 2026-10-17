@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createCategorySchema } from "../../../lib/validations/category";
+import { createCategorySchema } from "../../schemas/category";
 
 describe("createCategorySchema", () => {
   it("N-1: 正常な入力を受け入れる", () => {

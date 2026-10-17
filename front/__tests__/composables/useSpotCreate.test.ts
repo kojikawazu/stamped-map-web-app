@@ -13,7 +13,7 @@ vi.mock("vue-sonner", () => ({
   },
 }));
 
-vi.mock("~/composables/useApiClient", () => ({
+vi.mock("~/repositories/api-client", () => ({
   useApiClient: () => ({ apiFetch: mockApiFetch }),
 }));
 
@@ -32,12 +32,17 @@ describe("useSpotCreate", () => {
 
   it("N-1: 登録成功時に Spot を返し、成功トーストを表示する", async () => {
     const spot = { id: "spot-1", ...validPayload };
-    mockApiFetch.mockResolvedValue(spot);
+    // API は { data: Spot } の envelope で返す（server/api/spots/index.post.ts）
+    mockApiFetch.mockResolvedValue({ data: spot });
 
     const { createSpot, loading, error } = useSpotCreate();
     const result = await createSpot(validPayload);
 
     expect(result).toEqual(spot);
+    expect(mockApiFetch).toHaveBeenCalledWith(
+      "/api/spots",
+      expect.objectContaining({ method: "POST", body: validPayload }),
+    );
     expect(mockToastSuccess).toHaveBeenCalledWith("スポットを登録しました");
     expect(loading.value).toBe(false);
     expect(error.value).toBeNull();
@@ -62,7 +67,7 @@ describe("useSpotCreate", () => {
     const { createSpot, loading } = useSpotCreate();
     const promise = createSpot(validPayload);
     expect(loading.value).toBe(true);
-    resolveFn({ id: "spot-1" });
+    resolveFn({ data: { id: "spot-1" } });
     await promise;
     expect(loading.value).toBe(false);
   });

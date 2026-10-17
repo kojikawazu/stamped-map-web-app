@@ -1,4 +1,5 @@
-import type { Category, CategoriesResponse } from "~/types/category";
+import { useCategoryRepository } from "~/repositories/category";
+import type { Category } from "~/types/category";
 
 /**
  * カテゴリ一覧の取得と共有状態を提供する。
@@ -9,7 +10,7 @@ import type { Category, CategoriesResponse } from "~/types/category";
  * @returns カテゴリ一覧・ローディング状態・エラーと、取得処理 `fetchCategories`
  */
 export const useCategories = () => {
-  const { apiFetch } = useApiClient();
+  const categoryRepository = useCategoryRepository();
 
   const categories = useState<Category[]>("categories:list", () => []);
   const loading = ref(false);
@@ -19,8 +20,7 @@ export const useCategories = () => {
     loading.value = true;
     error.value = null;
     try {
-      const res = await apiFetch<CategoriesResponse>("/api/categories");
-      categories.value = res.data;
+      categories.value = await categoryRepository.list();
     } catch {
       error.value = "カテゴリの取得に失敗しました";
     } finally {

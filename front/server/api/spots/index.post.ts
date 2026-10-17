@@ -1,4 +1,4 @@
-import { createSpotSchema } from "~/lib/validations/spot";
+import { createSpotSchema } from "~/schemas/spot";
 
 export default defineEventHandler(async (event) => {
   await verifyOwner(event);

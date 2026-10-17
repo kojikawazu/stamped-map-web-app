@@ -1,5 +1,6 @@
 import { toast } from "vue-sonner";
-import type { CreateSpotInput } from "~/lib/validations/spot";
+import { useSpotRepository } from "~/repositories/spot";
+import type { CreateSpotInput } from "~/schemas/spot";
 import type { Spot } from "~/types/spot";
 
 /**
@@ -11,7 +12,7 @@ import type { Spot } from "~/types/spot";
  * @returns ローディング状態・エラーと、登録処理 `createSpot`
  */
 export const useSpotCreate = () => {
-  const { apiFetch } = useApiClient();
+  const spotRepository = useSpotRepository();
 
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -20,10 +21,7 @@ export const useSpotCreate = () => {
     loading.value = true;
     error.value = null;
     try {
-      const spot = await apiFetch<Spot>("/api/spots", {
-        method: "POST",
-        body: payload,
-      });
+      const spot = await spotRepository.create(payload);
       toast.success("スポットを登録しました");
       return spot;
     } catch {

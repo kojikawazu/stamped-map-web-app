@@ -193,7 +193,7 @@
 | ユーティリティ | 80%+ | 純粋関数は高カバレッジ |
 | composables | - | 主要ロジックを優先的にカバー |
 
-**全体閾値（CI で強制）**: ロジック層（`server/**` / `composables/**` / `lib/**` / `middleware/**`）で Statements / Branches ともに **80% 以上**。`vitest.config.ts` の `coverage.thresholds` に設定しており、下回ると `pnpm test:coverage` が失敗する。CI はこのコマンドを実行するため、閾値割れはマージ前に検出される。
+**全体閾値（CI で強制）**: ロジック層（`server/**` / `composables/**` / `repositories/**` / `schemas/**` / `lib/**` / `middleware/**`）で Statements / Branches ともに **80% 以上**。`vitest.config.ts` の `coverage.thresholds` に設定しており、下回ると `pnpm test:coverage` が失敗する。CI はこのコマンドを実行するため、閾値割れはマージ前に検出される。
 
 > 上表は対象ごとの**目標**（努力目標）、閾値は**全体の下限**（機械的な強制）という役割分担。
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createSpotSchema } from "../../../lib/validations/spot";
+import { createSpotSchema } from "../../schemas/spot";
 
 const validSpot = {
   name: "東京タワー",
