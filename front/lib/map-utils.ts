@@ -1,3 +1,4 @@
+import type { FeatureCollection } from "geojson";
 import type { Marker } from "~/types/marker";
 import type { Category } from "~/types/category";
 
@@ -46,7 +47,7 @@ export function buildCategoryMap(cats: Category[]): Map<string, string> {
 export function markersToGeoJSON(
   items: Marker[],
   categoryMap: Map<string, string>,
-): GeoJSON.FeatureCollection {
+): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: items.map((m) => ({

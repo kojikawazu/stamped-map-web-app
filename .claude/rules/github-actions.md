@@ -17,7 +17,7 @@ globs: ".github/workflows/**"
 | `markdownlint.yml` | Markdown の検査（`scripts/lint-docs.sh`。`static-analysis.md`） | **なし**（常時実行） |
 | `shellcheck.yml` | 独立したシェルスクリプト（`*.sh`）の検査（`scripts/lint-shell.sh`。`static-analysis.md`） | **なし**（常時実行） |
 
-アクションの更新 PR は `.github/dependabot.yml` が週次で作成する（「5. アクションのバージョン更新」）。
+アクションの更新 PR は `.github/dependabot.yml` が週次で作成する（「5. アクションのバージョン更新」）。同じファイルで npm（`front/`）の更新 PR も作成する（運用は `coding-standards.md`「依存パッケージの管理」）。
 
 ## 1. 発火トリガ（二重実行を作らない）
 

@@ -12,6 +12,10 @@
 {
   "globs": ["**/*.md"],
 
+  // .gitignore の対象（Playwright の test-results/ など、ローカルで生成される成果物）は検査しない。
+  // 生成物を ignores に 1 件ずつ足すと、.gitignore と除外の定義が二重管理になるため。
+  "gitignore": true,
+
   // 生成物・依存ディレクトリ。プロジェクトに合わせて増やす
   // （自動生成の CHANGELOG.md、ベンダリングしたドキュメントなど）。
   //

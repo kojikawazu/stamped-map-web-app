@@ -262,4 +262,4 @@ GitHub Actions（`.github/workflows/ci.yml`）で `front/**` 変更時に自動�
 
 運用方針（警告ゼロ・抑制コメントの作法・`--fix` の扱い）は `.claude/rules/static-analysis.md`。
 
-**アクションの更新**: `.github/dependabot.yml`（`github-actions`、毎週月曜 09:00 JST、全アクションを 1 PR にグループ化）が `uses:` のバージョン更新 PR を作成する。更新 PR も上記の CI / actionlint を通してからマージする。
+**依存の更新**: `.github/dependabot.yml` が毎週月曜 09:00 JST に更新 PR を作成する。`github-actions`（`uses:` のバージョン。全アクションを 1 PR にグループ化）と `npm`（`front/`。minor / patch は 1 PR にグループ化、major は個別 PR）の 2 系統。更新 PR も上記の CI / actionlint を通してからマージする。

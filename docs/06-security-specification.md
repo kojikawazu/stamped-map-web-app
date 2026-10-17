@@ -225,6 +225,7 @@ export default defineEventHandler(async (event) => {
 | 不正サインアップ | Supabase 側で公開サインアップを無効化 |
 | 非オーナーによるWrite操作 | `verifyOwner()` で 403 を返却（`ALLOWED_EMAILS` による制限） |
 | 秘匿ファイルのリポジトリ混入 | `.gitignore` での除外に加え、CI の Secret scan で追跡対象を検査（下記「シークレット管理」） |
+| 依存パッケージの既知脆弱性 | Dependabot alerts / security updates に加え、`.github/dependabot.yml` の npm 定期更新（`front/`・週次）で lockfile を古いまま放置しない。件数は `pnpm audit` で確認する。運用は `.claude/rules/coding-standards.md`「依存パッケージの管理」 |
 
 ## シークレット管理
 
