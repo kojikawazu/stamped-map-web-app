@@ -43,7 +43,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@testcontainers/postgresql": "^12.2.1",
     "@types/geojson": "^7946.0.16",
-    "@types/node": "^20.19.43",
+    "@types/node": "^26.6.5",
     "@types/pg": "^8.23.1",
     "@vitest/coverage-v8": "^4.1.12",
     "@vue/test-utils": "^2.5.1",
