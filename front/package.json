@@ -29,7 +29,7 @@
     "@prisma/client": "^6.19.3",
     "@supabase/supabase-js": "^2.118.0",
     "maplibre-gl": "^6.14.0",
-    "nuxt": "^3.21.11",
+    "nuxt": "^4.6.3",
     "pg": "^8.23.1",
     "vue": "^3.5.44",
     "vue-router": "^4.6.4",
