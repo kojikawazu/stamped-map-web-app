@@ -26,7 +26,7 @@
   "dependencies": {
     "@nuxtjs/supabase": "^1.6.2",
     "@prisma/adapter-pg": "^6.19.3",
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "^7.10.1",
     "@supabase/supabase-js": "^2.118.0",
     "maplibre-gl": "^6.14.0",
     "nuxt": "^3.21.11",
