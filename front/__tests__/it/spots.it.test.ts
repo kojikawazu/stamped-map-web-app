@@ -112,7 +112,7 @@ describe("[IT] GET /api/spots", () => {
     const res = await handler(makeEvent("GET", `/api/spots?category=${a.id}`));
 
     expect(res.data).toHaveLength(1);
-    expect(res.data[0].name).toBe("a1");
+    expect(res.data[0]?.name).toBe("a1");
   });
 
   it("N-4: 名前の部分一致検索（q）が実クエリで機能する", async () => {
@@ -124,7 +124,7 @@ describe("[IT] GET /api/spots", () => {
     const res = await handler(makeEvent("GET", "/api/spots?q=東京"));
 
     expect(res.data).toHaveLength(1);
-    expect(res.data[0].name).toBe("東京タワー");
+    expect(res.data[0]?.name).toBe("東京タワー");
   });
 });
 

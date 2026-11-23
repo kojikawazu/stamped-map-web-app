@@ -25,7 +25,11 @@ export const createSpotSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, "日付はYYYY-MM-DD形式で入力してください")
     .refine(
       (date) => {
-        const [year, month, day] = date.split("-").map(Number);
+        // refine は前段の regex が失敗した入力でも実行され得る。欠けた要素は NaN にして
+        // 下の比較を必ず false にし、不正な日付として拒否する
+        const [year = NaN, month = NaN, day = NaN] = date
+          .split("-")
+          .map(Number);
         const d = new Date(year, month - 1, day);
         return (
           d.getFullYear() === year &&
@@ -40,7 +44,7 @@ export const createSpotSchema = z.object({
         // UTC 基準で当日と比較する（サーバータイムゾーン依存を排除）
         // ⚠️ JST (UTC+9) では日本時間 00:00〜08:59 の間、UTC 当日が前日になるため
         //    その時間帯に当日の日付を入力すると拒否される場合がある。個人アプリとして許容する。
-        const todayUtc = new Date().toISOString().split("T")[0];
+        const todayUtc = new Date().toISOString().slice(0, 10);
         return date <= todayUtc;
       },
       { message: "未来の日付は指定できません" },

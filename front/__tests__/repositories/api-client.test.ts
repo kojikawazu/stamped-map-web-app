@@ -2,24 +2,27 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mockNuxtImport } from "@nuxt/test-utils/runtime";
 import { useNuxtApp } from "#imports";
 
-// navigateTo は Nuxt の auto-import で、変換後は "#imports" ではなく実体のモジュール
-// （#app/composables/router）を直接 import する。そのため vi.mock("#imports") や
+// navigateTo と $fetch は Nuxt の auto-import で、変換後は "#imports" ではなく実体のモジュール
+// を直接 import する（$fetch は Nuxt 4 から。3 系ではグローバル参照だった）。そのため vi.mock("#imports") や
 // vi.stubGlobal では対象コードの import binding に届かない。@nuxt/test-utils の
 // mockNuxtImport は auto-import の解決先ごと差し替えるため、こちらを使う。
 
-const { mockGetSession, mockRefreshSession, navigateToMock } = vi.hoisted(
-  () => ({
+const { mockFetch, mockGetSession, mockRefreshSession, navigateToMock } =
+  vi.hoisted(() => ({
+    mockFetch: vi.fn(),
     mockGetSession: vi.fn(),
     mockRefreshSession: vi.fn(),
     navigateToMock: vi.fn(),
-  }),
-);
+  }));
 
 mockNuxtImport("navigateTo", () => navigateToMock);
+mockNuxtImport("$fetch", () => mockFetch);
 
 describe("useApiClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // 全テストで共有するため、前のテストの戻り値の設定まで消す（clear は呼び出し履歴しか消さない）
+    mockFetch.mockReset();
 
     // 初期化済みの Supabase クライアントの auth メソッドをスタブで差し替える
     const nuxtApp = useNuxtApp();
@@ -38,15 +41,14 @@ describe("useApiClient", () => {
   // --- 正常系 ---
 
   it("N-1: 有効なトークンがある場合、Authorization ヘッダー付きで $fetch を呼ぶ", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({ data: [] });
-    vi.stubGlobal("$fetch", mockFetch);
+    mockFetch.mockResolvedValue({ data: [] });
 
     const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await apiFetch("/api/spots");
 
     expect(mockFetch).toHaveBeenCalledOnce();
-    const [url, options] = mockFetch.mock.calls[0];
+    const [url, options] = mockFetch.mock.calls[0] ?? [];
     expect(url).toBe("/api/spots");
     const authHeader = (options.headers as Headers).get("Authorization");
     expect(authHeader).toBe("Bearer valid-token");
@@ -54,27 +56,25 @@ describe("useApiClient", () => {
 
   it("N-2: セッションがない場合、Authorization ヘッダーなしで $fetch を呼ぶ", async () => {
     mockGetSession.mockResolvedValue({ data: { session: null } });
-    const mockFetch = vi.fn().mockResolvedValue({ data: [] });
-    vi.stubGlobal("$fetch", mockFetch);
+    mockFetch.mockResolvedValue({ data: [] });
 
     const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await apiFetch("/api/spots");
 
-    const [, options] = mockFetch.mock.calls[0];
+    const [, options] = mockFetch.mock.calls[0] ?? [];
     const authHeader = (options.headers as Headers).get("Authorization");
     expect(authHeader).toBeNull();
   });
 
   it("N-3: 追加の options（body, method）が $fetch に引き渡される", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({ data: {} });
-    vi.stubGlobal("$fetch", mockFetch);
+    mockFetch.mockResolvedValue({ data: {} });
 
     const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
     await apiFetch("/api/spots", { method: "POST", body: { name: "test" } });
 
-    const [, options] = mockFetch.mock.calls[0];
+    const [, options] = mockFetch.mock.calls[0] ?? [];
     expect(options.method).toBe("POST");
     expect(options.body).toEqual({ name: "test" });
   });
@@ -85,11 +85,9 @@ describe("useApiClient", () => {
     const error401 = Object.assign(new Error("401"), {
       response: { status: 401 },
     });
-    const mockFetch = vi
-      .fn()
+    mockFetch
       .mockRejectedValueOnce(error401)
       .mockResolvedValueOnce({ data: [] });
-    vi.stubGlobal("$fetch", mockFetch);
 
     mockRefreshSession.mockResolvedValue({ error: null });
     mockGetSession
@@ -106,7 +104,7 @@ describe("useApiClient", () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
     expect(result).toEqual({ data: [] });
-    const [, retryOptions] = mockFetch.mock.calls[1];
+    const [, retryOptions] = mockFetch.mock.calls[1] ?? [];
     expect((retryOptions.headers as Headers).get("Authorization")).toBe(
       "Bearer new-token",
     );
@@ -116,8 +114,7 @@ describe("useApiClient", () => {
     const error500 = Object.assign(new Error("500"), {
       response: { status: 500 },
     });
-    const mockFetch = vi.fn().mockRejectedValue(error500);
-    vi.stubGlobal("$fetch", mockFetch);
+    mockFetch.mockRejectedValue(error500);
 
     const { useApiClient } = await import("../../repositories/api-client");
     const { apiFetch } = useApiClient();
@@ -133,8 +130,7 @@ describe("useApiClient", () => {
     const error401 = Object.assign(new Error("401"), {
       response: { status: 401 },
     });
-    const mockFetch = vi.fn().mockRejectedValue(error401);
-    vi.stubGlobal("$fetch", mockFetch);
+    mockFetch.mockRejectedValue(error401);
 
     mockRefreshSession.mockResolvedValue({
       error: new Error("refresh failed"),
@@ -153,8 +149,7 @@ describe("useApiClient", () => {
     const error401 = Object.assign(new Error("401"), {
       response: { status: 401 },
     });
-    const mockFetch = vi.fn().mockRejectedValue(error401);
-    vi.stubGlobal("$fetch", mockFetch);
+    mockFetch.mockRejectedValue(error401);
 
     // refreshSession はエラーを返さないが、直後の getSession でセッションが消えている
     // （別タブでのログアウト・リフレッシュトークン失効の競合など）

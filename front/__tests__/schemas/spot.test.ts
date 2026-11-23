@@ -19,7 +19,7 @@ describe("createSpotSchema", () => {
     const result = createSpotSchema.safeParse({ ...validSpot, name: "" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].path).toContain("name");
+      expect(result.error.issues[0]?.path).toContain("name");
     }
   });
 
@@ -64,6 +64,18 @@ describe("createSpotSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it.each(["2026", "2026-01"])(
+    "S-14: visitedAt の月日が欠けた入力 %s は、形式エラーに加えて存在しない日付としても拒否する",
+    (visitedAt) => {
+      const result = createSpotSchema.safeParse({ ...validSpot, visitedAt });
+      expect(result.success).toBe(false);
+      // regex だけでなく refine 側でも拒否されること（欠けた要素を 1 月・1 日等に丸めない）
+      expect(result.error?.issues.map((issue) => issue.message)).toContain(
+        "存在しない日付です",
+      );
+    },
+  );
 
   it("S-7: visitedAt が存在しない日付のときバリデーションエラーになる", () => {
     const result = createSpotSchema.safeParse({

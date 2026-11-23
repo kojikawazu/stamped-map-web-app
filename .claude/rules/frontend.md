@@ -1,9 +1,9 @@
 ---
-description: Nuxt.js 3 フロントエンド設計・コンポーネント規約
+description: Nuxt.js 4 フロントエンド設計・コンポーネント規約
 globs: "front/components/**,front/pages/**,front/composables/**,front/layouts/**,front/stores/**,front/constants/**,front/schemas/**,front/repositories/**,front/utils/**"
 ---
 
-# フロントエンドルール（Nuxt.js 3）
+# フロントエンドルール（Nuxt.js 4）
 
 ## コンポーネント設計
 
@@ -15,7 +15,7 @@ globs: "front/components/**,front/pages/**,front/composables/**,front/layouts/**
 ## ロジック分離
 
 - ロジックは `composables/` に切り出す。コンポーネントは UI 描画に専念する。
-- Nuxt 3 の auto-import を活用する（`composables/`, `utils/` は自動インポート対象）。
+- Nuxt の auto-import を活用する（`composables/`, `utils/` は自動インポート対象）。
 
 ## 関心別にディレクトリを切る
 

@@ -154,14 +154,12 @@ function addSpotLayers(map: maplibregl.Map) {
     const features = map.queryRenderedFeatures(e.point, {
       layers: ["spots-cluster"],
     });
-    const clusterId = features[0]?.properties?.cluster_id as number | undefined;
-    if (clusterId == null) return;
+    const feature = features[0];
+    const clusterId = feature?.properties?.cluster_id as number | undefined;
+    if (!feature || clusterId == null) return;
 
     const source = map.getSource("spots") as maplibregl.GeoJSONSource;
-    const coords = (features[0].geometry as Point).coordinates as [
-      number,
-      number,
-    ];
+    const coords = (feature.geometry as Point).coordinates as [number, number];
     source
       .getClusterExpansionZoom(clusterId)
       .then((zoom) => {

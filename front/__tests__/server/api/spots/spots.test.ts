@@ -91,7 +91,7 @@ describe("GET /api/spots", () => {
     const result = await handler(event);
 
     expect(result.data).toHaveLength(1);
-    expect(result.data[0].name).toBe("東京タワー");
+    expect(result.data[0]?.name).toBe("東京タワー");
     expect(result.pagination.total).toBe(1);
   });
 

@@ -40,7 +40,7 @@
 | MapTiler + MapLibre ガイド | https://docs.maptiler.com/maplibre/ |
 | Prisma + PostgreSQL | https://www.prisma.io/docs/concepts/database-connectors/postgresql |
 | Supabase Auth (JS SDK) | https://supabase.com/docs/reference/javascript/auth-signup |
-| Nuxt.js 3 ドキュメント | https://nuxt.com/docs |
+| Nuxt.js 4 ドキュメント | https://nuxt.com/docs |
 | @nuxtjs/supabase | https://supabase.nuxtjs.org/ |
 | Vercel デプロイ | https://vercel.com/docs |
 
