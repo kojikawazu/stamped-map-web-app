@@ -4,6 +4,45 @@
 
 新しいエントリはこの見出しの直下に追記する（新しいものが上）。
 
+## 2026-11-25 手元で入れた公開直後の版が、Dependabot の更新をまとめて失敗させた
+
+### 概要
+
+Nuxt 4 移行の lockfile に、公開から約 15 時間の `unhead` 3.5.0 が入った。マージ後、Dependabot の npm グループ更新（#134）が公開日の制限に当たって失敗し、PR が自動で閉じられた。
+
+### 詳細
+
+- 何が起きたか: Dependabot の更新ジョブが `ERR_PNPM_NO_MATURE_MATCHING_VERSION`（`unhead` 3.5.0）で失敗し、`unhead` と無関係なパッケージを含む 12 件が `update_not_possible` になった。#134 は「no longer updatable」として閉じられた。アプリの動作とデプロイには影響していない。
+- なぜ起きたか（根本原因）: Dependabot は `pnpm update` に `--config.minimum-release-age=4320`（3 日）を付けて実行するが、手元の pnpm にはこの制限が無い。nuxt 4.6.4 の要求は `^3.4.3` で、公開から 1 か月以上経った 3.4.3 でも満たせたが、手元では範囲内の最新が選ばれた。lockfile に新しすぎる版が 1 つあると、他のパッケージの更新でも解決が失敗する。CI は固定された lockfile を使うため、この条件は検査されない。
+- 教訓 / 次からどうする: lockfile を手で大きく更新するときは、`pnpm install --config.minimum-release-age=4320` のように Dependabot と同じ条件で解決する。Dependabot の PR が「no longer updatable」で閉じられたら、更新が不要になったと判断せず、更新ジョブのログでエラーの種類を確かめる。
+- 関連: issue #138（リポジトリへの設定の要否）、PR #136、PR #134
+
+## 2026-11-25 pnpm install だけでは間接依存の脆弱な版が lockfile に残った
+
+### 概要
+
+Nuxt 4 へ上げて `pnpm install` しても、`node-forge` 1.4.0 と `serialize-javascript` 7.1.2 が lockfile に残った。修正版は依存元の要求範囲内にあり、「親を上げれば間接依存も上がる」という前提が誤っていた。
+
+### 詳細
+
+- 何が起きたか: 移行後の lockfile で、alert の対象である 2 つの版が変わっていなかった。PR 作成前に、lockfile の解決済みの版を alert の修正版と突き合わせて気づいた。そのままマージしていれば、`node-forge` の 20 件を含む alert が残っていた。
+- なぜ起きたか（根本原因）: `pnpm install` は、既存の lockfile の版が要求範囲（`^1.4.0` / `^7.0.3`）を満たす限り、それを維持する。親のパッケージを上げても、間接依存の範囲が今の版を許すなら更新されない。
+- 教訓 / 次からどうする: alert の解消を目的とする更新では、`package.json` の差分や install の成功で判断せず、**lockfile の解決済みの版を alert の修正版と 1 件ずつ突き合わせる**。範囲内なのに上がらない間接依存は `pnpm update <pkg> --depth 99 --no-save` で明示的に上げる（override は範囲内で上げられない場合に限る）。
+- 関連: `.claude/rules/coding-standards.md`「依存パッケージの管理」、PR #136、issue #135
+
+## 2026-11-25 Nuxt 4 で $fetch が auto-import になり、vi.stubGlobal のモックが届かなくなった
+
+### 概要
+
+Nuxt 4 へ上げたところ、`api-client.test.ts` の 7 件が失敗した。`$fetch` がグローバル参照から auto-import に変わり、`vi.stubGlobal("$fetch", ...)` が対象コードに届かなくなっていた。
+
+### 詳細
+
+- 何が起きたか: 同じ移行を試みた Dependabot の PR（#129）では型チェックの失敗だけが見えており、テストの失敗は型エラーを直した後に初めて現れた。
+- なぜ起きたか（根本原因）: Nuxt 4 では `$fetch` が `#build/fetch` からの import に変換される。`vi.stubGlobal` が差し替えるのは `globalThis` のプロパティだけで、モジュールの import binding には届かない。また CI の `test` ジョブは手順を順に実行し、型チェックで失敗すると後続のテストを実行しないため、失敗が 1 種類に見えていた。
+- 教訓 / 次からどうする: クライアント側コードの auto-import（`$fetch` を含む）は `mockNuxtImport` で差し替える。メジャー更新の影響は、CI で失敗した手順だけで見積もらず、手元で型チェック・lint・テスト・ビルドを個別に実行して全体を見る。
+- 関連: `.claude/rules/testing.md`「コンポーネント（VTU）」（`mockNuxtImport`）、PR #136、PR #129
+
 ## 2026-10-17 数値入力を消すと未入力チェックをすり抜け、英語の検証メッセージが出ていた
 
 ### 概要
