@@ -76,7 +76,7 @@ flowchart TD
 
 ### 前提条件
 
-- Node.js 22.22.3+ または 24.15+（CI は Node 22 で検証。Nuxt 4.6 が `^22.22.3 || ^24.15.0 || >=26.0.0` を要求）
+- Node.js 22.22.3+ または 24.15+（`front/package.json` の `engines`。範囲外では `pnpm install` が警告する。CI は Node 22 で検証）
 - pnpm 10+
 - Supabase プロジェクト（PostgreSQL + PostGIS 有効化済み）
 - MapTiler Cloud アカウント（API Key 発行済み）
