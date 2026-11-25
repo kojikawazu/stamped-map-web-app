@@ -21,4 +21,8 @@ globs:
   - `package.json` にはコメントを書けないため、追加した override の理由は PR 本文に残す。
   - **範囲指定の override（`pkg@<x.y.z`）は、他パッケージの peer 指定まで書き換える。** peer の範囲が狭まって「peer 未充足」の警告が出たら、その override は外す。
   - pnpm が自動で入れる peer（auto-install-peers）は override で版を変えられないことがある。その場合は、該当パッケージを直接依存として明示する（例: `vite`）。
+- **公開から 3 日未満の版は入れない**（`front/pnpm-workspace.yaml` の `minimumReleaseAge`）。Dependabot と条件を揃え、新しすぎる版が lockfile に入って更新 PR がまとめて失敗するのを防ぐ（#138）。
+  - 修正版を急いで入れる場合は `minimumReleaseAgeExclude` に**対象パッケージだけ**を書き、理由を PR 本文に残す。3 日を過ぎたら外す。
+  - **pnpm の設定を足したら、効いていることを実際に確かめる。** 読まれない場所に書いた設定はエラーにならない（`package.json` の `pnpm` フィールドの `minimumReleaseAge` は pnpm 10.28 では無視される）。
+- **`engines.node` に `>=` の上限の無い範囲を書かない。** Vercel は `engines.node` をプロジェクト設定より優先し、範囲内の最新メジャーを選ぶ（`>=26.0.0` を含めると本番が 26.x に変わる）。検証済みのメジャーだけを列挙する。
 - **コードが直接使う型パッケージは、自分の依存として明示する。** 他パッケージ経由で偶然見えている `@types/*` に頼らない（Nuxt の生成する `tsconfig` は `types: []` のため、グローバルの型名前空間は自動で読み込まれない）。

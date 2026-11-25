@@ -1,0 +1,7 @@
+# 公開から 3 日（4320 分）未満の版を選ばない（#138）。
+# - Dependabot は pnpm update に同じ値（--config.minimum-release-age=4320）を付ける。手元だけ新しすぎる版を
+#   lockfile に入れると、Dependabot の更新がまとめて失敗する（docs/lessons-learned.md）。
+# - 公開直後に発覚する乗っ取りパッケージを避ける。
+# - package.json の pnpm フィールドに書いても pnpm 10.28 では無視されるため、このファイルに置く。
+# 修正版を急いで入れる場合だけ、minimumReleaseAgeExclude に対象を書き、3 日を過ぎたら外す。
+minimumReleaseAge: 4320
