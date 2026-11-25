@@ -23,7 +23,7 @@
 
 ```mermaid
 flowchart TD
-    subgraph Client["Client (Browser) — Nuxt.js 3 + TypeScript"]
+    subgraph Client["Client (Browser) — Nuxt.js 4 + TypeScript"]
         Pages["Pages (CSR)"]
         Map["Map Component<br/>&lt;ClientOnly&gt; + MapLibre GL JS"]
         Auth["@nuxtjs/supabase<br/>useSupabaseClient / Session"]
@@ -51,7 +51,7 @@ flowchart TD
 
 | レイヤー | 技術 | 選定理由 |
 |----------|------|----------|
-| フロントエンド | Nuxt.js 3 + TypeScript | Vue.js エコシステム、地図SPA開発に適した CSR/SSR ハイブリッド構成 |
+| フロントエンド | Nuxt.js 4 + TypeScript | Vue.js エコシステム、地図SPA開発に適した CSR/SSR ハイブリッド構成 |
 | スタイリング | Tailwind CSS v4（`@tailwindcss/vite`） | ユーティリティファースト、Vite ネイティブ統合 |
 | トースト通知 | vue-sonner | API 失敗・操作完了の通知 |
 | 地図ライブラリ | MapLibre GL JS（v6） | MapTiler推奨、TS製、WebGL2描画、ベクタータイルネイティブ対応。v6 は ESM のみのため名前空間 import（`import * as maplibregl`）で使い、ワーカーの URL を `setWorkerUrl()` で明示する（Vite の `?worker&url`） |
@@ -102,6 +102,8 @@ export default defineNuxtRouteMiddleware(() => {
 > 地図SPA の特性上（全ページ要認証）、この設計で十分。
 
 ## ディレクトリ構成（`front/`）
+
+Nuxt 4 の既定の `srcDir` は `app/` だが、本プロジェクトは `front/` 直下に `pages/` `components/` 等を置く従来の構成を維持する（Nuxt が旧構成を検出し、`srcDir` を `front/` として扱うため設定は不要）。**`front/app/` ディレクトリを作らない**（検出が変わり、`~` の解決先が変わり得る）。
 
 ```text
 front/

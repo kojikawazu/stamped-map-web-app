@@ -46,7 +46,7 @@
 
 | レイヤー | 技術 |
 |----------|------|
-| フロントエンド | Nuxt.js 3 + TypeScript + Tailwind CSS v4 |
+| フロントエンド | Nuxt.js 4 + TypeScript + Tailwind CSS v4 |
 | 地図 | MapLibre GL JS + MapTiler Cloud |
 | API | Nuxt Server Routes (Vercel Serverless) |
 | ORM | Prisma + `@prisma/adapter-pg` |
@@ -62,7 +62,7 @@
 
 ```mermaid
 flowchart TD
-    Browser["Browser<br/>Nuxt.js 3 + MapLibre GL JS"]
+    Browser["Browser<br/>Nuxt.js 4 + MapLibre GL JS"]
     Tiles["MapTiler Cloud<br/>ベクタータイル"]
     API["Nuxt Server Routes<br/>(Vercel Serverless)<br/>JWT検証 → Zod → Prisma"]
     DB["Supabase<br/>PostgreSQL + PostGIS / Auth"]
@@ -76,7 +76,7 @@ flowchart TD
 
 ### 前提条件
 
-- Node.js 22+（CI は Node 22 で検証。ESLint 10 / @nuxt/eslint が Node 22 以上を要求）
+- Node.js 22.22.3+ または 24.15+（CI は Node 22 で検証。Nuxt 4.6 が `^22.22.3 || ^24.15.0 || >=26.0.0` を要求）
 - pnpm 10+
 - Supabase プロジェクト（PostgreSQL + PostGIS 有効化済み）
 - MapTiler Cloud アカウント（API Key 発行済み）

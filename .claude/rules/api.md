@@ -1,5 +1,5 @@
 ---
-description: Nuxt.js 3 Server API 設計・サービス層分離
+description: Nuxt.js 4 Server API 設計・サービス層分離
 globs: "front/server/**"
 ---
 
@@ -7,7 +7,7 @@ globs: "front/server/**"
 
 ## 設計方針
 
-- Nuxt.js 3 の Nitro サーバーエンジンによる Server API を使用する。
+- Nuxt.js 4 の Nitro サーバーエンジンによる Server API を使用する。
 - すべての DB 読み書きは Server API + Prisma 経由で行う（クライアントから直接 DB にアクセスしない）。
 - 共通処理（認証・レスポンス整形・WHERE 句ビルダー等）は `server/utils/` に切り出し、ハンドラーから再利用する。
 - ハンドラーが肥大化したら `server/services/` を新設してビジネスロジックを分離する（現状は未作成。ロジックはハンドラー内に記述）。

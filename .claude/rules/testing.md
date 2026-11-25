@@ -82,6 +82,7 @@ front/
 
 - **境界**: 1 コンポーネントの props → 描画、操作 → emit。子コンポーネントはスタブせず本物を描画する（auto-import がそのまま解決される）。通信は持たない（`components/` は `$fetch` を呼ばない。`frontend.md`）ため、モックは原則不要。
 - **マウント**: `@nuxt/test-utils/runtime` の `mountSuspended` を使う（Nuxt 環境・auto-import が効く）。
+- **auto-import の差し替え**: クライアント側コードが使う auto-import（`navigateTo` / `$fetch` 等）は `mockNuxtImport` で差し替える。`vi.stubGlobal` は変換後の import binding に届かない（`$fetch` も Nuxt 4 から auto-import になった）。Server API 側のグローバル（`vitest.setup.ts`）は従来どおり `vi.stubGlobal` を使う。
 - **`<Teleport>`**: `global: { stubs: { teleport: true } }` でインライン描画させ、`wrapper` 内で検証する（そのままでは `document.body` に出て `wrapper.find` で取れない）。
 - **アサーションは要素を特定して行う**。HTML 全体への正規表現は、別要素の値に一致して壊れを見逃す（例: バッジの `color:` が左ボーダーの `background-color:` に一致する）。
 - 無効化（`disabled`）は属性の有無に加え、**押しても emit されないこと**まで検証する。

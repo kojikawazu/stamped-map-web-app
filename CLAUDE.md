@@ -30,7 +30,7 @@
 | `security.md` | 全体 | Supabase Auth / ALLOWED_EMAILS / Prisma インジェクション対策 |
 | `production-data.md` | 全体 | 本番データ保護（本番 DB への破壊的操作の禁止・環境分離・例外手順・AI エージェントへの制約） |
 | `testing.md` | `front/__tests__/**`, `front/tests/**` | Vitest + Playwright テスト方針 |
-| `frontend.md` | `front/components/**`, `front/pages/**`, `front/composables/**`, `front/repositories/**`, `front/schemas/**` | Nuxt.js 3 コンポーネント・composables 設計規約・関心別ディレクトリ・レイヤ一方向依存 |
+| `frontend.md` | `front/components/**`, `front/pages/**`, `front/composables/**`, `front/repositories/**`, `front/schemas/**` | Nuxt.js 4 コンポーネント・composables 設計規約・関心別ディレクトリ・レイヤ一方向依存 |
 | `api.md` | `front/server/**` | Nuxt.js Server API 設計・ディレクトリ構成・バリデーション方針 |
 | `database.md` | `front/prisma/**`, `front/server/utils/**` | Prisma 命名規約・監査列の自動設定・スキーマ同期（本番は変更しない）・クエリ規約 |
 | `vercel.md` | `vercel.json` | Vercel デプロイ制御（ブランチ単位の発火制御・ビルドスキップの是非） |

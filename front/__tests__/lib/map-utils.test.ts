@@ -133,18 +133,18 @@ describe("markersToGeoJSON", () => {
 
   it("N-3: 座標が [longitude, latitude] の順で設定される", () => {
     const result = markersToGeoJSON([baseMarker], categoryMap);
-    const coords = result.features[0].geometry as Point;
-    expect(coords.coordinates[0]).toBe(baseMarker.longitude);
-    expect(coords.coordinates[1]).toBe(baseMarker.latitude);
+    const coords = result.features[0]?.geometry as Point | undefined;
+    expect(coords?.coordinates[0]).toBe(baseMarker.longitude);
+    expect(coords?.coordinates[1]).toBe(baseMarker.latitude);
   });
 
   it("N-4: properties に id, name, color, categoryName が含まれる", () => {
     const result = markersToGeoJSON([baseMarker], categoryMap);
-    const props = result.features[0].properties!;
-    expect(props.id).toBe("spot-1");
-    expect(props.name).toBe("東京カフェ");
-    expect(props.color).toBe("#FF0000");
-    expect(props.categoryName).toBe("カフェ");
+    const props = result.features[0]?.properties;
+    expect(props?.id).toBe("spot-1");
+    expect(props?.name).toBe("東京カフェ");
+    expect(props?.color).toBe("#FF0000");
+    expect(props?.categoryName).toBe("カフェ");
   });
 
   it("S-1: categoryId がマップに存在しない場合は categoryName が空文字になる（フォールバック）", () => {
@@ -153,7 +153,7 @@ describe("markersToGeoJSON", () => {
       categoryId: "unknown",
     };
     const result = markersToGeoJSON([markerWithUnknownCategory], categoryMap);
-    expect(result.features[0].properties!.categoryName).toBe("");
+    expect(result.features[0]?.properties?.categoryName).toBe("");
   });
 
   it("S-2: マーカーが 0 件のとき空の features 配列を返す（境界値）", () => {

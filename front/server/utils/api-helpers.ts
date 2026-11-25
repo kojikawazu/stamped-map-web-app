@@ -130,9 +130,8 @@ export function buildSpotWhereClause(query: Record<string, string | string[]>) {
 
   const category = query.category;
   if (category) {
-    const ids = (Array.isArray(category) ? category[0] : category)
-      .split(",")
-      .filter(Boolean);
+    const first = Array.isArray(category) ? category[0] : category;
+    const ids = first?.split(",").filter(Boolean) ?? [];
     if (ids.length > 0) {
       conditions.push({ categoryId: { in: ids } });
     }

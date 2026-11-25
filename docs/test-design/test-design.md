@@ -53,7 +53,7 @@
 ## 対象
 
 - **プロジェクト**: Stamped Map Web App
-- **スタック**: Nuxt.js 3 + TypeScript（フロントエンド一体型）
+- **スタック**: Nuxt.js 4 + TypeScript（フロントエンド一体型）
 - **テストツール**:
   - ユニット/結合テスト: Vitest + `@nuxt/test-utils`
   - E2E: Playwright
@@ -193,7 +193,7 @@ front/
 
 **対象ファイル**: `front/repositories/api-client.ts`
 **テストファイル**: `front/__tests__/repositories/api-client.test.ts`
-**モック対象**: Supabase の `auth.getSession` / `auth.refreshSession`（外部I/O）、`$fetch`（外部I/O）、`navigateTo`（`mockNuxtImport` で差し替え。`vi.mock("#imports")` は auto-import の解決先に届かない）
+**モック対象**: Supabase の `auth.getSession` / `auth.refreshSession`（外部I/O）、`$fetch`（外部I/O）、`navigateTo`（`$fetch` と `navigateTo` はともに auto-import のため `mockNuxtImport` で差し替え。`vi.mock("#imports")` や `vi.stubGlobal` は auto-import の解決先に届かない）
 
 #### 正常系
 
